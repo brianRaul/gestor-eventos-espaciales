@@ -1,0 +1,62 @@
+[
+    {
+        "id": "fa44d88e-3646-4f2b-af8b-7f7ca7a87331",
+        "nombre": "Cohete Falcon 9",
+        "tipo": "VEHICULO_LANZAMIENTO",
+        "cantidad_total": 3,
+        "cantidad_disponible": 2,
+        "cantidad_reservada": 1,
+        "estado": "OPERATIVO",
+        "ubicacion": "Cabo Cañaveral",
+        "mantenimiento_hasta": null,
+        "descripcion": "Cohete reutilizable para lanzamientos orbitales"
+    },
+    {
+        "id": "8bccec7f-41d6-47c0-b82f-562196f864b1",
+        "nombre": "Estación Espacial Internacional",
+        "tipo": "ESTACION_ORBITAL",
+        "cantidad_total": 1,
+        "cantidad_disponible": 0,
+        "cantidad_reservada": 1,
+        "estado": "EN_OPERACION",
+        "ubicacion": "Órbita Terrestre",
+        "mantenimiento_hasta": null,
+        "descripcion": "Laboratorio orbital para investigación científica"
+    },
+    {
+        "id": "da9219f8-bfde-4406-8fa9-4daf1b6c97f6",
+        "nombre": "Rover Perseverance",
+        "tipo": "ROVER_MARTE",
+        "cantidad_total": 1,
+        "cantidad_disponible": 0,
+        "cantidad_reservada": 1,
+        "estado": "EN_MISION",
+        "ubicacion": "Marte",
+        "mantenimiento_hasta": null,
+        "descripcion": "Vehículo de exploración marciana"
+    },
+    {
+        "id": "99125a5e-4cec-4147-85e7-2b608cec9570",
+        "nombre": "Traje Espacial xEMU",
+        "tipo": "EQUIPO_TRIPULACION",
+        "cantidad_total": 15,
+        "cantidad_disponible": 12,
+        "cantidad_reservada": 3,
+        "estado": "DISPONIBLE",
+        "ubicacion": "Centro Espacial Johnson",
+        "mantenimiento_hasta": null,
+        "descripcion": "Traje espacial para actividades extravehiculares"
+    },
+    {
+        "id": "347fa4ab-79de-4d07-be6c-8089234528fb",
+        "nombre": "Sistema de Soporte Vital",
+        "tipo": "SISTEMA_VIDA",
+        "cantidad_total": 8,
+        "cantidad_disponible": 6,
+        "cantidad_reservada": 2,
+        "estado": "EN_MANTENIMIENTO",
+        "ubicacion": "Laboratorio de Sistemas",
+        "mantenimiento_hasta": "2024-12-15",
+        "descripcion": "Sistema de soporte vital para tripulaciones"
+    }
+]

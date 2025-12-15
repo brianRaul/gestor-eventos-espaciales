@@ -1,0 +1,23 @@
+{
+    "tipos_evento": [
+        "Lanzamiento Espacial",
+        "Mantenimiento Orbital",
+        "Prueba de Sistemas",
+        "Investigación Científica",
+        "Entrenamiento de Tripulación"
+    ],
+    "ubicaciones": [
+        "Cabo Cañaveral",
+        "Centro Espacial Kennedy",
+        "Base Vandenberg",
+        "Centro Espacial Baikonur",
+        "Puerto Espacial Europeo"
+    ],
+    "responsables": [
+        "Dr. Elena Rodríguez",
+        "Ing. Marco Chen",
+        "Dra. Sophia Williams",
+        "Ing. Alexei Petrov",
+        "Dra. Aisha Mohammed"
+    ]
+}

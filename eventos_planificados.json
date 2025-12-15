@@ -1,0 +1,35 @@
+[
+    {
+        "tipo": "Lanzamiento satelital",
+        "fecha": "02/03/2009",
+        "recursos": []
+    },
+    {
+        "tipo": "Mantenimiento orbital",
+        "fecha": "23/02/2004",
+        "recursos": []
+    },
+    {
+        "tipo": "Mantenimiento orbital",
+        "fecha": "03/01/2025",
+        "recursos": []
+    },
+    {
+        "tipo": "Mantenimiento orbital",
+        "fecha": "02/09/2023",
+        "recursos": [
+            "EQUIPO DE RECUPERACIÓN",
+            "SISTEMA DE NAVEGACIÓN",
+            "SISTEMA DE CONTROL TÉRMICO"
+        ]
+    },
+    {
+        "tipo": "Pruebas de carga útil",
+        "fecha": "03/04/2020",
+        "recursos": [
+            "LABORATORIO DE PRUEBAS",
+            "EQUIPO DE CONTROL",
+            "SISTEMA ELÉCTRICO"
+        ]
+    }
+]
