@@ -124,5 +124,14 @@
             "SISTEMA DE COMBUSTIBLE",
             "SISTEMA DE SEGURIDAD"
         ]
+    },
+    {
+        "tipo": "Simulación de emergencia",
+        "fecha": "04/02/2009",
+        "recursos": [
+            "EQUIPO DE CONTROL",
+            "SALA DE CONTROL PRINCIPAL",
+            "SISTEMA DE SEGURIDAD"
+        ]
     }
 ]

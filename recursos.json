@@ -10,11 +10,11 @@
   },
   {
    "nombre": "EQUIPO DE CONTROL",
-   "cantidad": 6
+   "cantidad": 5
   },
   {
    "nombre": "SALA DE CONTROL PRINCIPAL",
-   "cantidad": 2
+   "cantidad": 1
   },
   {
    "nombre": "SISTEMA DE COMBUSTIBLE",
@@ -26,7 +26,7 @@
   },
   {
    "nombre": "SISTEMA DE SEGURIDAD",
-   "cantidad": 13
+   "cantidad": 12
   },
   {
    "nombre": "ESTACIÓN DE SEGUIMIENTO",

@@ -254,7 +254,7 @@ class GestorEventosSimple(ctk.CTk):
         # Crear una nueva ventana emergente
         ventana_eventos = ctk.CTkToplevel(self)
         ventana_eventos.title("📋 Eventos Planificados")
-        ventana_eventos.geometry("600x400")
+        ventana_eventos.geometry("400x400")
 
         # Título
         titulo = ctk.CTkLabel(
@@ -264,7 +264,7 @@ class GestorEventosSimple(ctk.CTk):
 
         # Frame para contener los eventos con scroll
         frame_contenedor = ctk.CTkScrollableFrame(
-            ventana_eventos, width=550, height=300
+            ventana_eventos, width=300, height=300
         )
         frame_contenedor.pack(pady=10, padx=10)
 
@@ -306,13 +306,13 @@ class GestorEventosSimple(ctk.CTk):
                 lbl_fecha.pack(anchor="w", padx=10)
 
                 # Recursos utilizados
-                recursos_texto = ", ".join(evento["recursos"])
-                lbl_recursos = ctk.CTkLabel(
-                    frame_evento,
-                    text=f"Recursos: {recursos_texto}",
-                    font=("Arial", 11),
-                )
-                lbl_recursos.pack(anchor="w", padx=10, pady=(0, 5))
+                # recursos_texto = ", ".join(evento["recursos"])
+                # lbl_recursos = ctk.CTkLabel(
+                #     frame_evento,
+                #     text=f" Recursos: {recursos_texto}",
+                #     font=("Arial", 11),
+                # )
+                # lbl_recursos.pack(anchor="w", padx=10, pady=(0, 5))
 
         # Botón para cerrar la ventana
         btn_cerrar = ctk.CTkButton(
