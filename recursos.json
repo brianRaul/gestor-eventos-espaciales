@@ -1,18 +1,60 @@
 {
-  "recursos": [
-    {"nombre": "COHETE", "cantidad": 5},
-    {"nombre": "PLATAFORMA DE LANZAMIENTO", "cantidad": 3},
-    {"nombre": "EQUIPO DE CONTROL", "cantidad": 10},
-    {"nombre": "SALA DE CONTROL PRINCIPAL", "cantidad": 2},
-    {"nombre": "SISTEMA DE COMBUSTIBLE", "cantidad": 8},
-    {"nombre": "TORRE DE SERVICIO", "cantidad": 4},
-    {"nombre": "SISTEMA DE SEGURIDAD", "cantidad": 12},
-    {"nombre": "ESTACIÓN DE SEGUIMIENTO", "cantidad": 6},
-    {"nombre": "PLATAFORMA DE ATERRIZAJE", "cantidad": 3},
-    {"nombre": "SISTEMA DE NAVEGACIÓN", "cantidad": 7},
-    {"nombre": "SISTEMA ELÉCTRICO", "cantidad": 15},
-    {"nombre": "SISTEMA DE CONTROL TÉRMICO", "cantidad": 9},
-    {"nombre": "EQUIPO DE RECUPERACIÓN", "cantidad": 4},
-    {"nombre": "LABORATORIO DE PRUEBAS", "cantidad": 2}
-  ]
+ "recursos": [
+  {
+   "nombre": "COHETE",
+   "cantidad": 6
+  },
+  {
+   "nombre": "PLATAFORMA DE LANZAMIENTO",
+   "cantidad": 4
+  },
+  {
+   "nombre": "EQUIPO DE CONTROL",
+   "cantidad": 6
+  },
+  {
+   "nombre": "SALA DE CONTROL PRINCIPAL",
+   "cantidad": 2
+  },
+  {
+   "nombre": "SISTEMA DE COMBUSTIBLE",
+   "cantidad": 9
+  },
+  {
+   "nombre": "TORRE DE SERVICIO",
+   "cantidad": 4
+  },
+  {
+   "nombre": "SISTEMA DE SEGURIDAD",
+   "cantidad": 13
+  },
+  {
+   "nombre": "ESTACIÓN DE SEGUIMIENTO",
+   "cantidad": 6
+  },
+  {
+   "nombre": "PLATAFORMA DE ATERRIZAJE",
+   "cantidad": 3
+  },
+  {
+   "nombre": "SISTEMA DE NAVEGACIÓN",
+   "cantidad": 6
+  },
+  {
+   "nombre": "SISTEMA ELÉCTRICO",
+   "cantidad": 14
+  },
+  {
+   "nombre": "SISTEMA DE CONTROL TÉRMICO",
+   "cantidad": 9
+  },
+  {
+   "nombre": "EQUIPO DE RECUPERACIÓN",
+   "cantidad": 4
+  },
+  {
+   "nombre": "LABORATORIO DE PRUEBAS",
+   "cantidad": 1
+  }
+ ]
 }

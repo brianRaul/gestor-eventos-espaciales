@@ -1,24 +1,7 @@
 {
-  "tipos_evento": [
-    {
-      "nombre": "Despegue de cohete",
-      "recursos": ["COHETE", "PLATAFORMA DE LANZAMIENTO", "SISTEMA DE COMBUSTIBLE", "SISTEMA DE SEGURIDAD"]
-    },
-    {
-      "nombre": "Pruebas de carga útil",
-      "recursos": ["LABORATORIO DE PRUEBAS", "EQUIPO DE CONTROL", "SISTEMA ELÉCTRICO"]
-    },
-    {
-      "nombre": "Mantenimiento orbital",
-      "recursos": ["EQUIPO DE RECUPERACIÓN", "SISTEMA DE NAVEGACIÓN", "SISTEMA DE CONTROL TÉRMICO"]
-    },
-    {
-      "nombre": "Lanzamiento satelital",
-      "recursos": ["COHETE", "PLATAFORMA DE LANZAMIENTO", "SISTEMA DE NAVEGACIÓN", "ESTACIÓN DE SEGUIMIENTO"]
-    },
-    {
-      "nombre": "Simulación de emergencia",
-      "recursos": ["SALA DE CONTROL PRINCIPAL", "SISTEMA DE SEGURIDAD", "EQUIPO DE CONTROL"]
-    }
-  ]
+  "Despegue de cohete": ["COHETE", "PLATAFORMA DE LANZAMIENTO", "SISTEMA DE COMBUSTIBLE", "SISTEMA DE SEGURIDAD"],
+  "Pruebas de carga útil": ["LABORATORIO DE PRUEBAS", "EQUIPO DE CONTROL", "SISTEMA ELÉCTRICO"],
+  "Mantenimiento orbital": ["EQUIPO DE RECUPERACIÓN", "SISTEMA DE NAVEGACIÓN", "SISTEMA DE CONTROL TÉRMICO"],
+  "Lanzamiento satelital": ["COHETE", "PLATAFORMA DE LANZAMIENTO", "SISTEMA DE NAVEGACIÓN", "ESTACIÓN DE SEGUIMIENTO"],
+  "Simulación de emergencia": ["SALA DE CONTROL PRINCIPAL", "SISTEMA DE SEGURIDAD", "EQUIPO DE CONTROL"]
 }

@@ -1,35 +1,128 @@
 [
     {
         "tipo": "Lanzamiento satelital",
-        "fecha": "02/03/2009",
-        "recursos": []
-    },
-    {
-        "tipo": "Mantenimiento orbital",
-        "fecha": "23/02/2004",
-        "recursos": []
-    },
-    {
-        "tipo": "Mantenimiento orbital",
-        "fecha": "03/01/2025",
-        "recursos": []
-    },
-    {
-        "tipo": "Mantenimiento orbital",
-        "fecha": "02/09/2023",
+        "fecha": "03/03/2023",
         "recursos": [
-            "EQUIPO DE RECUPERACIÓN",
-            "SISTEMA DE NAVEGACIÓN",
-            "SISTEMA DE CONTROL TÉRMICO"
+            "COHETE",
+            "PLATAFORMA DE LANZAMIENTO",
+            "ESTACIÓN DE SEGUIMIENTO",
+            "SISTEMA DE NAVEGACIÓN"
         ]
     },
     {
         "tipo": "Pruebas de carga útil",
-        "fecha": "03/04/2020",
+        "fecha": "06/08/2024",
         "recursos": [
-            "LABORATORIO DE PRUEBAS",
             "EQUIPO DE CONTROL",
-            "SISTEMA ELÉCTRICO"
+            "SISTEMA ELÉCTRICO",
+            "LABORATORIO DE PRUEBAS"
+        ]
+    },
+    {
+        "tipo": "Despegue de cohete",
+        "fecha": "02/01/2020",
+        "recursos": [
+            "COHETE",
+            "PLATAFORMA DE LANZAMIENTO",
+            "SISTEMA DE COMBUSTIBLE",
+            "SISTEMA DE SEGURIDAD"
+        ]
+    },
+    {
+        "tipo": "Despegue de cohete",
+        "fecha": "03/11/2026",
+        "recursos": [
+            "COHETE",
+            "PLATAFORMA DE LANZAMIENTO",
+            "SISTEMA DE COMBUSTIBLE",
+            "SISTEMA DE SEGURIDAD"
+        ]
+    },
+    {
+        "tipo": "Despegue de cohete",
+        "fecha": "06/12/2009",
+        "recursos": [
+            "COHETE",
+            "PLATAFORMA DE LANZAMIENTO",
+            "SISTEMA DE COMBUSTIBLE",
+            "SISTEMA DE SEGURIDAD"
+        ]
+    },
+    {
+        "tipo": "Despegue de cohete",
+        "fecha": "11/05/2022",
+        "recursos": [
+            "COHETE",
+            "PLATAFORMA DE LANZAMIENTO",
+            "SISTEMA DE COMBUSTIBLE",
+            "SISTEMA DE SEGURIDAD"
+        ]
+    },
+    {
+        "tipo": "Despegue de cohete",
+        "fecha": "19/09/2025",
+        "recursos": [
+            "COHETE",
+            "PLATAFORMA DE LANZAMIENTO",
+            "SISTEMA DE COMBUSTIBLE",
+            "SISTEMA DE SEGURIDAD"
+        ]
+    },
+    {
+        "tipo": "Despegue de cohete",
+        "fecha": "05/02/2001",
+        "recursos": [
+            "COHETE",
+            "PLATAFORMA DE LANZAMIENTO",
+            "SISTEMA DE COMBUSTIBLE",
+            "SISTEMA DE SEGURIDAD"
+        ]
+    },
+    {
+        "tipo": "Pruebas de carga útil",
+        "fecha": "04/05/2003",
+        "recursos": [
+            "EQUIPO DE CONTROL",
+            "SISTEMA ELÉCTRICO",
+            "LABORATORIO DE PRUEBAS"
+        ]
+    },
+    {
+        "tipo": "Pruebas de carga útil",
+        "fecha": "03/10/2019",
+        "recursos": [
+            "EQUIPO DE CONTROL"
+        ]
+    },
+    {
+        "tipo": "Pruebas de carga útil",
+        "fecha": "23/03/2006",
+        "recursos": [
+            "EQUIPO DE CONTROL"
+        ]
+    },
+    {
+        "tipo": "Simulación de emergencia",
+        "fecha": "12/06/2029",
+        "recursos": [
+            "EQUIPO DE CONTROL"
+        ]
+    },
+    {
+        "tipo": "Pruebas de carga útil",
+        "fecha": "05/06/2009",
+        "recursos": [
+            "SISTEMA DE NAVEGACIÓN"
+        ]
+    },
+    {
+        "tipo": "Despegue de cohete",
+        "fecha": "09/07/2004",
+        "recursos": [
+            "COHETE",
+            "PLATAFORMA DE LANZAMIENTO",
+            "SISTEMA DE COMBUSTIBLE",
+            "SISTEMA DE SEGURIDAD"
         ]
     }
 ]
