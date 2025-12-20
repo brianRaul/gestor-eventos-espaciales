@@ -2,59 +2,59 @@
  "recursos": [
   {
    "nombre": "COHETE",
-   "cantidad": 6
+   "cantidad": 18
   },
   {
    "nombre": "PLATAFORMA DE LANZAMIENTO",
-   "cantidad": 4
+   "cantidad": 18
   },
   {
    "nombre": "EQUIPO DE CONTROL",
-   "cantidad": 5
+   "cantidad": 18
   },
   {
    "nombre": "SALA DE CONTROL PRINCIPAL",
-   "cantidad": 1
+   "cantidad": 20
   },
   {
    "nombre": "SISTEMA DE COMBUSTIBLE",
-   "cantidad": 9
+   "cantidad": 18
   },
   {
    "nombre": "TORRE DE SERVICIO",
-   "cantidad": 4
+   "cantidad": 20
   },
   {
    "nombre": "SISTEMA DE SEGURIDAD",
-   "cantidad": 12
+   "cantidad": 18
   },
   {
    "nombre": "ESTACIÓN DE SEGUIMIENTO",
-   "cantidad": 6
+   "cantidad": 20
   },
   {
    "nombre": "PLATAFORMA DE ATERRIZAJE",
-   "cantidad": 3
+   "cantidad": 20
   },
   {
    "nombre": "SISTEMA DE NAVEGACIÓN",
-   "cantidad": 6
+   "cantidad": 20
   },
   {
    "nombre": "SISTEMA ELÉCTRICO",
-   "cantidad": 14
+   "cantidad": 18
   },
   {
    "nombre": "SISTEMA DE CONTROL TÉRMICO",
-   "cantidad": 9
+   "cantidad": 20
   },
   {
    "nombre": "EQUIPO DE RECUPERACIÓN",
-   "cantidad": 4
+   "cantidad": 20
   },
   {
    "nombre": "LABORATORIO DE PRUEBAS",
-   "cantidad": 1
+   "cantidad": 18
   }
  ]
 }

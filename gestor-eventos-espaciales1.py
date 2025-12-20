@@ -1,5 +1,6 @@
 import customtkinter as ctk
 import json
+from datetime import datetime,date,timedelta
 
 
 class GestorEventosSimple(ctk.CTk):
@@ -24,7 +25,7 @@ class GestorEventosSimple(ctk.CTk):
 
         # Crear la interfaz
         self.crear_interfaz()
-
+    #****************** GUARDAR/CARGAR RECURSOS ********************#
     def cargar_eventos_desde_json(self):
         try:
             with open("eventos_predeterminados.json", "r", encoding="utf-8") as f:
@@ -93,7 +94,7 @@ class GestorEventosSimple(ctk.CTk):
                 json.dump({"recursos": self.datos}, f, ensure_ascii=False, indent=1)
         except Exception as e:
             print(f"Error al actualizar la cantidad de recursos: {e}")
-
+    #*********** LOGICA *************#
     # ========== Crear checkboxes de recursos ==========
     def crear_checkboxes_recursos(self):
         # Limpiar checkboxes anteriores si existen
@@ -146,37 +147,49 @@ class GestorEventosSimple(ctk.CTk):
 
         # Obtener datos
         tipo_evento = self.combo_evento.get()
-        dia = self.entry_dia.get()
-        mes = self.entry_mes.get()
-        anio = self.entry_anio.get()
-
+        day = self.entry_day.get()
+        month = self.entry_month.get()
+        year = self.entry_year.get()
+            
         # Validar que todos los campos estén completos
+        
+        # Eventos
         if tipo_evento == "Elige un tipo de evento" or not tipo_evento:
             self.lbl_info.configure(
                 text="❌ Debes seleccionar un tipo de evento", text_color="red"
             )
             return
-
-        if not (dia and mes and anio):
-            self.lbl_info.configure(
-                text="❌ Debes completar la fecha", text_color="red"
-            )
+        
+        # Fechas
+        if not day:
+            self.lbl_info.configure(text="❌ El día es obligatorio", text_color="red")
             return
+        if not month:
+            self.lbl_info.configure(text="❌ El mes es obligatorio", text_color="red")
+            return
+        if not year:
+            self.lbl_info.configure(text="❌ El año es obligatorio", text_color="red")
+            return
+            
+            
 
-        # Validar formato de fecha 
+        # Validar fecha  
         try:
-            dia = int(dia)
-            mes = int(mes)
-            anio = int(anio)
-
-            if not (1 <= dia <= 31 and 1 <= mes <= 12 and 2000 <= anio <= 2100):
-                raise ValueError
-        except ValueError:
+           year_int = int(year)
+           month_int = int(month)
+           day_int = int(day)
+           fecha_evento = datetime(year_int,month_int,day_int)
+        except ValueError as e:
+            self.lbl_info.configure(text=f'Fecha inválida Error: {e}', color='red')
+            return
+        
+        if fecha_evento.date() < datetime.now().date():
             self.lbl_info.configure(
-                text="❌ Fecha inválida. Usa números válidos", text_color="red"
+                text=f"No puedes crear eventos en fechas pasadas",
+                text_color="red"
             )
             return
-
+        
         # Obtener recursos SELECCIONADOS por el usuario
         recursos_seleccionados = []
 
@@ -184,22 +197,18 @@ class GestorEventosSimple(ctk.CTk):
             for recurso_nombre, var in self.checkbox_vars.items():
                 if var.get():  # Si el checkbox está marcado
                     recursos_seleccionados.append(recurso_nombre)
-
+                    
         # Validar que se haya seleccionado al menos un recurso
         if not recursos_seleccionados:
             self.lbl_info.configure(
                 text="❌ Debes seleccionar al menos un recurso", text_color="red"
             )
-            return
-
-        # Validar fechas y recursos
-        # recursos_innecesarios= []
-        # for recurso_seleccionado in recursos_seleccionados:
+            return                    
 
         # Crear el evento
         nuevo_evento = {
             "tipo": tipo_evento,
-            "fecha": f"{dia:02d}/{mes:02d}/{anio}",
+            "fecha": f"{int(day):02d}/{int(month):02d}/{int(year)}",
             "recursos": recursos_seleccionados,
         }
 
@@ -222,14 +231,14 @@ class GestorEventosSimple(ctk.CTk):
         # Actualizar interfaz
         self.actualizar_contador()
         self.lbl_info.configure(
-            text=f"✅ Evento '{tipo_evento}' creado para el {dia:02d}/{mes:02d}/{anio}",
+            text=f"✅ Evento '{tipo_evento}' creado para el {int(day):02d}/{int(month):02d}/{int(year)}",
             text_color="green",
         )
 
         # Limpiar campos
-        self.entry_dia.delete(0, "end")
-        self.entry_mes.delete(0, "end")
-        self.entry_anio.delete(0, "end")
+        self.entry_day.delete(0, "end")
+        self.entry_month.delete(0, "end")
+        self.entry_year.delete(0, "end")
 
         # Desmarcar todos los checkboxes después de crear evento
         for var in self.checkbox_vars.values():
@@ -452,7 +461,7 @@ class GestorEventosSimple(ctk.CTk):
 
         print(f"✅ Se eliminaron {len(indices_a_eliminar)} evento(s)")
 
-    # ========== INTERFAZ ==========
+    # ************** INTERFAZ *************#
     def crear_interfaz(self):
         """Crear todos los elementos visuales"""
 
@@ -533,29 +542,29 @@ class GestorEventosSimple(ctk.CTk):
         frame_campos_fecha = ctk.CTkFrame(frame_fecha)
         frame_campos_fecha.pack(pady=5)
 
-        # Día
-        self.entry_dia = ctk.CTkEntry(
+        # Day
+        self.entry_day = ctk.CTkEntry(
             frame_campos_fecha, placeholder_text="Día", width=60
         )
-        self.entry_dia.pack(side="left", padx=5)
+        self.entry_day.pack(side="left", padx=5)
 
         # Separador
         ctk.CTkLabel(frame_campos_fecha, text="/").pack(side="left", padx=2)
 
-        # Mes
-        self.entry_mes = ctk.CTkEntry(
-            frame_campos_fecha, placeholder_text="Mes", width=60
+        # month
+        self.entry_month = ctk.CTkEntry(
+            frame_campos_fecha, placeholder_text="month", width=60
         )
-        self.entry_mes.pack(side="left", padx=5)
+        self.entry_month.pack(side="left", padx=5)
 
         # Separador
         ctk.CTkLabel(frame_campos_fecha, text="/").pack(side="left", padx=2)
 
         # Año
-        self.entry_anio = ctk.CTkEntry(
+        self.entry_year = ctk.CTkEntry(
             frame_campos_fecha, placeholder_text="Año", width=80
         )
-        self.entry_anio.pack(side="left", padx=5)
+        self.entry_year.pack(side="left", padx=5)        
 
         # ========== 6. BOTONES DE ACCIÓN ==========
         frame_botones = ctk.CTkFrame(self)

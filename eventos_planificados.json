@@ -133,5 +133,61 @@
             "SALA DE CONTROL PRINCIPAL",
             "SISTEMA DE SEGURIDAD"
         ]
+    },
+    {
+        "tipo": "Mantenimiento orbital",
+        "fecha": "03/02/2040",
+        "recursos": [
+            "SISTEMA DE NAVEGACIÓN",
+            "SISTEMA DE CONTROL TÉRMICO",
+            "EQUIPO DE RECUPERACIÓN"
+        ]
+    },
+    {
+        "tipo": "Simulación de emergencia",
+        "fecha": "02/03/2027",
+        "recursos": [
+            "EQUIPO DE CONTROL",
+            "SALA DE CONTROL PRINCIPAL",
+            "SISTEMA DE SEGURIDAD"
+        ]
+    },
+    {
+        "tipo": "Pruebas de carga útil",
+        "fecha": "02/03/2028",
+        "recursos": [
+            "EQUIPO DE CONTROL",
+            "SISTEMA ELÉCTRICO",
+            "LABORATORIO DE PRUEBAS"
+        ]
+    },
+    {
+        "tipo": "Despegue de cohete",
+        "fecha": "23/04/2026",
+        "recursos": [
+            "COHETE",
+            "PLATAFORMA DE LANZAMIENTO",
+            "SISTEMA DE COMBUSTIBLE",
+            "SISTEMA DE SEGURIDAD"
+        ]
+    },
+    {
+        "tipo": "Despegue de cohete",
+        "fecha": "02/03/2026",
+        "recursos": [
+            "COHETE",
+            "PLATAFORMA DE LANZAMIENTO",
+            "SISTEMA DE COMBUSTIBLE",
+            "SISTEMA DE SEGURIDAD"
+        ]
+    },
+    {
+        "tipo": "Pruebas de carga útil",
+        "fecha": "02/09/2026",
+        "recursos": [
+            "EQUIPO DE CONTROL",
+            "SISTEMA ELÉCTRICO",
+            "LABORATORIO DE PRUEBAS"
+        ]
     }
 ]
