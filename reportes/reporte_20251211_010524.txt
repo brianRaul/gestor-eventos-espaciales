@@ -1,0 +1,23 @@
+============================================================
+REPORTE DEL SISTEMA - GESTOR DE EVENTOS ESPACIALES
+============================================================
+
+Fecha de generación: 11/12/2025 01:05:24
+
+RESUMEN DE EVENTOS
+----------------------------------------
+Total de eventos: 0
+
+RESUMEN DE RECURSOS
+----------------------------------------
+Total de recursos: 5
+Recursos disponibles: 20
+Recursos en uso: 8
+
+RECURSOS CRÍTICOS (sin disponibilidad):
+  • Estación Espacial Internacional (ESTACION_ORBITAL)
+  • Rover Perseverance (ROVER_MARTE)
+
+============================================================
+FIN DEL REPORTE
+============================================================
