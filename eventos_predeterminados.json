@@ -1,7 +1,32 @@
 {
-  "Despegue de cohete": ["COHETE", "PLATAFORMA DE LANZAMIENTO", "SISTEMA DE COMBUSTIBLE", "SISTEMA DE SEGURIDAD"],
-  "Pruebas de carga útil": ["LABORATORIO DE PRUEBAS", "EQUIPO DE CONTROL", "SISTEMA ELÉCTRICO"],
-  "Mantenimiento orbital": ["EQUIPO DE RECUPERACIÓN", "SISTEMA DE NAVEGACIÓN", "SISTEMA DE CONTROL TÉRMICO"],
-  "Lanzamiento satelital": ["COHETE", "PLATAFORMA DE LANZAMIENTO", "SISTEMA DE NAVEGACIÓN", "ESTACIÓN DE SEGUIMIENTO"],
-  "Simulación de emergencia": ["SALA DE CONTROL PRINCIPAL", "SISTEMA DE SEGURIDAD", "EQUIPO DE CONTROL"]
+  "Despegue de cohete": {
+    "recursos_recomendados": ["COHETE", "PLATAFORMA DE LANZAMIENTO", "SISTEMA DE COMBUSTIBLE", "SISTEMA DE SEGURIDAD"],
+    "recursos_prohibidos": [],
+    "duracion_minima": 1,
+    "duracion_maxima": 3
+  },
+  "Pruebas de carga útil": {
+    "recursos_recomendados": ["LABORATORIO DE PRUEBAS", "EQUIPO DE CONTROL", "SISTEMA ELÉCTRICO"],
+    "recursos_prohibidos": [],
+    "duracion_minima": 2,
+    "duracion_maxima": 5
+  },
+  "Mantenimiento orbital": {
+    "recursos_recomendados": ["EQUIPO DE RECUPERACIÓN", "SISTEMA DE NAVEGACIÓN", "SISTEMA DE CONTROL TÉRMICO"],
+    "recursos_prohibidos": [],
+    "duracion_minima": 3,
+    "duracion_maxima": 10
+  },
+  "Lanzamiento satelital": {
+    "recursos_recomendados": ["COHETE", "PLATAFORMA DE LANZAMIENTO", "SISTEMA DE NAVEGACIÓN", "ESTACIÓN DE SEGUIMIENTO"],
+    "recursos_prohibidos": [],
+    "duracion_minima": 1,
+    "duracion_maxima": 4
+  },
+  "Simulación de emergencia": {
+    "recursos_recomendados": ["SALA DE CONTROL PRINCIPAL", "SISTEMA DE SEGURIDAD", "EQUIPO DE CONTROL"],
+    "recursos_prohibidos": [],
+    "duracion_minima": 1,
+    "duracion_maxima": 2
+  }
 }
