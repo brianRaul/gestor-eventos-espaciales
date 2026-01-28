@@ -1,6 +1,6 @@
 import customtkinter as ctk
 import json
-from datetime import datetime,date,timedelta
+from datetime import datetime, date, timedelta
 
 
 class GestorEventosSimple(ctk.CTk):
@@ -25,39 +25,67 @@ class GestorEventosSimple(ctk.CTk):
 
         # Crear la interfaz
         self.crear_interfaz()
-    #****************** GUARDAR/CARGAR RECURSOS ********************#
+
+    # ****************** GUARDAR/CARGAR RECURSOS ********************#
     def cargar_eventos_desde_json(self):
         try:
             with open("eventos_predeterminados.json", "r", encoding="utf-8") as f:
                 datos = json.load(f)
                 return datos
         except FileNotFoundError:
+
             return {
-                "Despegue": ["COHETE", "PLATAFORMA"],
-                "Prueba": ["LABORATORIO", "EQUIPO"],
-                "Ensayo": ["SISTEMA", "CONTROL"],
+                "Despegue de cohete": {
+                    "recursos_recomendados": [
+                        "COHETE",
+                        "PLATAFORMA DE LANZAMIENTO",
+                        "SISTEMA DE COMBUSTIBLE",
+                        "SISTEMA DE SEGURIDAD",
+                    ],
+                    "recursos_prohibidos": [],
+                    "duracion_minima": 1,
+                    "duracion_maxima": 3,
+                },
+                "Pruebas de carga útil": {
+                    "recursos_recomendados": [
+                        "LABORATORIO DE PRUEBAS",
+                        "EQUIPO DE CONTROL",
+                        "SISTEMA ELÉCTRICO",
+                    ],
+                    "recursos_prohibidos": [],
+                    "duracion_minima": 2,
+                    "duracion_maxima": 5,
+                },
             }
 
     def cargar_recursos_desde_json(self):
-        """Cargar recursos desde archivo JSON"""
         try:
             with open("recursos.json", "r", encoding="utf-8") as f:
-                datos = json.load(f)
-                self.datos = datos["recursos"]
-                return datos.get(
-                    "recursos",
-                    [
-                        {"nombre": "COHETE", "cantidad": 5},
-                        {"nombre": "PLATAFORMA", "cantidad": 3},
-                    ],
-                )
-        except FileNotFoundError:
-            return [
-                {"nombre": "COHETE", "cantidad": 5},
-                {"nombre": "PLATAFORMA", "cantidad": 3},
-                {"nombre": "LABORATORIO", "cantidad": 2},
-                {"nombre": "EQUIPO", "cantidad": 10},
-            ]
+                datos_json = json.load(f)
+                self.recursos_raw = datos_json["recursos"]
+
+                lista_plana = []
+                for nombre_recurso, tipos in self.recursos_raw.items():
+                    for nombre_tipo, valor in tipos.items():
+                        # Definimos la unidad de medida
+                        unidad = "L" if "COMBUSTIBLE" in nombre_recurso else "uds"
+
+                        nombre_completo = f"{nombre_recurso} ({nombre_tipo})"
+                        lista_plana.append(
+                            {
+                                "nombre": nombre_completo,
+                                "cantidad": valor,  # Internamente sigue siendo un número para cálculos
+                                "unidad": unidad,
+                                "recurso_base": nombre_recurso,
+                                "tipo_especifico": nombre_tipo,
+                            }
+                        )
+
+                self.datos = lista_plana
+                return lista_plana
+        except Exception as e:
+            print(f"Error: {e}")
+            return []
 
     def cargar_eventos_planificados(self):
 
@@ -94,7 +122,8 @@ class GestorEventosSimple(ctk.CTk):
                 json.dump({"recursos": self.datos}, f, ensure_ascii=False, indent=1)
         except Exception as e:
             print(f"Error al actualizar la cantidad de recursos: {e}")
-    #*********** LOGICA *************#
+
+    # *********** LOGICA *************#
     # ========== Crear checkboxes de recursos ==========
     def crear_checkboxes_recursos(self):
         # Limpiar checkboxes anteriores si existen
@@ -110,7 +139,7 @@ class GestorEventosSimple(ctk.CTk):
 
             checkbox = ctk.CTkCheckBox(
                 self.frame_checkboxes,
-                text=f"{recurso['nombre']} (Disponibles: {recurso['cantidad']})",
+                text = f"{recurso['nombre']} ({recurso['cantidad']} {recurso['unidad']} disponibles)",
                 variable=var,
                 onvalue=True,
                 offvalue=False,
@@ -129,10 +158,14 @@ class GestorEventosSimple(ctk.CTk):
 
         # Buscar el evento seleccionado en el diccionario
         if tipo_evento in self.tipos_evento_data:
-            recursos_predeterminados = self.tipos_evento_data[tipo_evento]
+            # EN FORMATO NUEVO: esto es un diccionario, no una lista
+            evento_data = self.tipos_evento_data[tipo_evento]
+
+            # Extraer la lista de recursos recomendados del diccionario
+            recursos_recomendados = evento_data.get("recursos_recomendados", [])
 
             # Marcar solo los checkboxes de recursos recomendados
-            for recurso_nombre in recursos_predeterminados:
+            for recurso_nombre in recursos_recomendados:
                 if recurso_nombre in self.checkbox_vars:
                     self.checkbox_vars[recurso_nombre].set(True)
 
@@ -150,16 +183,16 @@ class GestorEventosSimple(ctk.CTk):
         day = self.entry_day.get()
         month = self.entry_month.get()
         year = self.entry_year.get()
-            
+
         # Validar que todos los campos estén completos
-        
+
         # Eventos
         if tipo_evento == "Elige un tipo de evento" or not tipo_evento:
             self.lbl_info.configure(
                 text="❌ Debes seleccionar un tipo de evento", text_color="red"
             )
             return
-        
+
         # Fechas
         if not day:
             self.lbl_info.configure(text="❌ El día es obligatorio", text_color="red")
@@ -170,26 +203,69 @@ class GestorEventosSimple(ctk.CTk):
         if not year:
             self.lbl_info.configure(text="❌ El año es obligatorio", text_color="red")
             return
-            
-            
 
-        # Validar fecha  
+        # Validar fecha
         try:
-           year_int = int(year)
-           month_int = int(month)
-           day_int = int(day)
-           fecha_evento = datetime(year_int,month_int,day_int)
+            year_int = int(year)
+            month_int = int(month)
+            day_int = int(day)
+            fecha_evento = datetime(year_int, month_int, day_int)
         except ValueError as e:
-            self.lbl_info.configure(text=f'Fecha inválida Error: {e}', color='red')
+            self.lbl_info.configure(text=f"Fecha inválida Error: {e}", color="red")
             return
-        
+
         if fecha_evento.date() < datetime.now().date():
             self.lbl_info.configure(
-                text=f"No puedes crear eventos en fechas pasadas",
-                text_color="red"
+                text=f"No puedes crear eventos en fechas pasadas", text_color="red"
             )
             return
-        
+        # ========== VALIDAR DURACIÓN  ==========
+        if not self.entry_duracion.get():
+            self.lbl_info.configure(
+                text="❌ La duración es obligatoria", text_color="red"
+            )
+            return
+
+        try:
+            duracion = int(self.entry_duracion.get())
+            if duracion <= 0:
+                self.lbl_info.configure(
+                    text="❌ La duración debe ser mayor a 0 días", text_color="red"
+                )
+                return
+        except ValueError:
+            self.lbl_info.configure(
+                text="❌ La duración debe ser un número entero", text_color="red"
+            )
+            return
+
+        # Validar duración según el tipo de evento
+        if tipo_evento in self.tipos_evento_data:
+            evento_data = self.tipos_evento_data[tipo_evento]
+            duracion_minima = evento_data.get("duracion_minima", 1)
+            duracion_maxima = evento_data.get("duracion_maxima", 30)
+
+            if duracion < duracion_minima:
+                self.lbl_info.configure(
+                    text=f"❌ La duración mínima para '{tipo_evento}' es {duracion_minima} días",
+                    text_color="red",
+                )
+                return
+            if duracion > duracion_maxima:
+                self.lbl_info.configure(
+                    text=f"❌ La duración máxima para '{tipo_evento}' es {duracion_maxima} días",
+                    text_color="red",
+                )
+                return
+
+            # Calcular fecha final
+            fecha_inicio = fecha_evento
+            fecha_fin = fecha_inicio + timedelta(
+                days=duracion - 1
+            )  # -1 porque el día de inicio cuenta
+
+        # Verificar hueco
+
         # Obtener recursos SELECCIONADOS por el usuario
         recursos_seleccionados = []
 
@@ -197,27 +273,22 @@ class GestorEventosSimple(ctk.CTk):
             for recurso_nombre, var in self.checkbox_vars.items():
                 if var.get():  # Si el checkbox está marcado
                     recursos_seleccionados.append(recurso_nombre)
-                    
+
         # Validar que se haya seleccionado al menos un recurso
         if not recursos_seleccionados:
             self.lbl_info.configure(
                 text="❌ Debes seleccionar al menos un recurso", text_color="red"
             )
-            return                    
+            return
 
         # Crear el evento
         nuevo_evento = {
             "tipo": tipo_evento,
-            "fecha": f"{int(day):02d}/{int(month):02d}/{int(year)}",
+            "fecha_inicio": f"{int(day):02d}/{int(month):02d}/{int(year)}",
+            "fecha_fin": fecha_fin.strftime("%d/%m/%Y"),
+            "duracion_dias": duracion,
             "recursos": recursos_seleccionados,
         }
-
-        # Eliminar recursos seleccionados
-        for recurso_eliminar in recursos_seleccionados:
-            for recursos_dicc in self.datos:
-                if recurso_eliminar == recursos_dicc["nombre"]:
-                    recursos_dicc["cantidad"] -= 1
-                    break
 
         # Agregar a la lista
         self.eventos_creados.append(nuevo_evento)
@@ -231,7 +302,7 @@ class GestorEventosSimple(ctk.CTk):
         # Actualizar interfaz
         self.actualizar_contador()
         self.lbl_info.configure(
-            text=f"✅ Evento '{tipo_evento}' creado para el {int(day):02d}/{int(month):02d}/{int(year)}",
+            text=f"Evento '{tipo_evento}' creado para el {int(day):02d}/{int(month):02d}/{int(year)}",
             text_color="green",
         )
 
@@ -239,7 +310,10 @@ class GestorEventosSimple(ctk.CTk):
         self.entry_day.delete(0, "end")
         self.entry_month.delete(0, "end")
         self.entry_year.delete(0, "end")
-
+        self.entry_duracion.delete(0, "end")
+        self.lbl_fecha_fin.configure(
+            text="📅 El evento terminará: --/--/----", text_color="gray"
+        )
         # Desmarcar todos los checkboxes después de crear evento
         for var in self.checkbox_vars.values():
             var.set(False)
@@ -255,7 +329,7 @@ class GestorEventosSimple(ctk.CTk):
             for var in self.checkbox_vars.values():
                 var.set(False)
             self.lbl_info.configure(
-                text="🗑️ Todos los recursos desmarcados", text_color="orange"
+                text="Todos los recursos desmarcados", text_color="orange"
             )
 
     def mostrar_eventos_planificados(self):
@@ -279,10 +353,10 @@ class GestorEventosSimple(ctk.CTk):
 
         # Verificar si hay eventos
         if not self.eventos_creados:
-            # Si no hay eventos
+            # si no hay eventos
             sin_eventos = ctk.CTkLabel(
                 frame_contenedor,
-                text="📭 No hay eventos planificados todavía.",
+                text=" No hay eventos planificados todavía.",
                 font=("Arial", 12),
                 text_color="gray",
             )
@@ -302,26 +376,25 @@ class GestorEventosSimple(ctk.CTk):
 
                 # Tipo de evento
                 lbl_tipo = ctk.CTkLabel(
-                    frame_evento, text=f"🚀 Tipo: {evento['tipo']}", font=("Arial", 12)
+                    frame_evento, text=f"Tipo: {evento['tipo']}", font=("Arial", 12)
                 )
                 lbl_tipo.pack(anchor="w", padx=10)
 
-                # Fecha del evento
+                # Fecha de inicio y fin
                 lbl_fecha = ctk.CTkLabel(
                     frame_evento,
-                    text=f"📅 Fecha: {evento['fecha']}",
+                    text=f"📅 Inicio: {evento.get('fecha_inicio', evento.get('fecha', 'N/A'))} | Fin: {evento.get('fecha_fin', 'N/A')}",
                     font=("Arial", 12),
                 )
                 lbl_fecha.pack(anchor="w", padx=10)
 
-                # Recursos utilizados
-                # recursos_texto = ", ".join(evento["recursos"])
-                # lbl_recursos = ctk.CTkLabel(
-                #     frame_evento,
-                #     text=f" Recursos: {recursos_texto}",
-                #     font=("Arial", 11),
-                # )
-                # lbl_recursos.pack(anchor="w", padx=10, pady=(0, 5))
+                # Duración
+                lbl_duracion = ctk.CTkLabel(
+                    frame_evento,
+                    text=f"⏱️ Duración: {evento.get('duracion_dias', 1)} días",
+                    font=("Arial", 11),
+                )
+                lbl_duracion.pack(anchor="w", padx=10)
 
         # Botón para cerrar la ventana
         btn_cerrar = ctk.CTkButton(
@@ -333,7 +406,7 @@ class GestorEventosSimple(ctk.CTk):
         # Verificar si hay eventos para eliminar
         if not self.eventos_creados:
             self.lbl_info.configure(
-                text="📭 No hay eventos para eliminar", text_color="orange"
+                text="No hay eventos para eliminar", text_color="orange"
             )
             return
 
@@ -494,7 +567,7 @@ class GestorEventosSimple(ctk.CTk):
 
         ctk.CTkLabel(
             frame_recursos,
-            text="Seleccionar Recursos (marca los que necesites):",
+            text="Seleccionar Recursos:",
             font=("Arial", 14),
         ).pack(pady=5)
 
@@ -564,7 +637,12 @@ class GestorEventosSimple(ctk.CTk):
         self.entry_year = ctk.CTkEntry(
             frame_campos_fecha, placeholder_text="Año", width=80
         )
-        self.entry_year.pack(side="left", padx=5)        
+        self.entry_year.pack(side="left", padx=5)
+
+        self.entry_duracion = ctk.CTkEntry(
+            frame_campos_fecha, placeholder_text="Duracion", width=100
+        )
+        self.entry_duracion.pack(pady=5)
 
         # ========== 6. BOTONES DE ACCIÓN ==========
         frame_botones = ctk.CTkFrame(self)

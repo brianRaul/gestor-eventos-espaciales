@@ -1,60 +1,60 @@
 {
- "recursos": [
-  {
-   "nombre": "COHETE",
-   "cantidad": 18
-  },
-  {
-   "nombre": "PLATAFORMA DE LANZAMIENTO",
-   "cantidad": 18
-  },
-  {
-   "nombre": "EQUIPO DE CONTROL",
-   "cantidad": 18
-  },
-  {
-   "nombre": "SALA DE CONTROL PRINCIPAL",
-   "cantidad": 20
-  },
-  {
-   "nombre": "SISTEMA DE COMBUSTIBLE",
-   "cantidad": 18
-  },
-  {
-   "nombre": "TORRE DE SERVICIO",
-   "cantidad": 20
-  },
-  {
-   "nombre": "SISTEMA DE SEGURIDAD",
-   "cantidad": 18
-  },
-  {
-   "nombre": "ESTACIÓN DE SEGUIMIENTO",
-   "cantidad": 20
-  },
-  {
-   "nombre": "PLATAFORMA DE ATERRIZAJE",
-   "cantidad": 20
-  },
-  {
-   "nombre": "SISTEMA DE NAVEGACIÓN",
-   "cantidad": 20
-  },
-  {
-   "nombre": "SISTEMA ELÉCTRICO",
-   "cantidad": 18
-  },
-  {
-   "nombre": "SISTEMA DE CONTROL TÉRMICO",
-   "cantidad": 20
-  },
-  {
-   "nombre": "EQUIPO DE RECUPERACIÓN",
-   "cantidad": 20
-  },
-  {
-   "nombre": "LABORATORIO DE PRUEBAS",
-   "cantidad": 18
+  "recursos": {
+    "COHETE": {
+      "Ligero": 10,
+      "Pesado": 10
+    },
+    "PLATAFORMA DE LANZAMIENTO": {
+      "Estática": 10,
+      "Móvil": 10
+    },
+    "EQUIPO DE CONTROL": {
+      "Digital": 10,
+      "Analógico": 10
+    },
+    "SALA DE CONTROL PRINCIPAL": {
+      "Primaria": 10,
+      "Secundaria": 10
+    },
+    "SISTEMA DE COMBUSTIBLE": {
+      "Líquido": 50000,
+      "Sólido": 30000
+    },
+    "TORRE DE SERVICIO": {
+      "Fija": 10,
+      "Retráctil": 10
+    },
+    "SISTEMA DE SEGURIDAD": {
+      "Pasivo": 10,
+      "Activo": 10
+    },
+    "ESTACIÓN DE SEGUIMIENTO": {
+      "Terrestre": 10,
+      "Satelital": 10
+    },
+    "PLATAFORMA DE ATERRIZAJE": {
+      "Continental": 10,
+      "Marítima": 10
+    },
+    "SISTEMA DE NAVEGACIÓN": {
+      "GPS": 10,
+      "Inercial": 10
+    },
+    "SISTEMA ELÉCTRICO": {
+      "Principal": 10,
+      "Emergencia": 10
+    },
+    "SISTEMA DE CONTROL TÉRMICO": {
+      "Refrigerante": 10,
+      "Aislante": 10
+    },
+    "EQUIPO DE RECUPERACIÓN": {
+      "Aéreo": 10,
+      "Terrestre": 10
+    },
+    "LABORATORIO DE PRUEBAS": {
+      "Químico": 10,
+      "Físico": 10
+    }
   }
- ]
 }
