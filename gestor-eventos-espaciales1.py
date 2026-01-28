@@ -59,25 +59,33 @@ class GestorEventosSimple(ctk.CTk):
             }
 
     def cargar_recursos_desde_json(self):
-        """Cargar recursos desde archivo JSON"""
         try:
             with open("recursos.json", "r", encoding="utf-8") as f:
-                datos = json.load(f)
-                self.datos = datos["recursos"]
-                return datos.get(
-                    "recursos",
-                    [
-                        {"nombre": "COHETE", "cantidad": 5},
-                        {"nombre": "PLATAFORMA", "cantidad": 3},
-                    ],
-                )
-        except FileNotFoundError:
-            return [
-                {"nombre": "COHETE", "cantidad": 5},
-                {"nombre": "PLATAFORMA", "cantidad": 3},
-                {"nombre": "LABORATORIO", "cantidad": 2},
-                {"nombre": "EQUIPO", "cantidad": 10},
-            ]
+                datos_json = json.load(f)
+                self.recursos_raw = datos_json["recursos"]
+
+                lista_plana = []
+                for nombre_recurso, tipos in self.recursos_raw.items():
+                    for nombre_tipo, valor in tipos.items():
+                        # Definimos la unidad de medida
+                        unidad = "L" if "COMBUSTIBLE" in nombre_recurso else "uds"
+
+                        nombre_completo = f"{nombre_recurso} ({nombre_tipo})"
+                        lista_plana.append(
+                            {
+                                "nombre": nombre_completo,
+                                "cantidad": valor,  # Internamente sigue siendo un número para cálculos
+                                "unidad": unidad,
+                                "recurso_base": nombre_recurso,
+                                "tipo_especifico": nombre_tipo,
+                            }
+                        )
+
+                self.datos = lista_plana
+                return lista_plana
+        except Exception as e:
+            print(f"Error: {e}")
+            return []
 
     def cargar_eventos_planificados(self):
 
@@ -131,7 +139,7 @@ class GestorEventosSimple(ctk.CTk):
 
             checkbox = ctk.CTkCheckBox(
                 self.frame_checkboxes,
-                text=f"{recurso['nombre']} (Disponibles: {recurso['cantidad']})",
+                text = f"{recurso['nombre']} ({recurso['cantidad']} {recurso['unidad']} disponibles)",
                 variable=var,
                 onvalue=True,
                 offvalue=False,
@@ -281,13 +289,6 @@ class GestorEventosSimple(ctk.CTk):
             "duracion_dias": duracion,
             "recursos": recursos_seleccionados,
         }
-
-        # Eliminar recursos seleccionados
-        for recurso_eliminar in recursos_seleccionados:
-            for recursos_dicc in self.datos:
-                if recurso_eliminar == recursos_dicc["nombre"]:
-                    recursos_dicc["cantidad"] -= 1
-                    break
 
         # Agregar a la lista
         self.eventos_creados.append(nuevo_evento)
