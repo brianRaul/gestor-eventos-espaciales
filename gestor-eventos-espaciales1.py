@@ -8,22 +8,28 @@ class GestorEventosSimple(ctk.CTk):
     def __init__(self):
         super().__init__()
 
-        # Configurar ventana
+        # 1.Configurar ventana
         self.title("Gestor de Eventos Espaciales")
-        self.geometry("600x800")
+        self.geometry("600x900")
 
-        self.evento_seleccionado = None  # Para guardar el evento actual seleccionado
+        self.evento_seleccionado = None
 
+        # 2. CARGA DE EVENTOS
         self.tipos_evento_data = self.cargar_eventos_desde_json()
 
-        # Extraer solo los nombres para el ComboBox
+        # Extraemos las llaves (nombres de eventos) para el ComboBox
         self.tipos_evento = list(self.tipos_evento_data.keys())
+
+        # Cargamos los recursos
         self.recursos = self.cargar_recursos_desde_json()
 
-        # Cargar eventos planificados
+        # 3. CARGA DE ARCHIVOS DE AGENDA
+        # Importante: Aseguramos que sea una lista para evitar el error 'NoneType'
         self.eventos_planificados = self.cargar_eventos_planificados()
+        if self.eventos_planificados is None:
+            self.eventos_planificados = []
 
-        # Crear la interfaz
+        # 4. CREACIÓN DE LA INTERFAZ
         self.crear_interfaz()
 
     # ****************** GUARDAR/CARGAR RECURSOS ********************#
@@ -59,67 +65,74 @@ class GestorEventosSimple(ctk.CTk):
             }
 
     def cargar_recursos_desde_json(self):
+        """Carga y aplana la estructura: Recurso -> Tipo -> Cantidad"""
         try:
             with open("recursos.json", "r", encoding="utf-8") as f:
-                datos_json = json.load(f)
-                self.recursos_raw = datos_json["recursos"]
+                # Accedemos a la clave principal "recursos"
+                datos_raw = json.load(f)["recursos"]
 
                 lista_plana = []
-                for nombre_recurso, tipos in self.recursos_raw.items():
-                    for nombre_tipo, valor in tipos.items():
-                        # Definimos la unidad de medida
-                        unidad = "L" if "COMBUSTIBLE" in nombre_recurso else "uds"
+                # Recorremos Recurso Base (ej: COHETE)
+                for res_base, tipos in datos_raw.items():
+                    # Recorremos Tipo (ej: Pesado, Ligero)
+                    for t_nombre, cantidad in tipos.items():
+                        # Detectar unidad de medida
+                        unidad = "L" if "COMBUSTIBLE" in res_base else "uds"
 
-                        nombre_completo = f"{nombre_recurso} ({nombre_tipo})"
+                        # Crear nombre único para la ID
+                        nombre_completo = f"{res_base} ({t_nombre})"
+
                         lista_plana.append(
                             {
                                 "nombre": nombre_completo,
-                                "cantidad": valor,  # Internamente sigue siendo un número para cálculos
+                                "cantidad_total": cantidad,  # La capacidad máxima
                                 "unidad": unidad,
-                                "recurso_base": nombre_recurso,
-                                "tipo_especifico": nombre_tipo,
+                                "categoria": res_base,  # Útil para agrupar si quisieras
                             }
                         )
 
-                self.datos = lista_plana
+                self.recursos = lista_plana
                 return lista_plana
         except Exception as e:
-            print(f"Error: {e}")
+            print(f"❌ Error cargando recursos: {e}")
             return []
 
     def cargar_eventos_planificados(self):
-
         try:
             with open("eventos_planificados.json", "r", encoding="utf-8") as f:
-                self.eventos_creados = json.load(f)
-            print(
-                f"✅ Eventos cargados desde JSON: {len(self.eventos_creados)} eventos"
-            )
-
-        except FileNotFoundError:
-            print("📄 Archivo de eventos no encontrado, se creará uno nuevo")
-            self.eventos_creados = []
-        except Exception as e:
-            print(f"❌ Error al cargar JSON: {e}")
-            self.eventos_creados = []
+                contenido = json.load(f)
+                return contenido if isinstance(contenido, list) else []
+        except (FileNotFoundError, json.JSONDecodeError):
+            return []
 
     def guardar_eventos_en_json(self):
 
         try:
+            # Ordenar eventos por fecha de inicio (más antigua primero)
+            eventos_ordenados = sorted(
+                self.eventos_planificados,
+                key=lambda x: datetime.strptime(x["fecha_inicio"], "%d/%m/%Y"),
+            )
+
             with open("eventos_planificados.json", "w", encoding="utf-8") as f:
-                json.dump(self.eventos_creados, f, ensure_ascii=False, indent=4)
-            print(f"✅ Eventos guardados en JSON: {len(self.eventos_creados)} eventos")
+                json.dump(eventos_ordenados, f, ensure_ascii=False, indent=4)
+
+            print(f"✅ Eventos guardados y ordenados: {len(eventos_ordenados)} eventos")
+
+            # Actualizar la lista en memoria
+            self.eventos_planificados = eventos_ordenados
+
         except Exception as e:
             print(f"❌ Error al guardar en JSON: {e}")
 
     def actualizar_contador(self):
-        total = len(self.eventos_creados)
+        total = len(self.eventos_planificados)
         self.lbl_contador.configure(text=f"Eventos planificados: {total}")
 
     def guardar_recursos(self):
         try:
             with open("recursos.json", "w", encoding="utf-8") as f:
-                json.dump({"recursos": self.datos}, f, ensure_ascii=False, indent=1)
+                json.dump({"recursos": self.recursos}, f, ensure_ascii=False, indent=1)
         except Exception as e:
             print(f"Error al actualizar la cantidad de recursos: {e}")
 
@@ -139,7 +152,7 @@ class GestorEventosSimple(ctk.CTk):
 
             checkbox = ctk.CTkCheckBox(
                 self.frame_checkboxes,
-                text = f"{recurso['nombre']} ({recurso['cantidad']} {recurso['unidad']} disponibles)",
+                text=f"{recurso['nombre']} ({recurso['cantidad_total']} {recurso['unidad']} totales)",
                 variable=var,
                 onvalue=True,
                 offvalue=False,
@@ -150,177 +163,300 @@ class GestorEventosSimple(ctk.CTk):
     def marcar_recursos_recomendados(self):
         tipo_evento = self.combo_evento.get()
 
-        if tipo_evento == "Elige un tipo de evento" or not tipo_evento:
+        if tipo_evento not in self.tipos_evento_data:
             self.lbl_info.configure(
-                text="❌ Primero selecciona un tipo de evento", text_color="red"
+                text="❌ Selecciona un evento válido", text_color="red"
             )
             return
 
-        # Buscar el evento seleccionado en el diccionario
-        if tipo_evento in self.tipos_evento_data:
-            # EN FORMATO NUEVO: esto es un diccionario, no una lista
-            evento_data = self.tipos_evento_data[tipo_evento]
+        evento_data = self.tipos_evento_data[tipo_evento]
 
-            # Extraer la lista de recursos recomendados del diccionario
-            recursos_recomendados = evento_data.get("recursos_recomendados", [])
+        # 1. Obtener los datos del nuevo JSON
+        # Ahora usamos .keys() porque 'recursos_necesarios' es un diccionario {nombre: cantidad}
+        necesarios = evento_data.get("recursos_necesarios", {}).keys()
+        prohibidos = evento_data.get("recursos_prohibidos", [])
 
-            # Marcar solo los checkboxes de recursos recomendados
-            for recurso_nombre in recursos_recomendados:
-                if recurso_nombre in self.checkbox_vars:
-                    self.checkbox_vars[recurso_nombre].set(True)
+        contador_marcados = 0
 
-            # Mostrar mensaje
-            self.lbl_info.configure(
-                text=f"✅ Recursos recomendados marcados para '{tipo_evento}'",
-                text_color="green",
-            )
+        # 2. Resetear y marcar
+        for nombre_recurso, var in self.checkbox_vars.items():
+            # Desmarcamos primero para limpiar selecciones anteriores
+            var.set(False)
 
-    # ========== Crear evento ==========
-    def crear_evento(self):
+            # Si el recurso es necesario para este evento, lo marcamos
+            if nombre_recurso in necesarios:
+                var.set(True)
+                contador_marcados += 1
 
-        # Obtener datos
-        tipo_evento = self.combo_evento.get()
-        day = self.entry_day.get()
-        month = self.entry_month.get()
-        year = self.entry_year.get()
+            # Opcional: Podrías deshabilitar los prohibidos aquí si quisieras
+            # if nombre_recurso in prohibidos:
+            #    self.checkbox_widgets[nombre_recurso].configure(state="disabled")
 
-        # Validar que todos los campos estén completos
-
-        # Eventos
-        if tipo_evento == "Elige un tipo de evento" or not tipo_evento:
-            self.lbl_info.configure(
-                text="❌ Debes seleccionar un tipo de evento", text_color="red"
-            )
-            return
-
-        # Fechas
-        if not day:
-            self.lbl_info.configure(text="❌ El día es obligatorio", text_color="red")
-            return
-        if not month:
-            self.lbl_info.configure(text="❌ El mes es obligatorio", text_color="red")
-            return
-        if not year:
-            self.lbl_info.configure(text="❌ El año es obligatorio", text_color="red")
-            return
-
-        # Validar fecha
-        try:
-            year_int = int(year)
-            month_int = int(month)
-            day_int = int(day)
-            fecha_evento = datetime(year_int, month_int, day_int)
-        except ValueError as e:
-            self.lbl_info.configure(text=f"Fecha inválida Error: {e}", color="red")
-            return
-
-        if fecha_evento.date() < datetime.now().date():
-            self.lbl_info.configure(
-                text=f"No puedes crear eventos en fechas pasadas", text_color="red"
-            )
-            return
-        # ========== VALIDAR DURACIÓN  ==========
-        if not self.entry_duracion.get():
-            self.lbl_info.configure(
-                text="❌ La duración es obligatoria", text_color="red"
-            )
-            return
-
-        try:
-            duracion = int(self.entry_duracion.get())
-            if duracion <= 0:
-                self.lbl_info.configure(
-                    text="❌ La duración debe ser mayor a 0 días", text_color="red"
-                )
-                return
-        except ValueError:
-            self.lbl_info.configure(
-                text="❌ La duración debe ser un número entero", text_color="red"
-            )
-            return
-
-        # Validar duración según el tipo de evento
-        if tipo_evento in self.tipos_evento_data:
-            evento_data = self.tipos_evento_data[tipo_evento]
-            duracion_minima = evento_data.get("duracion_minima", 1)
-            duracion_maxima = evento_data.get("duracion_maxima", 30)
-
-            if duracion < duracion_minima:
-                self.lbl_info.configure(
-                    text=f"❌ La duración mínima para '{tipo_evento}' es {duracion_minima} días",
-                    text_color="red",
-                )
-                return
-            if duracion > duracion_maxima:
-                self.lbl_info.configure(
-                    text=f"❌ La duración máxima para '{tipo_evento}' es {duracion_maxima} días",
-                    text_color="red",
-                )
-                return
-
-            # Calcular fecha final
-            fecha_inicio = fecha_evento
-            fecha_fin = fecha_inicio + timedelta(
-                days=duracion - 1
-            )  # -1 porque el día de inicio cuenta
-
-        # Verificar hueco
-
-        # Obtener recursos SELECCIONADOS por el usuario
-        recursos_seleccionados = []
-
-        if hasattr(self, "checkbox_vars"):
-            for recurso_nombre, var in self.checkbox_vars.items():
-                if var.get():  # Si el checkbox está marcado
-                    recursos_seleccionados.append(recurso_nombre)
-
-        # Validar que se haya seleccionado al menos un recurso
-        if not recursos_seleccionados:
-            self.lbl_info.configure(
-                text="❌ Debes seleccionar al menos un recurso", text_color="red"
-            )
-            return
-
-        # Crear el evento
-        nuevo_evento = {
-            "tipo": tipo_evento,
-            "fecha_inicio": f"{int(day):02d}/{int(month):02d}/{int(year)}",
-            "fecha_fin": fecha_fin.strftime("%d/%m/%Y"),
-            "duracion_dias": duracion,
-            "recursos": recursos_seleccionados,
-        }
-
-        # Agregar a la lista
-        self.eventos_creados.append(nuevo_evento)
-        # Guardar en archivo JSON
-        self.guardar_eventos_en_json()
-        # Actualizar cantidad de eventos
-        self.guardar_recursos()
-        # Actualizar los checkboxes con los recursos actualizados
-        self.crear_checkboxes_recursos()
-
-        # Actualizar interfaz
-        self.actualizar_contador()
         self.lbl_info.configure(
-            text=f"Evento '{tipo_evento}' creado para el {int(day):02d}/{int(month):02d}/{int(year)}",
+            text=f"✅ Configurado: {contador_marcados} recursos necesarios marcados",
             text_color="green",
         )
 
-        # Limpiar campos
+    # ========== Crear evento ==========
+    def crear_evento(self):
+        # Obtención y validación de los datos
+        tipo_evento = self.combo_evento.get()
+        evento_data = self.tipos_evento_data.get(tipo_evento, {})
+        recursos_obligatorios = evento_data.get("recursos_necesarios", {})
+        day, month, year = (
+            self.entry_day.get(),
+            self.entry_month.get(),
+            self.entry_year.get(),
+        )
+        duracion_str = self.entry_duracion.get()
+
+        if not tipo_evento or tipo_evento == "Elige un tipo de evento":
+            self.lbl_info.configure(
+                text="❌ Selecciona un tipo de evento", text_color="red"
+            )
+            return
+
+        # Validar fechas
+        try:
+            fecha_inicio = datetime(int(year), int(month), int(day))
+            if fecha_inicio.date() < datetime.now().date():
+                self.lbl_info.configure(
+                    text="❌ No puedes planificar en el pasado", text_color="red"
+                )
+                return
+
+            duracion = int(duracion_str)
+            if duracion <= 0:
+                self.lbl_info.configure(
+                    text="❌ La duración debe ser mayor a 0", text_color="red"
+                )
+                return
+
+            # Calcular fecha fin
+            fecha_fin = fecha_inicio + timedelta(days=duracion - 1)
+        except ValueError:
+            self.lbl_info.configure(
+                text="❌ Fecha o duración inválida", text_color="red"
+            )
+            return
+
+        # Validar duración min/max (Mantenido de tu lógica original)
+        if tipo_evento in self.tipos_evento_data:
+            evento_data = self.tipos_evento_data[tipo_evento]
+            d_min = evento_data.get("duracion_minima", 1)
+            d_max = evento_data.get("duracion_maxima", 30)
+            if not (d_min <= duracion <= d_max):
+                self.lbl_info.configure(
+                    text=f"❌ Duración permitida: {d_min}-{d_max} días",
+                    text_color="red",
+                )
+                return
+
+        # Obtener recursos seleccionados (checkboxes)
+        recursos_seleccionados = [k for k, v in self.checkbox_vars.items() if v.get()]
+        if not recursos_seleccionados:
+            self.lbl_info.configure(
+                text="❌ Selecciona al menos un recurso", text_color="red"
+            )
+            return
+
+        # A. Verificar Recursos Prohibidos (Exclusión Mutua)
+        prohibidos = evento_data.get("recursos_prohibidos", [])
+        for rec in recursos_seleccionados:
+            if rec in prohibidos:
+                self.lbl_info.configure(
+                    text=f"⛔ REGLA VIOLADA: '{rec}' está prohibido en este evento.",
+                    text_color="red",
+                )
+                return
+        # B Validar Co-requisitos
+        corequisitos = evento_data.get("recursos_corequisitos", {})
+
+        if corequisitos:
+            # 1. Construir relaciones bidireccionales
+            relaciones = {}
+
+            for recurso_principal, lista_requeridos in corequisitos.items():
+                if recurso_principal not in relaciones:
+                    relaciones[recurso_principal] = []
+
+                # Añadir relaciones directas (A -> B)
+                for requerido in lista_requeridos:
+                    if requerido not in relaciones[recurso_principal]:
+                        relaciones[recurso_principal].append(requerido)
+
+            # Hacer bidireccional (B -> A)
+            for requerido in lista_requeridos:
+                if requerido not in relaciones:
+                    relaciones[requerido] = []
+
+                if recurso_principal not in relaciones[requerido]:
+                    relaciones[requerido].append(recurso_principal)
+
+            # 2. Expandir relaciones transitivas (A->B->C = A->C)
+            for _ in range(5):  # Máximo 5 niveles de profundidad
+                cambios = False
+
+                for recurso in list(relaciones.keys()):
+                    # Para cada recurso relacionado actualmente
+                    for relacionado in list(relaciones[recurso]):
+                        # Ver sus relaciones
+                        if relacionado in relaciones:
+                            for relacionado_del_relacionado in relaciones[relacionado]:
+                                # Si no es el mismo y no está ya relacionado
+                                if (
+                                    relacionado_del_relacionado != recurso
+                                    and relacionado_del_relacionado
+                                    not in relaciones[recurso]
+                                ):
+                                    relaciones[recurso].append(
+                                        relacionado_del_relacionado
+                                    )
+                                    cambios = True
+
+                # Si no hubo cambios, terminamos antes
+                if not cambios:
+                    break
+
+            # 3. Validar que todos los recursos relacionados estén seleccionados
+            errores_corequisitos = []
+
+            for recurso_seleccionado in recursos_seleccionados:
+                if recurso_seleccionado in relaciones:
+                    for recurso_relacionado in relaciones[recurso_seleccionado]:
+                        if recurso_relacionado not in recursos_seleccionados:
+                            mensaje_error = f"⚠️ '{recurso_seleccionado}' necesita también: '{recurso_relacionado}'"
+                            # Evitar mensajes duplicados
+                            if mensaje_error not in errores_corequisitos:
+                                errores_corequisitos.append(mensaje_error)
+
+                # 4. Mostrar errores si los hay
+                if len(errores_corequisitos) > 3:
+                    errores_a_mostrar = errores_corequisitos[:3]
+                    errores_a_mostrar.append(
+                        f"... y {len(errores_corequisitos) - 3} error(es) más"
+                    )
+                else:
+                    errores_a_mostrar = errores_corequisitos
+
+            self.lbl_info.configure(
+                text="\n".join(errores_a_mostrar),
+                text_color="orange",  # Color para advertencias
+            )
+            return
+        # Detener la creación del evento
+
+        # C. Verificar SI FALTA ALGUNO
+        for obligatorio in recursos_obligatorios.keys():
+            encontrado = False
+
+            # Revisamos los que el usuario marcó en los cuadritos
+            for marcado in recursos_seleccionados:
+                # Si el obligatorio está dentro del nombre marcado (sin importar mayúsculas)
+                if obligatorio.upper() in marcado.upper():
+                    encontrado = True
+                    break  # Si ya lo encontramos, dejamos de buscar este
+
+            # Si terminamos de revisar y NO lo encontramos...
+            if encontrado == False:
+                self.lbl_info.configure(
+                    text=f"❌ ¡Oye! Te falta marcar: {obligatorio}", text_color="red"
+                )
+                return  # Detenemos todo porque falta algo
+
+        # CÁLCULO DE DISPONIBILIDAD TEMPORAL CORREGIDO
+        necesarios_config = evento_data.get("recursos_necesarios", {})
+        uso_recursos_evento = {}
+
+        # Primero, calcular cuánto necesita cada recurso
+        for rec_nombre in recursos_seleccionados:
+            # Buscar la cantidad necesaria (coincidencia parcial)
+            cantidad_requerida = 1
+            for recurso_necesario, cantidad in necesarios_config.items():
+                if recurso_necesario.upper() in rec_nombre.upper():
+                    cantidad_requerida = cantidad
+                    break
+            uso_recursos_evento[rec_nombre] = cantidad_requerida
+
+        # Verificar disponibilidad para cada recurso seleccionado
+        for rec_nombre, cantidad_requerida in uso_recursos_evento.items():
+            # Buscar información del recurso en inventario (coincidencia parcial)
+            recurso_info = None
+            for r in self.recursos:
+                if (
+                    rec_nombre.upper() in r["nombre"].upper()
+                    or r["nombre"].upper() in rec_nombre.upper()
+                ):
+                    recurso_info = r
+                    break
+
+            if not recurso_info:
+                self.lbl_info.configure(
+                    text=f"❌ Error: Recurso '{rec_nombre}' no encontrado en inventario",
+                    text_color="red",
+                )
+                return
+
+            capacidad_total = recurso_info["cantidad_total"]
+            unidad = recurso_info.get("unidad", "uds")
+
+            # Calcular cuánto está ocupado en esas fechas
+            cantidad_ocupada_en_fechas = 0
+
+            for ev in self.eventos_planificados:
+                # Parsear fechas de eventos existentes
+                e_ini = datetime.strptime(ev["fecha_inicio"], "%d/%m/%Y")
+                e_fin = datetime.strptime(ev["fecha_fin"], "%d/%m/%Y")
+
+                # Verificar solapamiento de fechas
+                if fecha_inicio <= e_fin and fecha_fin >= e_ini:
+                    # Buscar uso de este recurso en el evento (coincidencia parcial)
+                    for nombre_usado, cantidad_usada in ev.get(
+                        "recursos_usados", {}
+                    ).items():
+                        if (
+                            rec_nombre.upper() in nombre_usado.upper()
+                            or nombre_usado.upper() in rec_nombre.upper()
+                        ):
+                            cantidad_ocupada_en_fechas += cantidad_usada
+                            break
+
+            # Verificar si hay disponibilidad
+            disponible = capacidad_total - cantidad_ocupada_en_fechas
+
+            if disponible < cantidad_requerida:
+                self.lbl_info.configure(
+                    text=f"❌ SIN STOCK: {recurso_info['nombre']}.\nNecesitas {cantidad_requerida}{unidad}, quedan {disponible}{unidad} en esas fechas.",
+                    text_color="red",
+                )
+                return
+
+        # GUARDADO
+        nuevo_evento = {
+            "tipo": tipo_evento,
+            "fecha_inicio": fecha_inicio.strftime("%d/%m/%Y"),
+            "fecha_fin": fecha_fin.strftime("%d/%m/%Y"),
+            "duracion_dias": duracion,
+            "recursos": recursos_seleccionados,  # Lista de nombres (para mostrar en GUI)
+            "recursos_usados": uso_recursos_evento,  # Diccionario con cantidades (para lógica interna)
+        }
+
+        self.eventos_planificados.append(nuevo_evento)
+        self.guardar_eventos_en_json()
+        self.actualizar_contador()
+
+        # Limpieza
         self.entry_day.delete(0, "end")
         self.entry_month.delete(0, "end")
         self.entry_year.delete(0, "end")
         self.entry_duracion.delete(0, "end")
-        self.lbl_fecha_fin.configure(
-            text="📅 El evento terminará: --/--/----", text_color="gray"
+        self.combo_evento.set("Elige un tipo de evento")
+        self.limpiar_seleccion_recursos()
+        self.lbl_info.configure(
+            text=f"🚀 Evento '{tipo_evento}' creado exitosamente ({fecha_inicio.strftime('%d/%m')})",
+            text_color="green",
         )
-        # Desmarcar todos los checkboxes después de crear evento
-        for var in self.checkbox_vars.values():
-            var.set(False)
-
-        # Mostrar en consola (para depuración)
         print(f"Evento creado: {nuevo_evento}")
-        print(f"Total eventos: {len(self.eventos_creados)}")
 
     # ========== Limpiar selección ==========
     def limpiar_seleccion_recursos(self):
@@ -332,6 +468,7 @@ class GestorEventosSimple(ctk.CTk):
                 text="Todos los recursos desmarcados", text_color="orange"
             )
 
+    # =========== Mostrar eventos planificados ========
     def mostrar_eventos_planificados(self):
 
         # Crear una nueva ventana emergente
@@ -352,7 +489,7 @@ class GestorEventosSimple(ctk.CTk):
         frame_contenedor.pack(pady=10, padx=10)
 
         # Verificar si hay eventos
-        if not self.eventos_creados:
+        if not self.eventos_planificados:
             # si no hay eventos
             sin_eventos = ctk.CTkLabel(
                 frame_contenedor,
@@ -363,7 +500,7 @@ class GestorEventosSimple(ctk.CTk):
             sin_eventos.pack(pady=20)
         else:
             # Mostrar cada evento
-            for i, evento in enumerate(self.eventos_creados, 1):
+            for i, evento in enumerate(self.eventos_planificados, 1):
                 # Crear un frame para cada evento (como una tarjeta)
                 frame_evento = ctk.CTkFrame(frame_contenedor)
                 frame_evento.pack(fill="x", pady=5, padx=5)
@@ -402,9 +539,199 @@ class GestorEventosSimple(ctk.CTk):
         )
         btn_cerrar.pack(pady=10)
 
+    # ============ Sugerir Fecha =============
+    def sugerir_fecha_disponible(self):
+
+        # Validaciones iniciales
+        if self.combo_evento.get() == "Elige un tipo de evento":
+            self.lbl_info.configure(
+                text="❌ Primero selecciona un evento", text_color="red"
+            )
+            return
+
+        tipo_evento = self.combo_evento.get()
+
+        if tipo_evento not in self.tipos_evento_data:
+            self.lbl_info.configure(
+                text="❌ Tipo de evento no encontrado", text_color="red"
+            )
+            return
+
+        # Obtener datos
+        evento_data = self.tipos_evento_data[tipo_evento]
+        recursos_necesarios = evento_data.get("recursos_necesarios", {})
+
+        if not recursos_necesarios:
+            self.lbl_info.configure(
+                text="⚠️ Este evento no tiene recursos necesarios definidos",
+                text_color="orange",
+            )
+            return
+
+        # Obtener duración
+        try:
+            duracion = max(1, int(self.entry_duracion.get()))
+        except:
+            duracion = 1
+
+        # Validar duración
+        d_min = evento_data.get("duracion_minima", 1)
+        d_max = evento_data.get("duracion_maxima", 30)
+        duracion = max(d_min, min(duracion, d_max))
+
+        # Preprocesar recursos necesarios
+        recursos_a_verificar = []
+        for recurso_nombre, cantidad in recursos_necesarios.items():
+            recurso_info = None
+            for r in self.recursos:
+                if recurso_nombre.upper() in r["nombre"].upper():
+                    recurso_info = r
+                    break
+
+            if not recurso_info:
+                self.lbl_info.configure(
+                    text=f"❌ Recurso '{recurso_nombre}' no encontrado",
+                    text_color="red",
+                )
+                return
+
+            recursos_a_verificar.append(
+                {
+                    "nombre": recurso_info["nombre"],
+                    "total": recurso_info["cantidad_total"],
+                    "necesario": cantidad,
+                    "unidad": recurso_info["unidad"],
+                    "buscar": recurso_nombre,
+                }
+            )
+
+        # Función para verificar disponibilidad en un período específico
+        def verificar_disponibilidad(fecha_inicio, fecha_fin):
+            for recurso in recursos_a_verificar:
+                disponible = recurso["total"]
+
+                # Buscar eventos que se solapen (optimizado)
+                for ev in self.eventos_planificados:
+                    # Convertir fechas
+                    ev_inicio = datetime.strptime(ev["fecha_inicio"], "%d/%m/%Y").date()
+                    ev_fin = datetime.strptime(ev["fecha_fin"], "%d/%m/%Y").date()
+
+                    # Si el evento está después del período, dejar de buscar
+                    if ev_inicio > fecha_fin:
+                        break
+
+                    # Si hay solapamiento
+                    if fecha_inicio <= ev_fin and fecha_fin >= ev_inicio:
+                        # Buscar uso del recurso (coincidencia parcial)
+                        for nombre_usado, cantidad in ev.get(
+                            "recursos_usados", {}
+                        ).items():
+                            # Búsqueda más flexible
+                            if (
+                                recurso["buscar"].upper() in nombre_usado.upper()
+                                or nombre_usado.upper() in recurso["buscar"].upper()
+                            ):
+                                disponible -= cantidad
+                                break
+
+                    # Si ya no hay suficiente, terminar
+                    if disponible < recurso["necesario"]:
+                        return False, recurso
+
+                    return True, None
+
+        # Algoritmo principal de búsqueda
+        hoy = datetime.now().date()
+
+        # Si no hay eventos, probar desde mañana
+        if not self.eventos_planificados:
+            fecha_prueba = hoy + timedelta(days=1)
+            fecha_fin_prueba = fecha_prueba + timedelta(days=duracion - 1)
+
+            disponible, recurso_problema = verificar_disponibilidad(
+                fecha_prueba, fecha_fin_prueba
+            )
+            if disponible:
+                self.actualizar_fecha_campos(fecha_prueba)
+                return
+
+        # Buscar huecos entre eventos
+        eventos_ordenados = self.eventos_planificados
+
+        # Hueco antes del primer evento
+        primer_evento_inicio = datetime.strptime(
+            eventos_ordenados[0]["fecha_inicio"], "%d/%m/%Y"
+        ).date()
+        fecha_inicio_hueco = hoy + timedelta(days=1)
+
+        if fecha_inicio_hueco + timedelta(days=duracion - 1) < primer_evento_inicio:
+            disponible, _ = verificar_disponibilidad(
+                fecha_inicio_hueco, fecha_inicio_hueco + timedelta(days=duracion - 1)
+            )
+            if disponible:
+                self.actualizar_fecha_campos(fecha_inicio_hueco)
+                return
+
+        # Huecos entre eventos
+        for i in range(len(eventos_ordenados) - 1):
+            evento_actual_fin = datetime.strptime(
+                eventos_ordenados[i]["fecha_fin"], "%d/%m/%Y"
+            ).date()
+            eventoSiguiente_inicio = datetime.strptime(
+                eventos_ordenados[i + 1]["fecha_inicio"], "%d/%m/%Y"
+            ).date()
+
+            # Si hay al menos 'duracion' días entre eventos
+            if evento_actual_fin + timedelta(days=duracion) < eventoSiguiente_inicio:
+                fecha_candidata = evento_actual_fin + timedelta(days=1)
+                fecha_fin_candidata = fecha_candidata + timedelta(days=duracion - 1)
+
+                disponible, _ = verificar_disponibilidad(
+                    fecha_candidata, fecha_fin_candidata
+                )
+                if disponible:
+                    self.actualizar_fecha_campos(fecha_candidata)
+                    return
+
+        # Hueco después del último evento
+        ultimo_evento_fin = datetime.strptime(
+            eventos_ordenados[-1]["fecha_fin"], "%d/%m/%Y"
+        ).date()
+        fecha_candidata = ultimo_evento_fin + timedelta(days=1)
+
+        # Probar los próximos 30 días después del último evento
+        for i in range(30):
+            fecha_prueba = fecha_candidata + timedelta(days=i)
+            fecha_fin_prueba = fecha_prueba + timedelta(days=duracion - 1)
+
+            disponible, recurso_problema = verificar_disponibilidad(
+                fecha_prueba, fecha_fin_prueba
+            )
+            if disponible:
+                self.actualizar_fecha_campos(fecha_prueba)
+                return
+
+        # No se encontró fecha
+        self.lbl_info.configure(
+            text="❌ No se encontraron fechas disponibles", text_color="red"
+        )
+
+    def actualizar_fecha_campos(self, fecha):
+
+        self.entry_day.delete(0, "end")
+        self.entry_day.insert(0, fecha.day)
+        self.entry_month.delete(0, "end")
+        self.entry_month.insert(0, fecha.month)
+        self.entry_year.delete(0, "end")
+        self.entry_year.insert(0, fecha.year)
+
+        self.lbl_info.configure(
+            text=f"✅ Fecha sugerida: {fecha.strftime('%d/%m/%Y')}", text_color="green"
+        )
+
     def eliminar_eventos_planificados(self):
         # Verificar si hay eventos para eliminar
-        if not self.eventos_creados:
+        if not self.eventos_planificados:
             self.lbl_info.configure(
                 text="No hay eventos para eliminar", text_color="orange"
             )
@@ -439,7 +766,7 @@ class GestorEventosSimple(ctk.CTk):
         self.checkbox_vars_eliminar = []
 
         # Crear un checkbox por cada evento
-        for i, evento in enumerate(self.eventos_creados):
+        for i, evento in enumerate(self.eventos_planificados):
             var = ctk.BooleanVar(value=False)
             self.checkbox_vars_eliminar.append(var)
 
@@ -505,15 +832,15 @@ class GestorEventosSimple(ctk.CTk):
         # Eliminar los eventos (empezando por el último para no afectar los índices)
         for index in sorted(indices_a_eliminar, reverse=True):
             # Antes de eliminar, restaurar los recursos utilizados
-            evento = self.eventos_creados[index]
+            evento = self.eventos_planificados[index]
             for recurso_nombre in evento["recursos"]:
-                for recurso_dicc in self.datos:
+                for recurso_dicc in self.recursos:
                     if recurso_nombre == recurso_dicc["nombre"]:
                         recurso_dicc["cantidad"] += 1  # Restaurar 1 unidad
                         break
 
             # Eliminar el evento de la lista
-            del self.eventos_creados[index]
+            del self.eventos_planificados[index]
 
         # Guardar cambios en los archivos JSON
         self.guardar_eventos_en_json()
@@ -667,6 +994,18 @@ class GestorEventosSimple(ctk.CTk):
             command=self.eliminar_eventos_planificados,
         )
         self.btn_eliminar.pack(side="left", padx=10)
+
+        # ========== BOTÓN DE SUGERENCIA ==========
+        self.btn_sugerir = ctk.CTkButton(
+            self,
+            text="🔍 Sugerir Próxima Fecha Libre",
+            width=250,
+            height=35,
+            fg_color="#1f538d",
+            hover_color="#14375e",
+            command=self.sugerir_fecha_disponible,
+        )
+        self.btn_sugerir.pack(pady=5)
 
         # ========== 7. BOTÓN PRINCIPAL ==========
         self.btn_crear = ctk.CTkButton(
