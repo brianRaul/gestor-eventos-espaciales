@@ -1,32 +1,520 @@
 {
   "Despegue de cohete": {
-    "recursos_recomendados": ["COHETE", "PLATAFORMA DE LANZAMIENTO", "SISTEMA DE COMBUSTIBLE", "SISTEMA DE SEGURIDAD"],
-    "recursos_prohibidos": [],
-    "duracion_minima": 1,
-    "duracion_maxima": 3
+    "recursos_necesarios": {
+      "COHETE (Pesado)": 1,
+      "PLATAFORMA DE LANZAMIENTO (Estática)": 1,
+      "EQUIPO DE CONTROL (Digital)": 1,
+      "SALA DE CONTROL PRINCIPAL (Primaria)": 1,
+      "SISTEMA DE COMBUSTIBLE (Líquido)": 45000,
+      "TORRE DE SERVICIO (Retráctil)": 1,
+      "SISTEMA DE SEGURIDAD (Activo)": 1,
+      "ESTACIÓN DE SEGUIMIENTO (Satelital)": 1,
+      "SISTEMA DE NAVEGACIÓN (GPS)": 1,
+      "SISTEMA ELÉCTRICO (Principal)": 1,
+      "SISTEMA DE CONTROL TÉRMICO (Refrigerante)": 1
+    },
+    "recursos_prohibidos": [
+      "COHETE (Ligero)",
+      "PLATAFORMA DE LANZAMIENTO (Móvil)",
+      "SISTEMA DE COMBUSTIBLE (Sólido)",
+      "PLATAFORMA DE ATERRIZAJE (Continental)",
+      "PLATAFORMA DE ATERRIZAJE (Marítima)",
+      "EQUIPO DE RECUPERACIÓN (Aéreo)",
+      "EQUIPO DE RECUPERACIÓN (Terrestre)"
+    ],
+    "recursos_innecesarios": [
+      "EQUIPO DE CONTROL (Analógico)",
+      "SALA DE CONTROL PRINCIPAL (Secundaria)",
+      "TORRE DE SERVICIO (Fija)",
+      "SISTEMA DE SEGURIDAD (Pasivo)",
+      "ESTACIÓN DE SEGUIMIENTO (Terrestre)",
+      "SISTEMA DE NAVEGACIÓN (Inercial)",
+      "SISTEMA ELÉCTRICO (Emergencia)",
+      "SISTEMA DE CONTROL TÉRMICO (Aislante)",
+      "LABORATORIO DE PRUEBAS (Químico)",
+      "LABORATORIO DE PRUEBAS (Físico)"
+    ],
+    "duracion_minima": 1, "duracion_maxima": 3
+  },
+  "Prueba estática de motor": {
+    "recursos_necesarios": {
+      "COHETE (Ligero)": 1,
+      "PLATAFORMA DE LANZAMIENTO (Estática)": 1,
+      "SISTEMA DE COMBUSTIBLE (Líquido)": 8000,
+      "SISTEMA DE SEGURIDAD (Activo)": 1,
+      "EQUIPO DE CONTROL (Digital)": 1
+    },
+    "recursos_prohibidos": [
+      "COHETE (Pesado)",
+      "PLATAFORMA DE LANZAMIENTO (Móvil)",
+      "SISTEMA DE COMBUSTIBLE (Sólido)",
+      "PLATAFORMA DE ATERRIZAJE (Continental)",
+      "PLATAFORMA DE ATERRIZAJE (Marítima)",
+      "SISTEMA DE NAVEGACIÓN (GPS)",
+      "SISTEMA DE NAVEGACIÓN (Inercial)"
+    ],
+    "recursos_innecesarios": [
+      "EQUIPO DE CONTROL (Analógico)",
+      "SALA DE CONTROL PRINCIPAL (Primaria)",
+      "SALA DE CONTROL PRINCIPAL (Secundaria)",
+      "TORRE DE SERVICIO (Fija)",
+      "TORRE DE SERVICIO (Retráctil)",
+      "SISTEMA DE SEGURIDAD (Pasivo)",
+      "ESTACIÓN DE SEGUIMIENTO (Terrestre)",
+      "ESTACIÓN DE SEGUIMIENTO (Satelital)",
+      "SISTEMA ELÉCTRICO (Principal)",
+      "SISTEMA ELÉCTRICO (Emergencia)",
+      "SISTEMA DE CONTROL TÉRMICO (Refrigerante)",
+      "SISTEMA DE CONTROL TÉRMICO (Aislante)",
+      "EQUIPO DE RECUPERACIÓN (Aéreo)",
+      "EQUIPO DE RECUPERACIÓN (Terrestre)",
+      "LABORATORIO DE PRUEBAS (Químico)",
+      "LABORATORIO DE PRUEBAS (Físico)"
+    ],
+    "duracion_minima": 1, "duracion_maxima": 1
   },
   "Pruebas de carga útil": {
-    "recursos_recomendados": ["LABORATORIO DE PRUEBAS", "EQUIPO DE CONTROL", "SISTEMA ELÉCTRICO"],
-    "recursos_prohibidos": [],
-    "duracion_minima": 2,
-    "duracion_maxima": 5
+    "recursos_necesarios": {
+      "LABORATORIO DE PRUEBAS (Físico)": 1,
+      "SISTEMA ELÉCTRICO (Principal)": 1,
+      "EQUIPO DE CONTROL (Digital)": 1,
+      "TORRE DE SERVICIO (Fija)": 1
+    },
+    "recursos_prohibidos": [
+      "SISTEMA DE COMBUSTIBLE (Líquido)",
+      "SISTEMA DE COMBUSTIBLE (Sólido)",
+      "COHETE (Pesado)",
+      "COHETE (Ligero)",
+      "PLATAFORMA DE LANZAMIENTO (Estática)",
+      "PLATAFORMA DE LANZAMIENTO (Móvil)"
+    ],
+    "recursos_innecesarios": [
+      "EQUIPO DE CONTROL (Analógico)",
+      "SALA DE CONTROL PRINCIPAL (Primaria)",
+      "SALA DE CONTROL PRINCIPAL (Secundaria)",
+      "TORRE DE SERVICIO (Retráctil)",
+      "SISTEMA DE SEGURIDAD (Pasivo)",
+      "SISTEMA DE SEGURIDAD (Activo)",
+      "ESTACIÓN DE SEGUIMIENTO (Terrestre)",
+      "ESTACIÓN DE SEGUIMIENTO (Satelital)",
+      "PLATAFORMA DE ATERRIZAJE (Continental)",
+      "PLATAFORMA DE ATERRIZAJE (Marítima)",
+      "SISTEMA DE NAVEGACIÓN (GPS)",
+      "SISTEMA DE NAVEGACIÓN (Inercial)",
+      "SISTEMA ELÉCTRICO (Emergencia)",
+      "SISTEMA DE CONTROL TÉRMICO (Refrigerante)",
+      "SISTEMA DE CONTROL TÉRMICO (Aislante)",
+      "EQUIPO DE RECUPERACIÓN (Aéreo)",
+      "EQUIPO DE RECUPERACIÓN (Terrestre)",
+      "LABORATORIO DE PRUEBAS (Químico)"
+    ],
+    "duracion_minima": 2, "duracion_maxima": 5
   },
-  "Mantenimiento orbital": {
-    "recursos_recomendados": ["EQUIPO DE RECUPERACIÓN", "SISTEMA DE NAVEGACIÓN", "SISTEMA DE CONTROL TÉRMICO"],
-    "recursos_prohibidos": [],
-    "duracion_minima": 3,
-    "duracion_maxima": 10
+  "Aterrizaje del cohete": {
+    "recursos_necesarios": {
+      "PLATAFORMA DE ATERRIZAJE (Marítima)": 1,
+      "COHETE (Pesado)": 1,
+      "EQUIPO DE RECUPERACIÓN (Aéreo)": 1,
+      "SISTEMA DE NAVEGACIÓN (Inercial)": 1,
+      "SISTEMA DE CONTROL TÉRMICO (Aislante)": 1,
+      "SALA DE CONTROL PRINCIPAL (Secundaria)": 1
+    },
+    "recursos_prohibidos": [
+      "PLATAFORMA DE LANZAMIENTO (Estática)",
+      "PLATAFORMA DE LANZAMIENTO (Móvil)",
+      "PLATAFORMA DE ATERRIZAJE (Continental)",
+      "COHETE (Ligero)",
+      "EQUIPO DE RECUPERACIÓN (Terrestre)"
+    ],
+    "recursos_innecesarios": [
+      "EQUIPO DE CONTROL (Digital)",
+      "EQUIPO DE CONTROL (Analógico)",
+      "SALA DE CONTROL PRINCIPAL (Primaria)",
+      "SISTEMA DE COMBUSTIBLE (Líquido)",
+      "SISTEMA DE COMBUSTIBLE (Sólido)",
+      "TORRE DE SERVICIO (Fija)",
+      "TORRE DE SERVICIO (Retráctil)",
+      "SISTEMA DE SEGURIDAD (Pasivo)",
+      "SISTEMA DE SEGURIDAD (Activo)",
+      "ESTACIÓN DE SEGUIMIENTO (Terrestre)",
+      "ESTACIÓN DE SEGUIMIENTO (Satelital)",
+      "SISTEMA DE NAVEGACIÓN (GPS)",
+      "SISTEMA ELÉCTRICO (Principal)",
+      "SISTEMA ELÉCTRICO (Emergencia)",
+      "SISTEMA DE CONTROL TÉRMICO (Refrigerante)",
+      "LABORATORIO DE PRUEBAS (Químico)",
+      "LABORATORIO DE PRUEBAS (Físico)"
+    ],
+    "duracion_minima": 1, "duracion_maxima": 1
   },
-  "Lanzamiento satelital": {
-    "recursos_recomendados": ["COHETE", "PLATAFORMA DE LANZAMIENTO", "SISTEMA DE NAVEGACIÓN", "ESTACIÓN DE SEGUIMIENTO"],
-    "recursos_prohibidos": [],
-    "duracion_minima": 1,
-    "duracion_maxima": 4
+  "Carga de combustible": {
+    "recursos_necesarios": {
+      "SISTEMA DE COMBUSTIBLE (Líquido)": 35000,
+      "PLATAFORMA DE LANZAMIENTO (Estática)": 1,
+      "SISTEMA DE SEGURIDAD (Activo)": 1,
+      "EQUIPO DE CONTROL (Analógico)": 1
+    },
+    "recursos_prohibidos": [
+      "SISTEMA DE COMBUSTIBLE (Sólido)",
+      "PLATAFORMA DE LANZAMIENTO (Móvil)",
+      "SISTEMA DE SEGURIDAD (Pasivo)",
+      "COHETE (Ligero)",
+      "COHETE (Pesado)"
+    ],
+    "recursos_innecesarios": [
+      "EQUIPO DE CONTROL (Digital)",
+      "SALA DE CONTROL PRINCIPAL (Primaria)",
+      "SALA DE CONTROL PRINCIPAL (Secundaria)",
+      "TORRE DE SERVICIO (Fija)",
+      "TORRE DE SERVICIO (Retráctil)",
+      "ESTACIÓN DE SEGUIMIENTO (Terrestre)",
+      "ESTACIÓN DE SEGUIMIENTO (Satelital)",
+      "PLATAFORMA DE ATERRIZAJE (Continental)",
+      "PLATAFORMA DE ATERRIZAJE (Marítima)",
+      "SISTEMA DE NAVEGACIÓN (GPS)",
+      "SISTEMA DE NAVEGACIÓN (Inercial)",
+      "SISTEMA ELÉCTRICO (Principal)",
+      "SISTEMA ELÉCTRICO (Emergencia)",
+      "SISTEMA DE CONTROL TÉRMICO (Refrigerante)",
+      "SISTEMA DE CONTROL TÉRMICO (Aislante)",
+      "EQUIPO DE RECUPERACIÓN (Aéreo)",
+      "EQUIPO DE RECUPERACIÓN (Terrestre)",
+      "LABORATORIO DE PRUEBAS (Químico)",
+      "LABORATORIO DE PRUEBAS (Físico)"
+    ],
+    "duracion_minima": 1, "duracion_maxima": 1
   },
-  "Simulación de emergencia": {
-    "recursos_recomendados": ["SALA DE CONTROL PRINCIPAL", "SISTEMA DE SEGURIDAD", "EQUIPO DE CONTROL"],
-    "recursos_prohibidos": [],
-    "duracion_minima": 1,
-    "duracion_maxima": 2
+  "Simulación de aterrizaje": {
+    "recursos_necesarios": {
+      "PLATAFORMA DE ATERRIZAJE (Continental)": 1,
+      "EQUIPO DE CONTROL (Digital)": 1,
+      "SALA DE CONTROL PRINCIPAL (Secundaria)": 1,
+      "SISTEMA DE NAVEGACIÓN (Inercial)": 1
+    },
+    "recursos_prohibidos": [
+      "PLATAFORMA DE ATERRIZAJE (Marítima)",
+      "PLATAFORMA DE LANZAMIENTO (Estática)",
+      "PLATAFORMA DE LANZAMIENTO (Móvil)",
+      "COHETE (Pesado)",
+      "COHETE (Ligero)"
+    ],
+    "recursos_innecesarios": [
+      "EQUIPO DE CONTROL (Analógico)",
+      "SALA DE CONTROL PRINCIPAL (Primaria)",
+      "SISTEMA DE COMBUSTIBLE (Líquido)",
+      "SISTEMA DE COMBUSTIBLE (Sólido)",
+      "TORRE DE SERVICIO (Fija)",
+      "TORRE DE SERVICIO (Retráctil)",
+      "SISTEMA DE SEGURIDAD (Pasivo)",
+      "SISTEMA DE SEGURIDAD (Activo)",
+      "ESTACIÓN DE SEGUIMIENTO (Terrestre)",
+      "ESTACIÓN DE SEGUIMIENTO (Satelital)",
+      "SISTEMA DE NAVEGACIÓN (GPS)",
+      "SISTEMA ELÉCTRICO (Principal)",
+      "SISTEMA ELÉCTRICO (Emergencia)",
+      "SISTEMA DE CONTROL TÉRMICO (Refrigerante)",
+      "SISTEMA DE CONTROL TÉRMICO (Aislante)",
+      "EQUIPO DE RECUPERACIÓN (Aéreo)",
+      "EQUIPO DE RECUPERACIÓN (Terrestre)",
+      "LABORATORIO DE PRUEBAS (Químico)",
+      "LABORATORIO DE PRUEBAS (Físico)"
+    ],
+    "duracion_minima": 1, "duracion_maxima": 2
+  },
+   "Inspección post aterrizaje": {
+    "recursos_necesarios": {
+      "COHETE (Ligero)": 1,
+      "LABORATORIO DE PRUEBAS (Químico)": 1,
+      "TORRE DE SERVICIO (Retráctil)": 1
+    },
+    "recursos_prohibidos": [
+      "SISTEMA DE COMBUSTIBLE (Líquido)",
+      "SISTEMA DE COMBUSTIBLE (Sólido)",
+      "PLATAFORMA DE LANZAMIENTO (Estática)",
+      "PLATAFORMA DE LANZAMIENTO (Móvil)"
+    ],
+    "recursos_innecesarios": [
+      "COHETE (Pesado)",
+      "EQUIPO DE CONTROL (Digital)",
+      "EQUIPO DE CONTROL (Analógico)",
+      "SALA DE CONTROL PRINCIPAL (Primaria)",
+      "SALA DE CONTROL PRINCIPAL (Secundaria)",
+      "TORRE DE SERVICIO (Fija)",
+      "SISTEMA DE SEGURIDAD (Pasivo)",
+      "SISTEMA DE SEGURIDAD (Activo)",
+      "ESTACIÓN DE SEGUIMIENTO (Terrestre)",
+      "ESTACIÓN DE SEGUIMIENTO (Satelital)",
+      "PLATAFORMA DE ATERRIZAJE (Continental)",
+      "PLATAFORMA DE ATERRIZAJE (Marítima)",
+      "SISTEMA DE NAVEGACIÓN (GPS)",
+      "SISTEMA DE NAVEGACIÓN (Inercial)",
+      "SISTEMA ELÉCTRICO (Principal)",
+      "SISTEMA ELÉCTRICO (Emergencia)",
+      "SISTEMA DE CONTROL TÉRMICO (Refrigerante)",
+      "SISTEMA DE CONTROL TÉRMICO (Aislante)",
+      "EQUIPO DE RECUPERACIÓN (Aéreo)",
+      "EQUIPO DE RECUPERACIÓN (Terrestre)",
+      "LABORATORIO DE PRUEBAS (Físico)"
+    ],
+    "duracion_minima": 1, "duracion_maxima": 5
+  },
+  "Entrenamiento de equipos": {
+    "recursos_necesarios": {
+      "SALA DE CONTROL PRINCIPAL (Secundaria)": 1,
+      "SISTEMA DE NAVEGACIÓN (GPS)": 1,
+      "EQUIPO DE CONTROL (Analógico)": 1
+    },
+    "recursos_prohibidos": [
+      "SISTEMA DE COMBUSTIBLE (Líquido)",
+      "SISTEMA DE COMBUSTIBLE (Sólido)",
+      "COHETE (Ligero)",
+      "COHETE (Pesado)"
+    ],
+    "recursos_innecesarios": [
+      "PLATAFORMA DE LANZAMIENTO (Estática)",
+      "PLATAFORMA DE LANZAMIENTO (Móvil)",
+      "EQUIPO DE CONTROL (Digital)",
+      "SALA DE CONTROL PRINCIPAL (Primaria)",
+      "TORRE DE SERVICIO (Fija)",
+      "TORRE DE SERVICIO (Retráctil)",
+      "SISTEMA DE SEGURIDAD (Pasivo)",
+      "SISTEMA DE SEGURIDAD (Activo)",
+      "ESTACIÓN DE SEGUIMIENTO (Terrestre)",
+      "ESTACIÓN DE SEGUIMIENTO (Satelital)",
+      "PLATAFORMA DE ATERRIZAJE (Continental)",
+      "PLATAFORMA DE ATERRIZAJE (Marítima)",
+      "SISTEMA DE NAVEGACIÓN (Inercial)",
+      "SISTEMA ELÉCTRICO (Principal)",
+      "SISTEMA ELÉCTRICO (Emergencia)",
+      "SISTEMA DE CONTROL TÉRMICO (Refrigerante)",
+      "SISTEMA DE CONTROL TÉRMICO (Aislante)",
+      "EQUIPO DE RECUPERACIÓN (Aéreo)",
+      "EQUIPO DE RECUPERACIÓN (Terrestre)",
+      "LABORATORIO DE PRUEBAS (Químico)",
+      "LABORATORIO DE PRUEBAS (Físico)"
+    ],
+    "duracion_minima": 1, "duracion_maxima": 2
+  },
+  "Pruebas de sistema de emergencia": {
+    "recursos_necesarios": {
+      "SISTEMA DE SEGURIDAD (Activo)": 1,
+      "EQUIPO DE RECUPERACIÓN (Terrestre)": 1,
+      "EQUIPO DE CONTROL (Digital)": 1
+    },
+    "recursos_prohibidos": [
+      "COHETE (Pesado)",
+      "COHETE (Ligero)",
+      "SISTEMA DE COMBUSTIBLE (Líquido)",
+      "SISTEMA DE COMBUSTIBLE (Sólido)"
+    ],
+    "recursos_innecesarios": [
+      "PLATAFORMA DE LANZAMIENTO (Estática)",
+      "PLATAFORMA DE LANZAMIENTO (Móvil)",
+      "EQUIPO DE CONTROL (Analógico)",
+      "SALA DE CONTROL PRINCIPAL (Primaria)",
+      "SALA DE CONTROL PRINCIPAL (Secundaria)",
+      "TORRE DE SERVICIO (Fija)",
+      "TORRE DE SERVICIO (Retráctil)",
+      "SISTEMA DE SEGURIDAD (Pasivo)",
+      "ESTACIÓN DE SEGUIMIENTO (Terrestre)",
+      "ESTACIÓN DE SEGUIMIENTO (Satelital)",
+      "PLATAFORMA DE ATERRIZAJE (Continental)",
+      "PLATAFORMA DE ATERRIZAJE (Marítima)",
+      "SISTEMA DE NAVEGACIÓN (GPS)",
+      "SISTEMA DE NAVEGACIÓN (Inercial)",
+      "SISTEMA ELÉCTRICO (Principal)",
+      "SISTEMA ELÉCTRICO (Emergencia)",
+      "SISTEMA DE CONTROL TÉRMICO (Refrigerante)",
+      "SISTEMA DE CONTROL TÉRMICO (Aislante)",
+      "EQUIPO DE RECUPERACIÓN (Aéreo)",
+      "LABORATORIO DE PRUEBAS (Químico)",
+      "LABORATORIO DE PRUEBAS (Físico)"
+    ],
+    "duracion_minima": 1, "duracion_maxima": 2
+  },
+  "Ensayo general": {
+    "recursos_necesarios": {
+      "COHETE (Pesado)": 1,
+      "EQUIPO DE CONTROL (Digital)": 1,
+      "SALA DE CONTROL PRINCIPAL (Primaria)": 1,
+      "SISTEMA ELÉCTRICO (Principal)": 1
+    },
+    "recursos_prohibidos": [
+      "LABORATORIO DE PRUEBAS (Químico)",
+      "LABORATORIO DE PRUEBAS (Físico)",
+      "COHETE (Ligero)"
+    ],
+    "recursos_innecesarios": [
+      "PLATAFORMA DE LANZAMIENTO (Estática)",
+      "PLATAFORMA DE LANZAMIENTO (Móvil)",
+      "EQUIPO DE CONTROL (Analógico)",
+      "SALA DE CONTROL PRINCIPAL (Secundaria)",
+      "SISTEMA DE COMBUSTIBLE (Líquido)",
+      "SISTEMA DE COMBUSTIBLE (Sólido)",
+      "TORRE DE SERVICIO (Fija)",
+      "TORRE DE SERVICIO (Retráctil)",
+      "SISTEMA DE SEGURIDAD (Pasivo)",
+      "SISTEMA DE SEGURIDAD (Activo)",
+      "ESTACIÓN DE SEGUIMIENTO (Terrestre)",
+      "ESTACIÓN DE SEGUIMIENTO (Satelital)",
+      "PLATAFORMA DE ATERRIZAJE (Continental)",
+      "PLATAFORMA DE ATERRIZAJE (Marítima)",
+      "SISTEMA DE NAVEGACIÓN (GPS)",
+      "SISTEMA DE NAVEGACIÓN (Inercial)",
+      "SISTEMA ELÉCTRICO (Emergencia)",
+      "SISTEMA DE CONTROL TÉRMICO (Refrigerante)",
+      "SISTEMA DE CONTROL TÉRMICO (Aislante)",
+      "EQUIPO DE RECUPERACIÓN (Aéreo)",
+      "EQUIPO DE RECUPERACIÓN (Terrestre)"
+    ],
+    "duracion_minima": 1, "duracion_maxima": 3
+  },
+  "Mantenimiento de plataforma": {
+    "recursos_necesarios": {
+      "PLATAFORMA DE LANZAMIENTO (Estática)": 1,
+      "TORRE DE SERVICIO (Fija)": 1,
+      "SISTEMA DE SEGURIDAD (Pasivo)": 1
+    },
+    "recursos_prohibidos": [
+      "COHETE (Pesado)",
+      "COHETE (Ligero)",
+      "SISTEMA DE COMBUSTIBLE (Líquido)",
+      "SISTEMA DE COMBUSTIBLE (Sólido)"
+    ],
+    "recursos_innecesarios": [
+      "PLATAFORMA DE LANZAMIENTO (Móvil)",
+      "EQUIPO DE CONTROL (Digital)",
+      "EQUIPO DE CONTROL (Analógico)",
+      "SALA DE CONTROL PRINCIPAL (Primaria)",
+      "SALA DE CONTROL PRINCIPAL (Secundaria)",
+      "TORRE DE SERVICIO (Retráctil)",
+      "SISTEMA DE SEGURIDAD (Activo)",
+      "ESTACIÓN DE SEGUIMIENTO (Terrestre)",
+      "ESTACIÓN DE SEGUIMIENTO (Satelital)",
+      "PLATAFORMA DE ATERRIZAJE (Continental)",
+      "PLATAFORMA DE ATERRIZAJE (Marítima)",
+      "SISTEMA DE NAVEGACIÓN (GPS)",
+      "SISTEMA DE NAVEGACIÓN (Inercial)",
+      "SISTEMA ELÉCTRICO (Principal)",
+      "SISTEMA ELÉCTRICO (Emergencia)",
+      "SISTEMA DE CONTROL TÉRMICO (Refrigerante)",
+      "SISTEMA DE CONTROL TÉRMICO (Aislante)",
+      "EQUIPO DE RECUPERACIÓN (Aéreo)",
+      "EQUIPO DE RECUPERACIÓN (Terrestre)",
+      "LABORATORIO DE PRUEBAS (Químico)",
+      "LABORATORIO DE PRUEBAS (Físico)"
+    ],
+    "duracion_minima": 1, "duracion_maxima": 4
+  },
+  "Prueba de comunicaciones": {
+    "recursos_necesarios": {
+      "ESTACIÓN DE SEGUIMIENTO (Satelital)": 1,
+      "SALA DE CONTROL PRINCIPAL (Primaria)": 1,
+      "EQUIPO DE CONTROL (Digital)": 1
+    },
+    "recursos_prohibidos": [
+      "LABORATORIO DE PRUEBAS (Físico)",
+      "LABORATORIO DE PRUEBAS (Químico)",
+      "SISTEMA DE NAVEGACIÓN (Inercial)"
+    ],
+    "recursos_innecesarios": [
+      "COHETE (Ligero)",
+      "COHETE (Pesado)",
+      "PLATAFORMA DE LANZAMIENTO (Estática)",
+      "PLATAFORMA DE LANZAMIENTO (Móvil)",
+      "EQUIPO DE CONTROL (Analógico)",
+      "SALA DE CONTROL PRINCIPAL (Secundaria)",
+      "SISTEMA DE COMBUSTIBLE (Líquido)",
+      "SISTEMA DE COMBUSTIBLE (Sólido)",
+      "TORRE DE SERVICIO (Fija)",
+      "TORRE DE SERVICIO (Retráctil)",
+      "SISTEMA DE SEGURIDAD (Pasivo)",
+      "SISTEMA DE SEGURIDAD (Activo)",
+      "ESTACIÓN DE SEGUIMIENTO (Terrestre)",
+      "PLATAFORMA DE ATERRIZAJE (Continental)",
+      "PLATAFORMA DE ATERRIZAJE (Marítima)",
+      "SISTEMA DE NAVEGACIÓN (GPS)",
+      "SISTEMA ELÉCTRICO (Principal)",
+      "SISTEMA ELÉCTRICO (Emergencia)",
+      "SISTEMA DE CONTROL TÉRMICO (Refrigerante)",
+      "SISTEMA DE CONTROL TÉRMICO (Aislante)",
+      "EQUIPO DE RECUPERACIÓN (Aéreo)",
+      "EQUIPO DE RECUPERACIÓN (Terrestre)"
+    ],
+    "duracion_minima": 1, "duracion_maxima": 1
+  },
+  "Entrenamiento de recuperación": {
+    "recursos_necesarios": {
+      "EQUIPO DE RECUPERACIÓN (Terrestre)": 1,
+      "SISTEMA DE SEGURIDAD (Pasivo)": 1,
+      "ESTACIÓN DE SEGUIMIENTO (Terrestre)": 1
+    },
+    "recursos_prohibidos": [
+      "SISTEMA DE COMBUSTIBLE (Líquido)",
+      "SISTEMA DE COMBUSTIBLE (Sólido)",
+      "COHETE (Pesado)"
+    ],
+    "recursos_innecesarios": [
+      "COHETE (Ligero)",
+      "PLATAFORMA DE LANZAMIENTO (Estática)",
+      "PLATAFORMA DE LANZAMIENTO (Móvil)",
+      "EQUIPO DE CONTROL (Digital)",
+      "EQUIPO DE CONTROL (Analógico)",
+      "SALA DE CONTROL PRINCIPAL (Primaria)",
+      "SALA DE CONTROL PRINCIPAL (Secundaria)",
+      "TORRE DE SERVICIO (Fija)",
+      "TORRE DE SERVICIO (Retráctil)",
+      "SISTEMA DE SEGURIDAD (Activo)",
+      "ESTACIÓN DE SEGUIMIENTO (Satelital)",
+      "PLATAFORMA DE ATERRIZAJE (Continental)",
+      "PLATAFORMA DE ATERRIZAJE (Marítima)",
+      "SISTEMA DE NAVEGACIÓN (GPS)",
+      "SISTEMA DE NAVEGACIÓN (Inercial)",
+      "SISTEMA ELÉCTRICO (Principal)",
+      "SISTEMA ELÉCTRICO (Emergencia)",
+      "SISTEMA DE CONTROL TÉRMICO (Refrigerante)",
+      "SISTEMA DE CONTROL TÉRMICO (Aislante)",
+      "EQUIPO DE RECUPERACIÓN (Aéreo)",
+      "LABORATORIO DE PRUEBAS (Químico)",
+      "LABORATORIO DE PRUEBAS (Físico)"
+    ],
+    "duracion_minima": 1, "duracion_maxima": 3
+  },
+  "Prueba de sistema de aterrizaje": {
+    "recursos_necesarios": {
+      "SISTEMA DE NAVEGACIÓN (GPS)": 1,
+      "SISTEMA ELÉCTRICO (Emergencia)": 1,
+      "EQUIPO DE CONTROL (Analógico)": 1
+    },
+    "recursos_prohibidos": [
+      "COHETE (Pesado)",
+      "COHETE (Ligero)",
+      "PLATAFORMA DE LANZAMIENTO (Estática)"
+    ],
+    "recursos_innecesarios": [
+      "PLATAFORMA DE LANZAMIENTO (Móvil)",
+      "EQUIPO DE CONTROL (Digital)",
+      "SALA DE CONTROL PRINCIPAL (Primaria)",
+      "SALA DE CONTROL PRINCIPAL (Secundaria)",
+      "SISTEMA DE COMBUSTIBLE (Líquido)",
+      "SISTEMA DE COMBUSTIBLE (Sólido)",
+      "TORRE DE SERVICIO (Fija)",
+      "TORRE DE SERVICIO (Retráctil)",
+      "SISTEMA DE SEGURIDAD (Pasivo)",
+      "SISTEMA DE SEGURIDAD (Activo)",
+      "ESTACIÓN DE SEGUIMIENTO (Terrestre)",
+      "ESTACIÓN DE SEGUIMIENTO (Satelital)",
+      "PLATAFORMA DE ATERRIZAJE (Continental)",
+      "PLATAFORMA DE ATERRIZAJE (Marítima)",
+      "SISTEMA DE NAVEGACIÓN (Inercial)",
+      "SISTEMA ELÉCTRICO (Principal)",
+      "SISTEMA DE CONTROL TÉRMICO (Refrigerante)",
+      "SISTEMA DE CONTROL TÉRMICO (Aislante)",
+      "EQUIPO DE RECUPERACIÓN (Aéreo)",
+      "EQUIPO DE RECUPERACIÓN (Terrestre)",
+      "LABORATORIO DE PRUEBAS (Químico)",
+      "LABORATORIO DE PRUEBAS (Físico)"
+    ],
+    "duracion_minima": 1, "duracion_maxima": 2
   }
 }

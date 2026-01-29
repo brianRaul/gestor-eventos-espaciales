@@ -17,8 +17,8 @@
       "Secundaria": 10
     },
     "SISTEMA DE COMBUSTIBLE": {
-      "Líquido": 50000,
-      "Sólido": 30000
+      "Líquido": 200000,
+      "Sólido": 300000
     },
     "TORRE DE SERVICIO": {
       "Fija": 10,
