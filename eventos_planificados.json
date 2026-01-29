@@ -324,6 +324,46 @@
         }
     },
     {
+        "tipo": "Prueba estática de motor",
+        "fecha_inicio": "31/01/2026",
+        "fecha_fin": "31/01/2026",
+        "duracion_dias": 1,
+        "recursos": [
+            "COHETE (Ligero)",
+            "PLATAFORMA DE LANZAMIENTO (Estática)",
+            "EQUIPO DE CONTROL (Digital)",
+            "SISTEMA DE COMBUSTIBLE (Líquido)",
+            "SISTEMA DE SEGURIDAD (Activo)"
+        ],
+        "recursos_usados": {
+            "COHETE (Ligero)": 1,
+            "PLATAFORMA DE LANZAMIENTO (Estática)": 1,
+            "EQUIPO DE CONTROL (Digital)": 1,
+            "SISTEMA DE COMBUSTIBLE (Líquido)": 8000,
+            "SISTEMA DE SEGURIDAD (Activo)": 1
+        }
+    },
+    {
+        "tipo": "Prueba estática de motor",
+        "fecha_inicio": "31/01/2026",
+        "fecha_fin": "31/01/2026",
+        "duracion_dias": 1,
+        "recursos": [
+            "COHETE (Ligero)",
+            "PLATAFORMA DE LANZAMIENTO (Estática)",
+            "EQUIPO DE CONTROL (Digital)",
+            "SISTEMA DE COMBUSTIBLE (Líquido)",
+            "SISTEMA DE SEGURIDAD (Activo)"
+        ],
+        "recursos_usados": {
+            "COHETE (Ligero)": 1,
+            "PLATAFORMA DE LANZAMIENTO (Estática)": 1,
+            "EQUIPO DE CONTROL (Digital)": 1,
+            "SISTEMA DE COMBUSTIBLE (Líquido)": 8000,
+            "SISTEMA DE SEGURIDAD (Activo)": 1
+        }
+    },
+    {
         "tipo": "Despegue de cohete",
         "fecha_inicio": "31/01/2026",
         "fecha_fin": "31/01/2026",
@@ -357,8 +397,8 @@
     },
     {
         "tipo": "Despegue de cohete",
-        "fecha_inicio": "28/02/2026",
-        "fecha_fin": "28/02/2026",
+        "fecha_inicio": "01/02/2026",
+        "fecha_fin": "01/02/2026",
         "duracion_dias": 1,
         "recursos": [
             "COHETE (Pesado)",
@@ -389,20 +429,8 @@
     },
     {
         "tipo": "Despegue de cohete",
-        "fecha_inicio": "02/03/2026",
-        "fecha_fin": "03/03/2026",
-        "duracion_dias": 2,
-        "recursos": [
-            "COHETE",
-            "PLATAFORMA DE LANZAMIENTO",
-            "SISTEMA DE COMBUSTIBLE",
-            "SISTEMA DE SEGURIDAD"
-        ]
-    },
-    {
-        "tipo": "Despegue de cohete",
-        "fecha_inicio": "02/03/2026",
-        "fecha_fin": "02/03/2026",
+        "fecha_inicio": "01/02/2026",
+        "fecha_fin": "01/02/2026",
         "duracion_dias": 1,
         "recursos": [
             "COHETE (Pesado)",
@@ -432,301 +460,18 @@
         }
     },
     {
-        "tipo": "Despegue de cohete",
-        "fecha_inicio": "02/04/2026",
-        "fecha_fin": "02/04/2026",
+        "tipo": "Aterrizaje del cohete",
+        "fecha_inicio": "02/02/2026",
+        "fecha_fin": "02/02/2026",
         "duracion_dias": 1,
         "recursos": [
             "COHETE (Pesado)",
-            "PLATAFORMA DE LANZAMIENTO (Estática)",
-            "EQUIPO DE CONTROL (Digital)",
-            "SALA DE CONTROL PRINCIPAL (Primaria)",
-            "SISTEMA DE COMBUSTIBLE (Líquido)",
-            "TORRE DE SERVICIO (Retráctil)",
-            "SISTEMA DE SEGURIDAD (Activo)",
-            "ESTACIÓN DE SEGUIMIENTO (Satelital)",
-            "SISTEMA DE NAVEGACIÓN (GPS)",
-            "SISTEMA ELÉCTRICO (Principal)",
-            "SISTEMA DE CONTROL TÉRMICO (Refrigerante)"
-        ],
-        "recursos_usados": {
-            "COHETE (Pesado)": 1,
-            "PLATAFORMA DE LANZAMIENTO (Estática)": 1,
-            "EQUIPO DE CONTROL (Digital)": 1,
-            "SALA DE CONTROL PRINCIPAL (Primaria)": 1,
-            "SISTEMA DE COMBUSTIBLE (Líquido)": 45000,
-            "TORRE DE SERVICIO (Retráctil)": 1,
-            "SISTEMA DE SEGURIDAD (Activo)": 1,
-            "ESTACIÓN DE SEGUIMIENTO (Satelital)": 1,
-            "SISTEMA DE NAVEGACIÓN (GPS)": 1,
-            "SISTEMA ELÉCTRICO (Principal)": 1,
-            "SISTEMA DE CONTROL TÉRMICO (Refrigerante)": 1
-        }
-    },
-    {
-        "tipo": "Despegue de cohete",
-        "fecha_inicio": "29/01/2027",
-        "fecha_fin": "29/01/2027",
-        "duracion_dias": 1,
-        "recursos": [
-            "COHETE (Pesado)",
-            "PLATAFORMA DE LANZAMIENTO (Estática)",
-            "EQUIPO DE CONTROL (Digital)",
-            "SALA DE CONTROL PRINCIPAL (Primaria)",
-            "SISTEMA DE COMBUSTIBLE (Líquido)",
-            "TORRE DE SERVICIO (Retráctil)",
-            "SISTEMA DE SEGURIDAD (Activo)",
-            "ESTACIÓN DE SEGUIMIENTO (Satelital)",
-            "SISTEMA DE NAVEGACIÓN (GPS)",
-            "SISTEMA ELÉCTRICO (Principal)",
-            "SISTEMA DE CONTROL TÉRMICO (Refrigerante)"
-        ],
-        "recursos_usados": {
-            "COHETE (Pesado)": 1,
-            "PLATAFORMA DE LANZAMIENTO (Estática)": 1,
-            "EQUIPO DE CONTROL (Digital)": 1,
-            "SALA DE CONTROL PRINCIPAL (Primaria)": 1,
-            "SISTEMA DE COMBUSTIBLE (Líquido)": 45000,
-            "TORRE DE SERVICIO (Retráctil)": 1,
-            "SISTEMA DE SEGURIDAD (Activo)": 1,
-            "ESTACIÓN DE SEGUIMIENTO (Satelital)": 1,
-            "SISTEMA DE NAVEGACIÓN (GPS)": 1,
-            "SISTEMA ELÉCTRICO (Principal)": 1,
-            "SISTEMA DE CONTROL TÉRMICO (Refrigerante)": 1
-        }
-    },
-    {
-        "tipo": "Despegue de cohete",
-        "fecha_inicio": "01/02/2027",
-        "fecha_fin": "01/02/2027",
-        "duracion_dias": 1,
-        "recursos": [
-            "COHETE (Pesado)",
-            "PLATAFORMA DE LANZAMIENTO (Estática)",
-            "EQUIPO DE CONTROL (Digital)",
-            "SALA DE CONTROL PRINCIPAL (Primaria)",
-            "SISTEMA DE COMBUSTIBLE (Líquido)",
-            "TORRE DE SERVICIO (Retráctil)",
-            "SISTEMA DE SEGURIDAD (Activo)",
-            "ESTACIÓN DE SEGUIMIENTO (Satelital)",
-            "SISTEMA DE NAVEGACIÓN (GPS)",
-            "SISTEMA ELÉCTRICO (Principal)",
-            "SISTEMA DE CONTROL TÉRMICO (Refrigerante)"
-        ],
-        "recursos_usados": {
-            "COHETE (Pesado)": 1,
-            "PLATAFORMA DE LANZAMIENTO (Estática)": 1,
-            "EQUIPO DE CONTROL (Digital)": 1,
-            "SALA DE CONTROL PRINCIPAL (Primaria)": 1,
-            "SISTEMA DE COMBUSTIBLE (Líquido)": 45000,
-            "TORRE DE SERVICIO (Retráctil)": 1,
-            "SISTEMA DE SEGURIDAD (Activo)": 1,
-            "ESTACIÓN DE SEGUIMIENTO (Satelital)": 1,
-            "SISTEMA DE NAVEGACIÓN (GPS)": 1,
-            "SISTEMA ELÉCTRICO (Principal)": 1,
-            "SISTEMA DE CONTROL TÉRMICO (Refrigerante)": 1
-        }
-    },
-    {
-        "tipo": "Prueba estática de motor",
-        "fecha_inicio": "02/02/2027",
-        "fecha_fin": "02/02/2027",
-        "duracion_dias": 1,
-        "recursos": [
-            "PLATAFORMA DE LANZAMIENTO (Estática)",
-            "EQUIPO DE CONTROL (Digital)",
-            "SISTEMA DE COMBUSTIBLE (Líquido)",
-            "SISTEMA DE SEGURIDAD (Activo)"
-        ],
-        "recursos_usados": {
-            "PLATAFORMA DE LANZAMIENTO (Estática)": 1,
-            "EQUIPO DE CONTROL (Digital)": 1,
-            "SISTEMA DE COMBUSTIBLE (Líquido)": 8000,
-            "SISTEMA DE SEGURIDAD (Activo)": 1
-        }
-    },
-    {
-        "tipo": "Prueba estática de motor",
-        "fecha_inicio": "03/02/2027",
-        "fecha_fin": "03/02/2027",
-        "duracion_dias": 1,
-        "recursos": [
-            "COHETE (Ligero)",
-            "PLATAFORMA DE LANZAMIENTO (Estática)",
-            "EQUIPO DE CONTROL (Digital)",
-            "SISTEMA DE COMBUSTIBLE (Líquido)",
-            "SISTEMA DE SEGURIDAD (Activo)"
-        ],
-        "recursos_usados": {
-            "COHETE (Ligero)": 1,
-            "PLATAFORMA DE LANZAMIENTO (Estática)": 1,
-            "EQUIPO DE CONTROL (Digital)": 1,
-            "SISTEMA DE COMBUSTIBLE (Líquido)": 8000,
-            "SISTEMA DE SEGURIDAD (Activo)": 1
-        }
-    },
-    {
-        "tipo": "Despegue de cohete",
-        "fecha_inicio": "02/03/2027",
-        "fecha_fin": "02/03/2027",
-        "duracion_dias": 1,
-        "recursos": [
-            "COHETE (Pesado)",
-            "PLATAFORMA DE LANZAMIENTO (Estática)",
-            "EQUIPO DE CONTROL (Digital)",
-            "SALA DE CONTROL PRINCIPAL (Primaria)",
-            "SISTEMA DE COMBUSTIBLE (Líquido)",
-            "TORRE DE SERVICIO (Retráctil)",
-            "SISTEMA DE SEGURIDAD (Activo)",
-            "ESTACIÓN DE SEGUIMIENTO (Satelital)",
-            "SISTEMA DE NAVEGACIÓN (GPS)",
-            "SISTEMA ELÉCTRICO (Principal)",
-            "SISTEMA DE CONTROL TÉRMICO (Refrigerante)"
-        ],
-        "recursos_usados": {
-            "COHETE (Pesado)": 1,
-            "PLATAFORMA DE LANZAMIENTO (Estática)": 1,
-            "EQUIPO DE CONTROL (Digital)": 1,
-            "SALA DE CONTROL PRINCIPAL (Primaria)": 1,
-            "SISTEMA DE COMBUSTIBLE (Líquido)": 45000,
-            "TORRE DE SERVICIO (Retráctil)": 1,
-            "SISTEMA DE SEGURIDAD (Activo)": 1,
-            "ESTACIÓN DE SEGUIMIENTO (Satelital)": 1,
-            "SISTEMA DE NAVEGACIÓN (GPS)": 1,
-            "SISTEMA ELÉCTRICO (Principal)": 1,
-            "SISTEMA DE CONTROL TÉRMICO (Refrigerante)": 1
-        }
-    },
-    {
-        "tipo": "Prueba estática de motor",
-        "fecha_inicio": "04/04/2027",
-        "fecha_fin": "04/04/2027",
-        "duracion_dias": 1,
-        "recursos": [
-            "COHETE (Ligero)",
-            "PLATAFORMA DE LANZAMIENTO (Estática)",
-            "EQUIPO DE CONTROL (Digital)",
-            "SISTEMA DE COMBUSTIBLE (Líquido)",
-            "SISTEMA DE SEGURIDAD (Activo)"
-        ],
-        "recursos_usados": {
-            "COHETE (Ligero)": 1,
-            "PLATAFORMA DE LANZAMIENTO (Estática)": 1,
-            "EQUIPO DE CONTROL (Digital)": 1,
-            "SISTEMA DE COMBUSTIBLE (Líquido)": 8000,
-            "SISTEMA DE SEGURIDAD (Activo)": 1
-        }
-    },
-    {
-        "tipo": "Entrenamiento de equipos",
-        "fecha_inicio": "04/05/2027",
-        "fecha_fin": "05/05/2027",
-        "duracion_dias": 2,
-        "recursos": [
-            "EQUIPO DE CONTROL (Analógico)",
             "SALA DE CONTROL PRINCIPAL (Secundaria)",
-            "SISTEMA DE NAVEGACIÓN (GPS)"
+            "PLATAFORMA DE ATERRIZAJE (Marítima)",
+            "SISTEMA DE NAVEGACIÓN (Inercial)",
+            "SISTEMA DE CONTROL TÉRMICO (Aislante)",
+            "EQUIPO DE RECUPERACIÓN (Aéreo)"
         ],
-        "recursos_usados": {
-            "EQUIPO DE CONTROL (Analógico)": 1,
-            "SALA DE CONTROL PRINCIPAL (Secundaria)": 1,
-            "SISTEMA DE NAVEGACIÓN (GPS)": 1
-        }
-    },
-    {
-        "tipo": "Despegue de cohete",
-        "fecha_inicio": "12/02/2028",
-        "fecha_fin": "13/02/2028",
-        "duracion_dias": 2,
-        "recursos": [
-            "COHETE (Pesado)",
-            "PLATAFORMA DE LANZAMIENTO (Estática)",
-            "EQUIPO DE CONTROL (Digital)",
-            "SALA DE CONTROL PRINCIPAL (Primaria)",
-            "SISTEMA DE COMBUSTIBLE (Líquido)",
-            "TORRE DE SERVICIO (Retráctil)",
-            "SISTEMA DE SEGURIDAD (Activo)",
-            "ESTACIÓN DE SEGUIMIENTO (Satelital)",
-            "SISTEMA DE NAVEGACIÓN (GPS)",
-            "SISTEMA ELÉCTRICO (Principal)",
-            "SISTEMA DE CONTROL TÉRMICO (Refrigerante)"
-        ],
-        "recursos_usados": {
-            "COHETE (Pesado)": 1,
-            "PLATAFORMA DE LANZAMIENTO (Estática)": 1,
-            "EQUIPO DE CONTROL (Digital)": 1,
-            "SALA DE CONTROL PRINCIPAL (Primaria)": 1,
-            "SISTEMA DE COMBUSTIBLE (Líquido)": 45000,
-            "TORRE DE SERVICIO (Retráctil)": 1,
-            "SISTEMA DE SEGURIDAD (Activo)": 1,
-            "ESTACIÓN DE SEGUIMIENTO (Satelital)": 1,
-            "SISTEMA DE NAVEGACIÓN (GPS)": 1,
-            "SISTEMA ELÉCTRICO (Principal)": 1,
-            "SISTEMA DE CONTROL TÉRMICO (Refrigerante)": 1
-        }
-    },
-    {
-        "tipo": "Despegue de cohete",
-        "fecha_inicio": "14/02/2028",
-        "fecha_fin": "14/02/2028",
-        "duracion_dias": 1,
-        "recursos": [
-            "COHETE (Pesado)",
-            "PLATAFORMA DE LANZAMIENTO (Estática)",
-            "EQUIPO DE CONTROL (Digital)",
-            "SALA DE CONTROL PRINCIPAL (Primaria)",
-            "SISTEMA DE COMBUSTIBLE (Líquido)",
-            "TORRE DE SERVICIO (Retráctil)",
-            "SISTEMA DE SEGURIDAD (Activo)",
-            "ESTACIÓN DE SEGUIMIENTO (Satelital)",
-            "SISTEMA DE NAVEGACIÓN (GPS)",
-            "SISTEMA ELÉCTRICO (Principal)",
-            "SISTEMA DE CONTROL TÉRMICO (Refrigerante)"
-        ],
-        "recursos_usados": {
-            "COHETE (Pesado)": 1,
-            "PLATAFORMA DE LANZAMIENTO (Estática)": 1,
-            "EQUIPO DE CONTROL (Digital)": 1,
-            "SALA DE CONTROL PRINCIPAL (Primaria)": 1,
-            "SISTEMA DE COMBUSTIBLE (Líquido)": 45000,
-            "TORRE DE SERVICIO (Retráctil)": 1,
-            "SISTEMA DE SEGURIDAD (Activo)": 1,
-            "ESTACIÓN DE SEGUIMIENTO (Satelital)": 1,
-            "SISTEMA DE NAVEGACIÓN (GPS)": 1,
-            "SISTEMA ELÉCTRICO (Principal)": 1,
-            "SISTEMA DE CONTROL TÉRMICO (Refrigerante)": 1
-        }
-    },
-    {
-        "tipo": "Despegue de cohete",
-        "fecha_inicio": "05/08/2028",
-        "fecha_fin": "05/08/2028",
-        "duracion_dias": 1,
-        "recursos": [
-            "COHETE (Pesado)",
-            "PLATAFORMA DE LANZAMIENTO (Estática)",
-            "EQUIPO DE CONTROL (Digital)",
-            "SALA DE CONTROL PRINCIPAL (Primaria)",
-            "SISTEMA DE COMBUSTIBLE (Líquido)",
-            "TORRE DE SERVICIO (Retráctil)",
-            "SISTEMA DE SEGURIDAD (Activo)",
-            "ESTACIÓN DE SEGUIMIENTO (Satelital)",
-            "SISTEMA DE NAVEGACIÓN (GPS)",
-            "SISTEMA ELÉCTRICO (Principal)",
-            "SISTEMA DE CONTROL TÉRMICO (Refrigerante)"
-        ],
-        "recursos_usados": {
-            "COHETE (Pesado)": 1,
-            "PLATAFORMA DE LANZAMIENTO (Estática)": 1,
-            "EQUIPO DE CONTROL (Digital)": 1,
-            "SALA DE CONTROL PRINCIPAL (Primaria)": 1,
-            "SISTEMA DE COMBUSTIBLE (Líquido)": 45000,
-            "TORRE DE SERVICIO (Retráctil)": 1,
-            "SISTEMA DE SEGURIDAD (Activo)": 1,
-            "ESTACIÓN DE SEGUIMIENTO (Satelital)": 1,
-            "SISTEMA DE NAVEGACIÓN (GPS)": 1,
-            "SISTEMA ELÉCTRICO (Principal)": 1,
-            "SISTEMA DE CONTROL TÉRMICO (Refrigerante)": 1
-        }
+        "recursos_usados": {}
     }
 ]

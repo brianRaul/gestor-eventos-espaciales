@@ -22,6 +22,10 @@ class GestorEventosSimple(ctk.CTk):
 
         # Cargamos los recursos
         self.recursos = self.cargar_recursos_desde_json()
+        print(f"DEBUG: Tipo de self.recursos = {type(self.recursos)}")
+        print(
+            f"DEBUG: Contenido de self.recursos (primeros 3 elementos) = {self.recursos[:3] if isinstance(self.recursos, list) else self.recursos}"
+        )
 
         # 3. CARGA DE ARCHIVOS DE AGENDA
         # Importante: Aseguramos que sea una lista para evitar el error 'NoneType'
@@ -65,35 +69,49 @@ class GestorEventosSimple(ctk.CTk):
             }
 
     def cargar_recursos_desde_json(self):
-        """Carga y aplana la estructura: Recurso -> Tipo -> Cantidad"""
         try:
+            # Abrir y leer el archivo JSON
             with open("recursos.json", "r", encoding="utf-8") as f:
-                # Accedemos a la clave principal "recursos"
-                datos_raw = json.load(f)["recursos"]
+                datos = json.load(f)
 
-                lista_plana = []
-                # Recorremos Recurso Base (ej: COHETE)
-                for res_base, tipos in datos_raw.items():
-                    # Recorremos Tipo (ej: Pesado, Ligero)
-                    for t_nombre, cantidad in tipos.items():
-                        # Detectar unidad de medida
-                        unidad = "L" if "COMBUSTIBLE" in res_base else "uds"
+            # El archivo tiene esta estructura: {"recursos": {...}}
+            recursos_dict = datos["recursos"]
 
-                        # Crear nombre único para la ID
-                        nombre_completo = f"{res_base} ({t_nombre})"
+            # Convertir la estructura anidada en una lista plana
+            lista_recursos = []
 
-                        lista_plana.append(
-                            {
-                                "nombre": nombre_completo,
-                                "cantidad_total": cantidad,  # La capacidad máxima
-                                "unidad": unidad,
-                                "categoria": res_base,  # Útil para agrupar si quisieras
-                            }
-                        )
+            # Recorrer cada categoría de recurso
+            for categoria, subcategorias in recursos_dict.items():
+                # Recorrer cada subcategoría dentro de la categoría
+                for subcategoria, cantidad in subcategorias.items():
+                    # Determinar la unidad de medida
+                    if "COMBUSTIBLE" in categoria.upper():
+                        unidad = "L"  # Litros para combustible
+                    else:
+                        unidad = "uds"  # Unidades para el resto
 
-                self.recursos = lista_plana
-                return lista_plana
+                    # Crear el nombre completo del recurso
+                    nombre_completo = f"{categoria} ({subcategoria})"
+
+                    # Añadir el recurso a la lista
+                    lista_recursos.append(
+                        {
+                            "nombre": nombre_completo,
+                            "cantidad_total": cantidad,
+                            "unidad": unidad,
+                            "categoria": categoria,
+                        }
+                    )
+
+            print(f"✅ Se cargaron {len(lista_recursos)} recursos")
+            return lista_recursos
+
+        except FileNotFoundError:
+            # Si el archivo no existe, mostrar error y devolver lista vacía
+            print("❌ Error: No se encontró el archivo 'recursos.json'")
+            return []
         except Exception as e:
+            # Cualquier otro error
             print(f"❌ Error cargando recursos: {e}")
             return []
 
@@ -139,25 +157,54 @@ class GestorEventosSimple(ctk.CTk):
     # *********** LOGICA *************#
     # ========== Crear checkboxes de recursos ==========
     def crear_checkboxes_recursos(self):
-        # Limpiar checkboxes anteriores si existen
+
+        # 1. Limpiar checkboxes anteriores si existen
         for widget in self.frame_checkboxes.winfo_children():
             widget.destroy()
 
-        self.checkbox_vars = {}  # Diccionario para guardar las variables BooleanVar
+        # 2. Diccionario para guardar las variables de los checkboxes
+        self.checkbox_vars = {}
 
-        # Crear un checkbox por cada recurso
+        # 3. Verificar que hay recursos cargados
+        if not self.recursos:
+            print("⚠️ No hay recursos disponibles para mostrar")
+
+            # Mostrar mensaje en lugar de checkboxes
+            mensaje = ctk.CTkLabel(
+                self.frame_checkboxes,
+                text="No hay recursos disponibles. Verifica el archivo recursos.json",
+                text_color="orange",
+            )
+            mensaje.pack(pady=20)
+            return
+
+        # 4. Crear un checkbox por cada recurso
         for recurso in self.recursos:
-            var = ctk.BooleanVar(value=False)  # Todos inician desmarcados
-            self.checkbox_vars[recurso["nombre"]] = var
+            # Crear variable para el checkbox (inicia desmarcado)
+            var = ctk.BooleanVar(value=False)
 
+            # Guardar la variable usando el nombre del recurso como clave
+            nombre_recurso = recurso["nombre"]
+            self.checkbox_vars[nombre_recurso] = var
+
+            # Crear el texto del checkbox
+            cantidad = recurso["cantidad_total"]
+            unidad = recurso["unidad"]
+            texto_checkbox = f"{nombre_recurso} ({cantidad} {unidad} disponibles)"
+
+            # Crear el checkbox
             checkbox = ctk.CTkCheckBox(
                 self.frame_checkboxes,
-                text=f"{recurso['nombre']} ({recurso['cantidad_total']} {recurso['unidad']} totales)",
+                text=texto_checkbox,
                 variable=var,
                 onvalue=True,
                 offvalue=False,
             )
-            checkbox.pack(anchor="w", pady=2)
+
+            # Colocar el checkbox en la interfaz
+            checkbox.pack(anchor="w", pady=2, padx=5)
+
+        print(f"✅ Se crearon {len(self.checkbox_vars)} checkboxes de recursos")
 
     # ========== Botón para marcar recursos recomendados ==========
     def marcar_recursos_recomendados(self):
@@ -240,7 +287,7 @@ class GestorEventosSimple(ctk.CTk):
             )
             return
 
-        # Validar duración min/max (Mantenido de tu lógica original)
+        # Validar duración min/max 
         if tipo_evento in self.tipos_evento_data:
             evento_data = self.tipos_evento_data[tipo_evento]
             d_min = evento_data.get("duracion_minima", 1)
@@ -272,65 +319,23 @@ class GestorEventosSimple(ctk.CTk):
         # B Validar Co-requisitos
         corequisitos = evento_data.get("recursos_corequisitos", {})
 
-        if corequisitos:
-            # 1. Construir relaciones bidireccionales
-            relaciones = {}
-
-            for recurso_principal, lista_requeridos in corequisitos.items():
-                if recurso_principal not in relaciones:
-                    relaciones[recurso_principal] = []
-
-                # Añadir relaciones directas (A -> B)
-                for requerido in lista_requeridos:
-                    if requerido not in relaciones[recurso_principal]:
-                        relaciones[recurso_principal].append(requerido)
-
-            # Hacer bidireccional (B -> A)
-            for requerido in lista_requeridos:
-                if requerido not in relaciones:
-                    relaciones[requerido] = []
-
-                if recurso_principal not in relaciones[requerido]:
-                    relaciones[requerido].append(recurso_principal)
-
-            # 2. Expandir relaciones transitivas (A->B->C = A->C)
-            for _ in range(5):  # Máximo 5 niveles de profundidad
-                cambios = False
-
-                for recurso in list(relaciones.keys()):
-                    # Para cada recurso relacionado actualmente
-                    for relacionado in list(relaciones[recurso]):
-                        # Ver sus relaciones
-                        if relacionado in relaciones:
-                            for relacionado_del_relacionado in relaciones[relacionado]:
-                                # Si no es el mismo y no está ya relacionado
-                                if (
-                                    relacionado_del_relacionado != recurso
-                                    and relacionado_del_relacionado
-                                    not in relaciones[recurso]
-                                ):
-                                    relaciones[recurso].append(
-                                        relacionado_del_relacionado
-                                    )
-                                    cambios = True
-
-                # Si no hubo cambios, terminamos antes
-                if not cambios:
-                    break
-
-            # 3. Validar que todos los recursos relacionados estén seleccionados
+        if corequisitos:  # Solo validar si hay co-requisitos definidos
             errores_corequisitos = []
 
-            for recurso_seleccionado in recursos_seleccionados:
-                if recurso_seleccionado in relaciones:
-                    for recurso_relacionado in relaciones[recurso_seleccionado]:
-                        if recurso_relacionado not in recursos_seleccionados:
-                            mensaje_error = f"⚠️ '{recurso_seleccionado}' necesita también: '{recurso_relacionado}'"
-                            # Evitar mensajes duplicados
-                            if mensaje_error not in errores_corequisitos:
-                                errores_corequisitos.append(mensaje_error)
+            # Para cada recurso principal y sus recursos requeridos
+            for recurso_principal, recursos_requeridos in corequisitos.items():
+                # Si el usuario seleccionó el recurso principal...
+                if recurso_principal in recursos_seleccionados:
+                    # ...debe tener TODOS los recursos requeridos
+                    for requerido in recursos_requeridos:
+                        if requerido not in recursos_seleccionados:
+                            errores_corequisitos.append(
+                                f"❌ '{recurso_principal}' requiere también '{requerido}'"
+                            )
 
-                # 4. Mostrar errores si los hay
+            # Si hay errores, mostrarlos y detener
+            if errores_corequisitos:
+                # Mostrar máximo 3 errores para no saturar la pantalla
                 if len(errores_corequisitos) > 3:
                     errores_a_mostrar = errores_corequisitos[:3]
                     errores_a_mostrar.append(
@@ -339,12 +344,10 @@ class GestorEventosSimple(ctk.CTk):
                 else:
                     errores_a_mostrar = errores_corequisitos
 
-            self.lbl_info.configure(
-                text="\n".join(errores_a_mostrar),
-                text_color="orange",  # Color para advertencias
-            )
-            return
-        # Detener la creación del evento
+                    self.lbl_info.configure(
+                        text="\n".join(errores_a_mostrar), text_color="red"
+                    )
+                return  # Detener la creación del evento
 
         # C. Verificar SI FALTA ALGUNO
         for obligatorio in recursos_obligatorios.keys():
@@ -364,72 +367,47 @@ class GestorEventosSimple(ctk.CTk):
                 )
                 return  # Detenemos todo porque falta algo
 
-        # CÁLCULO DE DISPONIBILIDAD TEMPORAL CORREGIDO
+        # CÁLCULO DE DISPONIBILIDAD TEMPORAL 
         necesarios_config = evento_data.get("recursos_necesarios", {})
         uso_recursos_evento = {}
 
-        # Primero, calcular cuánto necesita cada recurso
         for rec_nombre in recursos_seleccionados:
-            # Buscar la cantidad necesaria (coincidencia parcial)
+            # Calcular cantidad requerida
             cantidad_requerida = 1
             for recurso_necesario, cantidad in necesarios_config.items():
                 if recurso_necesario.upper() in rec_nombre.upper():
                     cantidad_requerida = cantidad
                     break
-            uso_recursos_evento[rec_nombre] = cantidad_requerida
 
-        # Verificar disponibilidad para cada recurso seleccionado
-        for rec_nombre, cantidad_requerida in uso_recursos_evento.items():
-            # Buscar información del recurso en inventario (coincidencia parcial)
+            # Buscar recurso en inventario
             recurso_info = None
             for r in self.recursos:
-                if (
-                    rec_nombre.upper() in r["nombre"].upper()
-                    or r["nombre"].upper() in rec_nombre.upper()
-                ):
+                if rec_nombre.upper() in r["nombre"].upper():
                     recurso_info = r
                     break
 
-            if not recurso_info:
-                self.lbl_info.configure(
-                    text=f"❌ Error: Recurso '{rec_nombre}' no encontrado en inventario",
-                    text_color="red",
-                )
-                return
+            if recurso_info:
+                # Calcular uso en esas fechas
+                cantidad_usada = 0
+                for ev in self.eventos_planificados:
+                    e_ini = datetime.strptime(ev["fecha_inicio"], "%d/%m/%Y")
+                    e_fin = datetime.strptime(ev["fecha_fin"], "%d/%m/%Y")
 
-            capacidad_total = recurso_info["cantidad_total"]
-            unidad = recurso_info.get("unidad", "uds")
+                    if fecha_inicio <= e_fin and fecha_fin >= e_ini:
+                        for nombre_usado, cant in ev.get("recursos_usados", {}).items():
+                            if rec_nombre.upper() in nombre_usado.upper():
+                                cantidad_usada += cant
+                                break
 
-            # Calcular cuánto está ocupado en esas fechas
-            cantidad_ocupada_en_fechas = 0
+                # Verificar disponibilidad
+                disponible = recurso_info["cantidad_total"] - cantidad_usada
 
-            for ev in self.eventos_planificados:
-                # Parsear fechas de eventos existentes
-                e_ini = datetime.strptime(ev["fecha_inicio"], "%d/%m/%Y")
-                e_fin = datetime.strptime(ev["fecha_fin"], "%d/%m/%Y")
-
-                # Verificar solapamiento de fechas
-                if fecha_inicio <= e_fin and fecha_fin >= e_ini:
-                    # Buscar uso de este recurso en el evento (coincidencia parcial)
-                    for nombre_usado, cantidad_usada in ev.get(
-                        "recursos_usados", {}
-                    ).items():
-                        if (
-                            rec_nombre.upper() in nombre_usado.upper()
-                            or nombre_usado.upper() in rec_nombre.upper()
-                        ):
-                            cantidad_ocupada_en_fechas += cantidad_usada
-                            break
-
-            # Verificar si hay disponibilidad
-            disponible = capacidad_total - cantidad_ocupada_en_fechas
-
-            if disponible < cantidad_requerida:
-                self.lbl_info.configure(
-                    text=f"❌ SIN STOCK: {recurso_info['nombre']}.\nNecesitas {cantidad_requerida}{unidad}, quedan {disponible}{unidad} en esas fechas.",
-                    text_color="red",
-                )
-                return
+                if disponible < cantidad_requerida:
+                    self.lbl_info.configure(
+                        text=f"❌ No hay suficiente {recurso_info['nombre']}",
+                        text_color="red",
+                    )
+                    return
 
         # GUARDADO
         nuevo_evento = {
@@ -638,7 +616,7 @@ class GestorEventosSimple(ctk.CTk):
                     if disponible < recurso["necesario"]:
                         return False, recurso
 
-                    return True, None
+            return True, None
 
         # Algoritmo principal de búsqueda
         hoy = datetime.now().date()
@@ -730,136 +708,147 @@ class GestorEventosSimple(ctk.CTk):
         )
 
     def eliminar_eventos_planificados(self):
-        # Verificar si hay eventos para eliminar
-        if not self.eventos_planificados:
+        # PASO 1: Verificar si hay eventos para eliminar
+        if len(self.eventos_planificados) == 0:
             self.lbl_info.configure(
-                text="No hay eventos para eliminar", text_color="orange"
+                text="❌ No hay eventos para eliminar", text_color="red"
             )
             return
 
-        # Crear una nueva ventana emergente
+        # PASO 2: Crear una nueva ventana emergente
         ventana_eliminar = ctk.CTkToplevel(self)
         ventana_eliminar.title("🗑️ Eliminar Eventos")
-        ventana_eliminar.geometry("500x450")
+        ventana_eliminar.geometry("600x500")
 
-        # Título
+        # PASO 3: Título de la ventana
         titulo = ctk.CTkLabel(
-            ventana_eliminar, text="ELIMINAR EVENTOS", font=("Arial", 16, "bold")
+            ventana_eliminar,
+            text="SELECCIONA EVENTOS A ELIMINAR",
+            font=("Arial", 18, "bold"),
         )
         titulo.pack(pady=10)
 
-        # Instrucciones
+        # PASO 4: Instrucciones
         instrucciones = ctk.CTkLabel(
             ventana_eliminar,
-            text="Selecciona los eventos que quieres eliminar:",
-            font=("Arial", 12),
+            text="Marca los eventos que quieres eliminar:",
+            font=("Arial", 14),
         )
         instrucciones.pack(pady=5)
 
-        # Frame para contener los checkboxes de eventos
-        frame_contenedor = ctk.CTkScrollableFrame(
-            ventana_eliminar, width=450, height=250
-        )
-        frame_contenedor.pack(pady=10, padx=10)
+        # PASO 5: Crear un área con scroll para los eventos
+        frame_scroll = ctk.CTkScrollableFrame(ventana_eliminar, width=550, height=300)
+        frame_scroll.pack(pady=10, padx=10)
 
-        # Crear variables para los checkboxes
-        self.checkbox_vars_eliminar = []
+        # PASO 6: Lista para guardar los checkboxes
+        self.checkboxes_eliminar = []  # Esta lista guardará todos los checkboxes
 
-        # Crear un checkbox por cada evento
+        # PASO 7: Crear un checkbox por cada evento
         for i, evento in enumerate(self.eventos_planificados):
-            var = ctk.BooleanVar(value=False)
-            self.checkbox_vars_eliminar.append(var)
+            # Crear una variable para el checkbox
+            var_checkbox = ctk.BooleanVar(value=False)
+            self.checkboxes_eliminar.append(var_checkbox)  # Guardar en lista
 
-            # Texto del evento
-            texto_evento = f"Evento #{i+1}: {evento['tipo']} - {evento['fecha']}"
+            # Crear el texto para mostrar
+            # CAMBIO IMPORTANTE: Usamos 'fecha_inicio' en lugar de 'fecha'
+            texto_evento = f"Evento #{i+1}: {evento['tipo']} - {evento['fecha_inicio']}"
 
-            # Crear checkbox
+            # Crear el checkbox
             checkbox = ctk.CTkCheckBox(
-                frame_contenedor,
+                frame_scroll,
                 text=texto_evento,
-                variable=var,
+                variable=var_checkbox,
                 onvalue=True,
                 offvalue=False,
             )
-            checkbox.pack(anchor="w", pady=2, padx=5)
+            checkbox.pack(anchor="w", pady=3, padx=10)
 
-        # Frame para botones
-        frame_botones_eliminar = ctk.CTkFrame(ventana_eliminar)
-        frame_botones_eliminar.pack(pady=10)
+        # PASO 8: Frame para los botones
+        frame_botones = ctk.CTkFrame(ventana_eliminar)
+        frame_botones.pack(pady=15)
 
-        # Botón para eliminar seleccionados
-        btn_eliminar_seleccionados = ctk.CTkButton(
-            frame_botones_eliminar,
-            text="Eliminar Seleccionados",
+        # PASO 9: Botón para eliminar
+        btn_eliminar = ctk.CTkButton(
+            frame_botones,
+            text="ELIMINAR SELECCIONADOS",
             fg_color="#FF5252",
             hover_color="#D32F2F",
+            width=200,
+            height=40,
+            font=("Arial", 14, "bold"),
             command=lambda: self.confirmar_eliminacion(ventana_eliminar),
         )
-        btn_eliminar_seleccionados.pack(side="left", padx=5)
+        btn_eliminar.pack(side="left", padx=10)
 
-        # Botón para cancelar
+        # PASO 10: Botón para cancelar
         btn_cancelar = ctk.CTkButton(
-            frame_botones_eliminar, text="Cancelar", command=ventana_eliminar.destroy
+            frame_botones,
+            text="CANCELAR",
+            width=100,
+            height=40,
+            command=ventana_eliminar.destroy,
         )
-        btn_cancelar.pack(side="left", padx=5)
+        btn_cancelar.pack(side="left", padx=10)
 
     def confirmar_eliminacion(self, ventana_eliminar):
-        # Obtener los índices de los eventos seleccionados
-        indices_a_eliminar = []
+        # Importar messagebox para mostrar mensajes
+        import tkinter.messagebox as messagebox
 
-        for i, var in enumerate(self.checkbox_vars_eliminar):
-            if var.get():  # Si el checkbox está marcado
-                indices_a_eliminar.append(i)
+        # PASO 1: Contar cuántos eventos están marcados
+        eventos_a_eliminar = []
 
-        # Verificar si seleccionó algún evento
-        if not indices_a_eliminar:
-            self.lbl_info.configure(
-                text="❌ No seleccionaste ningún evento para eliminar", text_color="red"
+        for i, checkbox_var in enumerate(self.checkboxes_eliminar):
+            if checkbox_var.get() == True:  # Si el checkbox está marcado
+                eventos_a_eliminar.append(i)  # Guardar el índice
+
+        # PASO 2: Verificar si se seleccionó algo
+        if len(eventos_a_eliminar) == 0:
+            messagebox.showwarning(
+                "Sin selección", "No has seleccionado ningún evento para eliminar."
             )
             return
 
-        # Confirmar con el usuario
-        from tkinter import messagebox
-
-        confirmar = messagebox.askyesno(
+        # PASO 3: Preguntar confirmación al usuario
+        respuesta = messagebox.askyesno(
             "Confirmar eliminación",
-            f"¿Estás seguro de que quieres eliminar {len(indices_a_eliminar)} evento(s)?",
+            f"¿Estás seguro de eliminar {len(eventos_a_eliminar)} evento(s)?",
         )
 
-        if not confirmar:
+        if not respuesta:  # Si el usuario dice "No"
             return
 
-        # Eliminar los eventos (empezando por el último para no afectar los índices)
-        for index in sorted(indices_a_eliminar, reverse=True):
-            # Antes de eliminar, restaurar los recursos utilizados
-            evento = self.eventos_planificados[index]
-            for recurso_nombre in evento["recursos"]:
-                for recurso_dicc in self.recursos:
-                    if recurso_nombre == recurso_dicc["nombre"]:
-                        recurso_dicc["cantidad"] += 1  # Restaurar 1 unidad
-                        break
+        # PASO 4: Eliminar los eventos (empezando del último al primero)
+        eventos_eliminados = 0
 
-            # Eliminar el evento de la lista
-            del self.eventos_planificados[index]
+        # Ordenar de mayor a menor para no afectar índices
+        eventos_a_eliminar.sort(reverse=True)
 
-        # Guardar cambios en los archivos JSON
+        for indice in eventos_a_eliminar:
+            # Verificar que el índice sea válido
+            if indice < len(self.eventos_planificados):
+                # Obtener información del evento antes de eliminarlo
+                evento_info = self.eventos_planificados[indice]
+                print(
+                    f"✅ Eliminando: {evento_info['tipo']} del {evento_info['fecha_inicio']}"
+                )
+
+                # Eliminar de la lista
+                del self.eventos_planificados[indice]
+                eventos_eliminados += 1
+
+        # PASO 5: Guardar los cambios en el archivo
         self.guardar_eventos_en_json()
-        self.guardar_recursos()
 
-        # Actualizar la interfaz
+        # PASO 6: Actualizar el contador en pantalla
         self.actualizar_contador()
-        self.crear_checkboxes_recursos()  # Para mostrar las nuevas cantidades de recursos
 
-        # Cerrar la ventana de eliminación
+        # PASO 7: Cerrar la ventana de eliminación
         ventana_eliminar.destroy()
 
-        # Mostrar mensaje de confirmación
+        # PASO 8: Mostrar mensaje de éxito
         self.lbl_info.configure(
-            text=f"✅ Se eliminaron {len(indices_a_eliminar)} evento(s) correctamente",
-            text_color="green",
+            text=f"✅ Se eliminaron {eventos_eliminados} evento(s)", text_color="green"
         )
-
-        print(f"✅ Se eliminaron {len(indices_a_eliminar)} evento(s)")
 
     # ************** INTERFAZ *************#
     def crear_interfaz(self):
