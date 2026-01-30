@@ -5,28 +5,28 @@
       "Pesado": 10
     },
     "PLATAFORMA DE LANZAMIENTO": {
-      "Estática": 10,
-      "Móvil": 10
+      "Estatica": 10,
+      "Movil": 10
     },
     "EQUIPO DE CONTROL": {
       "Digital": 10,
-      "Analógico": 10
+      "Analogico": 10
     },
     "SALA DE CONTROL PRINCIPAL": {
       "Primaria": 10,
       "Secundaria": 10
     },
     "SISTEMA DE COMBUSTIBLE": {
-      "Líquido": 200000,
-      "Sólido": 300000
+      "Liquido": 200000,
+      "Solido": 300000
     },
     "TORRE DE SERVICIO": {
       "Fija": 10,
-      "Retráctil": 10
+      "Retractil": 10
     },
     "SISTEMA DE SEGURIDAD": {
       "Pasivo": 10,
-      "Activo": 10
+      "Activa": 10
     },
     "ESTACIÓN DE SEGUIMIENTO": {
       "Terrestre": 10,
@@ -34,7 +34,7 @@
     },
     "PLATAFORMA DE ATERRIZAJE": {
       "Continental": 10,
-      "Marítima": 10
+      "Maritima": 10
     },
     "SISTEMA DE NAVEGACIÓN": {
       "GPS": 10,
@@ -49,12 +49,12 @@
       "Aislante": 10
     },
     "EQUIPO DE RECUPERACIÓN": {
-      "Aéreo": 10,
+      "Aereo": 10,
       "Terrestre": 10
     },
     "LABORATORIO DE PRUEBAS": {
-      "Químico": 10,
-      "Físico": 10
+      "Quimico": 10,
+      "Fisico": 10
     }
   }
 }

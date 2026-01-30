@@ -91,7 +91,7 @@ class GestorEventosSimple(ctk.CTk):
                         unidad = "uds"  # Unidades para el resto
 
                     # Crear el nombre completo del recurso
-                    nombre_completo = f"{categoria} ({subcategoria})"
+                    nombre_completo = f"{categoria.upper()}-{subcategoria.upper()}"
 
                     # Añadir el recurso a la lista
                     lista_recursos.append(
@@ -183,14 +183,16 @@ class GestorEventosSimple(ctk.CTk):
             # Crear variable para el checkbox (inicia desmarcado)
             var = ctk.BooleanVar(value=False)
 
-            # Guardar la variable usando el nombre del recurso como clave
-            nombre_recurso = recurso["nombre"]
-            self.checkbox_vars[nombre_recurso] = var
+            # Guardar el nombre base del recurso
+            nombre_base = recurso["nombre"]
 
-            # Crear el texto del checkbox
+            # Guardar la variable usando el nombre base como clave
+            self.checkbox_vars[nombre_base] = var
+
+            # Crear el texto del checkbox (solo para mostrar)
             cantidad = recurso["cantidad_total"]
             unidad = recurso["unidad"]
-            texto_checkbox = f"{nombre_recurso} ({cantidad} {unidad} disponibles)"
+            texto_checkbox = f"{nombre_base} ({cantidad} {unidad} disponibles)"
 
             # Crear el checkbox
             checkbox = ctk.CTkCheckBox(
@@ -203,9 +205,7 @@ class GestorEventosSimple(ctk.CTk):
 
             # Colocar el checkbox en la interfaz
             checkbox.pack(anchor="w", pady=2, padx=5)
-
-        print(f"✅ Se crearon {len(self.checkbox_vars)} checkboxes de recursos")
-
+            
     # ========== Botón para marcar recursos recomendados ==========
     def marcar_recursos_recomendados(self):
         tipo_evento = self.combo_evento.get()
@@ -219,7 +219,6 @@ class GestorEventosSimple(ctk.CTk):
         evento_data = self.tipos_evento_data[tipo_evento]
 
         # 1. Obtener los datos del nuevo JSON
-        # Ahora usamos .keys() porque 'recursos_necesarios' es un diccionario {nombre: cantidad}
         necesarios = evento_data.get("recursos_necesarios", {}).keys()
         prohibidos = evento_data.get("recursos_prohibidos", [])
 
@@ -235,7 +234,6 @@ class GestorEventosSimple(ctk.CTk):
                 var.set(True)
                 contador_marcados += 1
 
-            # Opcional: Podrías deshabilitar los prohibidos aquí si quisieras
             # if nombre_recurso in prohibidos:
             #    self.checkbox_widgets[nombre_recurso].configure(state="disabled")
 
@@ -287,7 +285,7 @@ class GestorEventosSimple(ctk.CTk):
             )
             return
 
-        # Validar duración min/max 
+        # Validar duración min/max
         if tipo_evento in self.tipos_evento_data:
             evento_data = self.tipos_evento_data[tipo_evento]
             d_min = evento_data.get("duracion_minima", 1)
@@ -367,7 +365,7 @@ class GestorEventosSimple(ctk.CTk):
                 )
                 return  # Detenemos todo porque falta algo
 
-        # CÁLCULO DE DISPONIBILIDAD TEMPORAL 
+        # CÁLCULO DE DISPONIBILIDAD TEMPORAL
         necesarios_config = evento_data.get("recursos_necesarios", {})
         uso_recursos_evento = {}
 

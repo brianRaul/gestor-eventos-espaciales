@@ -473,5 +473,25 @@
             "EQUIPO DE RECUPERACIÓN (Aéreo)"
         ],
         "recursos_usados": {}
+    },
+    {
+        "tipo": "Despegue de cohete",
+        "fecha_inicio": "03/02/2026",
+        "fecha_fin": "03/02/2026",
+        "duracion_dias": 1,
+        "recursos": [
+            "COHETE-PESADO",
+            "PLATAFORMA DE LANZAMIENTO-ESTATICA",
+            "EQUIPO DE CONTROL-DIGITAL",
+            "SALA DE CONTROL PRINCIPAL-PRIMARIA",
+            "SISTEMA DE COMBUSTIBLE-LIQUIDO",
+            "TORRE DE SERVICIO-RETRACTIL",
+            "SISTEMA DE SEGURIDAD-ACTIVA",
+            "ESTACIÓN DE SEGUIMIENTO-SATELITAL",
+            "SISTEMA DE NAVEGACIÓN-GPS",
+            "SISTEMA ELÉCTRICO-PRINCIPAL",
+            "SISTEMA DE CONTROL TÉRMICO-REFRIGERANTE"
+        ],
+        "recursos_usados": {}
     }
 ]
