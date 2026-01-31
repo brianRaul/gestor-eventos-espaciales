@@ -3,6 +3,7 @@ import json
 from funciones_datos import *
 from datetime import datetime, date, timedelta
 from funciones_crear_evento import *
+from funciones_buscar_hueco import *
 
 class GestorEventos(ctk.CTk):
 
@@ -157,7 +158,6 @@ class GestorEventos(ctk.CTk):
                     text_color=color,
                 )
                 checkbox.pack(anchor="w", padx=20, pady=2)
-
     # .2 ========== Botón para marcar recursos recomendados ==========
     def marcar_recursos_recomendados(self, event=None):
      tipo_evento = self.combo_evento.get()
@@ -241,7 +241,6 @@ class GestorEventos(ctk.CTk):
         )
     # .3 ========== Crear evento ==========
     def crear_evento(self):
-        """Versión simplificada - solo maneja la interfaz"""
         # 1. Obtener datos de la interfaz
         tipo_evento = self.combo_evento.get()
         day = self.entry_day.get()
@@ -297,7 +296,6 @@ class GestorEventos(ctk.CTk):
         else:
             # Error: mostrar mensaje
             self.lbl_info.configure(text=mensaje, text_color="red")
-
     # .4 ========== Limpiar selección ==========
     def limpiar_seleccion_recursos(self):
         """Desmarcar todos los checkboxes de recursos"""
@@ -307,7 +305,6 @@ class GestorEventos(ctk.CTk):
             self.lbl_info.configure(
                 text="Todos los recursos desmarcados", text_color="orange"
             )
-
     # .5 =========== Mostrar eventos planificados ========
     def mostrar_eventos_planificados(self):
 
@@ -378,7 +375,6 @@ class GestorEventos(ctk.CTk):
             ventana_eventos, text="Cerrar", width=100, command=ventana_eventos.destroy
         )
         btn_cerrar.pack(pady=10)
-
     # .6 ============ Seccioón Sugerir Fecha =============
     def sugerir_fecha_disponible(self):
         """Busca la próxima fecha disponible basada en solapamientos reales"""
@@ -398,16 +394,8 @@ class GestorEventos(ctk.CTk):
         evento_data = self.tipos_evento_data[tipo_evento]
         recursos_requeridos = evento_data.get("recursos_requeridos", [])
 
-        # Convertir a formato más manejable
-        recursos_necesarios = {}
-        for req in recursos_requeridos:
-            clave = f"{req['categoria']}|{req['tipo']}"
-            recursos_necesarios[clave] = {
-                "categoria": req["categoria"],
-                "tipo": req["tipo"],
-                "cantidad": req["cantidad"],
-                "es_combustible": "COMBUSTIBLE" in req["categoria"].upper(),
-            }
+        # Usar función preparada para convertir recursos requeridos
+        recursos_necesarios = preparar_recursos_requeridos(recursos_requeridos)
 
         # Empezar la búsqueda desde la fecha que el usuario puso, o desde mañana
         try:
@@ -427,9 +415,10 @@ class GestorEventos(ctk.CTk):
         for _ in range(365):
             fecha_fin = fecha_busqueda + timedelta(days=duracion - 1)
 
-            # Verificar disponibilidad para este rango de fechas
-            disponible = self.verificar_disponibilidad_fecha(
-                fecha_busqueda, fecha_fin, recursos_necesarios
+            # Usar la función de disponibilidad externa
+            disponible = verificar_disponibilidad_fecha(
+                fecha_busqueda, fecha_fin, recursos_necesarios,
+                self.eventos_planificados, self.recursos
             )
 
             if disponible:
@@ -447,120 +436,7 @@ class GestorEventos(ctk.CTk):
             text="❌ No se encontró fecha disponible en el próximo año",
             text_color="red",
         )
-
-    def verificar_disponibilidad_fecha(
-        self, fecha_inicio, fecha_fin, recursos_necesarios
-    ):
-
-        print(f"\n🔍 Verificando disponibilidad para: {fecha_inicio} a {fecha_fin}")
-
-        # 1. Buscar todos los eventos que se solapan con este rango
-        eventos_solapados = []
-
-        for evento in self.eventos_planificados:
-            try:
-                ev_inicio = datetime.strptime(evento["fecha_inicio"], "%d/%m/%Y").date()
-                ev_fin = datetime.strptime(evento["fecha_fin"], "%d/%m/%Y").date()
-            except:
-                continue
-
-            # Verificar solapamiento: fechas se cruzan
-            se_solapan = (fecha_inicio <= ev_fin) and (fecha_fin >= ev_inicio)
-
-            if se_solapan:
-                eventos_solapados.append(evento)
-
-        print(f"   Eventos solapados encontrados: {len(eventos_solapados)}")
-
-        # Si no hay eventos solapados, verificar solo stock de combustible
-        if not eventos_solapados:
-            print("   ✅ No hay eventos solapados")
-            for clave, req in recursos_necesarios.items():
-                if req["es_combustible"]:
-                    # Buscar stock disponible
-                    stock_total = 0
-                    for r in self.recursos:
-                        if (
-                            r["categoria"] == req["categoria"]
-                            and r["tipo"] == req["tipo"]
-                        ):
-                            stock_total += r["cantidad_disponible"]
-
-                    print(
-                        f"   🔍 Combustible {req['categoria']} {req['tipo']}: Necesita {req['cantidad']}, hay {stock_total}"
-                    )
-
-                    if stock_total < req["cantidad"]:
-                        print(
-                            f"   ❌ No hay suficiente combustible: {req['categoria']} {req['tipo']}"
-                        )
-                        return False
-            return True
-
-        # 2. Si hay eventos solapados, calcular recursos ocupados
-        recursos_ocupados = {}
-
-        for evento in eventos_solapados:
-            # Sumar recursos usados por este evento
-            for recurso_usado, cantidad in evento.get("recursos_usados", {}).items():
-                # Buscar categoría y tipo de este recurso
-                for r_detalle in evento.get("recursos_detalle", []):
-                    if r_detalle["nombre_mostrar"] == recurso_usado:
-                        clave = f"{r_detalle['categoria']}|{r_detalle['tipo']}"
-
-                        if clave not in recursos_ocupados:
-                            recursos_ocupados[clave] = 0
-                        recursos_ocupados[clave] += cantidad
-                        break
-
-        # 3. Verificar disponibilidad para cada recurso necesario
-        for clave, req in recursos_necesarios.items():
-            # Cantidad necesaria para nuestro nuevo evento
-            cantidad_necesaria = req["cantidad"]
-
-            # Si es combustible, solo verificar stock disponible
-            if req["es_combustible"]:
-                stock_total = 0
-                for r in self.recursos:
-                    if r["categoria"] == req["categoria"] and r["tipo"] == req["tipo"]:
-                        stock_total += r["cantidad_disponible"]
-
-                print(
-                    f"   🔍 Combustible {req['categoria']} {req['tipo']}: Necesita {cantidad_necesaria}, hay {stock_total}"
-                )
-
-                if stock_total < cantidad_necesaria:
-                    print(
-                        f"   ❌ No hay suficiente combustible: {req['categoria']} {req['tipo']}"
-                    )
-                    return False
-                continue
-
-            # Para equipos: calcular capacidad total y verificar ocupación
-            capacidad_total = 0
-            for r in self.recursos:
-                if r["categoria"] == req["categoria"] and r["tipo"] == req["tipo"]:
-                    capacidad_total += r["cantidad_total"]
-
-            # Cantidad ya ocupada en estas fechas
-            cantidad_ocupada = recursos_ocupados.get(clave, 0)
-
-            # Verificar si hay suficiente disponibilidad
-            disponible = capacidad_total - cantidad_ocupada
-
-            print(
-                f"   🔍 Equipo {req['categoria']} {req['tipo']}: Capacidad {capacidad_total}, Ocupados {cantidad_ocupada}, Necesita {cantidad_necesaria}"
-            )
-
-            if disponible < cantidad_necesaria:
-                print(
-                    f"   ❌ No hay suficiente {req['categoria']} {req['tipo']} en estas fechas"
-                )
-                return False
-
-        print("   ✅ Todos los recursos están disponibles")
-        return True
-
+        
     def actualizar_campos_fecha(self, fecha):
         """Rellena los campos de fecha con la fecha sugerida"""
         self.entry_day.delete(0, "end")
@@ -687,15 +563,35 @@ class GestorEventos(ctk.CTk):
         frame_scroll = ctk.CTkScrollableFrame(ventana_eliminar, width=550, height=300)
         frame_scroll.pack(pady=10, padx=10)
 
-        # Lista para checkboxes
+        # ========== CHECKBOX "SELECCIONAR TODOS" ==========
+        frame_seleccion_todos = ctk.CTkFrame(frame_scroll)
+        frame_seleccion_todos.pack(fill="x", pady=(0, 10), padx=5)
+        
+        self.var_seleccionar_todos = ctk.BooleanVar(value=False)
+        
+        checkbox_seleccionar_todos = ctk.CTkCheckBox(
+            frame_seleccion_todos,
+            text="📋 SELECCIONAR TODOS LOS EVENTOS",
+            variable=self.var_seleccionar_todos,
+            onvalue=True,
+            offvalue=False,
+            font=("Arial", 12, "bold"),
+            command=lambda: self.toggle_seleccionar_todos(self.checkboxes_eliminar, self.var_seleccionar_todos)
+        )
+        checkbox_seleccionar_todos.pack(anchor="w", padx=5)
+
+        # Lista para checkboxes de eventos
         self.checkboxes_eliminar = []
 
-        # Crear checkboxes
+        # Crear checkboxes para cada evento
         for i, evento in enumerate(self.eventos_planificados):
             var_checkbox = ctk.BooleanVar(value=False)
             self.checkboxes_eliminar.append(var_checkbox)
 
-            texto_evento = f"Evento #{i+1}: {evento['tipo']} - {evento['fecha_inicio']}"
+            # Formatear texto del evento
+            fecha_inicio = evento.get('fecha_inicio', 'N/A')
+            duracion = evento.get('duracion_dias', 1)
+            texto_evento = f"Evento #{i+1}: {evento['tipo']} - {fecha_inicio} ({duracion} días)"
 
             checkbox = ctk.CTkCheckBox(
                 frame_scroll,
@@ -703,8 +599,9 @@ class GestorEventos(ctk.CTk):
                 variable=var_checkbox,
                 onvalue=True,
                 offvalue=False,
+                font=("Arial", 11)
             )
-            checkbox.pack(anchor="w", pady=3, padx=10)
+            checkbox.pack(anchor="w", pady=2, padx=20)
 
         # Botones
         frame_botones = ctk.CTkFrame(ventana_eliminar)
@@ -730,6 +627,11 @@ class GestorEventos(ctk.CTk):
             command=ventana_eliminar.destroy,
         )
         btn_cancelar.pack(side="left", padx=10)
+
+    def toggle_seleccionar_todos(self, checkboxes_list, var_todos):
+        estado = var_todos.get()
+        for checkbox_var in checkboxes_list:
+            checkbox_var.set(estado)
 
     def confirmar_eliminacion(self, ventana_eliminar):
         import tkinter.messagebox as messagebox
@@ -757,7 +659,17 @@ class GestorEventos(ctk.CTk):
         if not respuesta:
             return
 
-        # 4. Procesar cada evento a eliminar (orden inverso)
+        # 4. Pedir confirmación
+        respuesta = messagebox.askyesno(
+            "Confirmar eliminación",
+            f"¿Estás seguro de eliminar {len(eventos_a_eliminar_indices)} evento(s)?\n\n"
+            f"Esta acción devolverá los recursos no consumibles al inventario.",
+        )
+
+        if not respuesta:
+            return
+
+        # 5. Procesar cada evento a eliminar (orden inverso)
         recursos_devueltos = []
         eventos_a_eliminar_indices.sort(reverse=True)
 
@@ -767,62 +679,49 @@ class GestorEventos(ctk.CTk):
 
             evento = self.eventos_planificados[indice]
 
-        # 5. Devolver recursos (SOLO equipos, NO combustible)
-        recursos_devueltos = []
+            # Devolver recursos (SOLO equipos, NO combustible)
+            for recurso_detalle in evento.get("recursos_detalle", []):
+                # Solo procesar recursos NO combustibles
+                if not recurso_detalle.get("es_combustible", False):
+                    # Buscar el recurso en la lista de recursos
+                    for recurso in self.recursos:
+                        if recurso["nombre_mostrar"] == recurso_detalle["nombre_mostrar"]:
+                            # Incrementar la cantidad disponible (para equipos, esto es lo mismo que total)
+                            # O simplemente marcarlo como disponible nuevamente
+                            print(f"🔄 Equipo liberado: {recurso['nombre_mostrar']}")
+                            recursos_devueltos.append({
+                                "nombre": recurso["nombre_mostrar"],
+                                "categoria": recurso["categoria"],
+                                "tipo": "equipo",
+                            })
+                            break
 
-        for recurso_detalle in evento.get("recursos_detalle", []):
-            # Solo procesar recursos NO combustibles
-            if not recurso_detalle.get("es_combustible", False):
-                # Verificar si está en recursos_consumidos (para consistencia)
-                encontrado = False
-                for consumido in evento.get("recursos_consumidos", []):
-                    if consumido["recurso"] == recurso_detalle["nombre_mostrar"]:
-                        encontrado = True
-                        break
+            # COMBUSTIBLE: No se hace nada - no se devuelve
+            for recurso_detalle in evento.get("recursos_detalle", []):
+                if recurso_detalle.get("es_combustible", False):
+                    print(f"🔥 Combustible NO devuelto (consumido): {recurso_detalle['nombre_mostrar']}")
 
-                if encontrado:
-                    print(f"🔄 Equipo liberado: {recurso_detalle['nombre_mostrar']}")
-                    recursos_devueltos.append(
-                        {
-                            "nombre": recurso_detalle["nombre_mostrar"],
-                            "categoria": recurso_detalle["categoria"],
-                            "tipo": "equipo",
-                        }
-                    )
-                else:
-                    print(
-                        f"⚠️ Equipo no encontrado en recursos_consumidos: {recurso_detalle['nombre_mostrar']}"
-                    )
+            # Eliminar el evento
+            del self.eventos_planificados[indice]
 
-        # COMBUSTIBLE: No se hace nada - no se devuelve
-        for recurso_detalle in evento.get("recursos_detalle", []):
-            if recurso_detalle.get("es_combustible", False):
-                print(
-                    f"🔥 Combustible NO devuelto (consumido): {recurso_detalle['nombre_mostrar']}"
-                )
-
-        # 6. Eliminar el evento
-        del self.eventos_planificados[indice]
-
-        # 7. Guardar cambios
+        # 6. Guardar cambios
         self.guardar_recursos()
         self.guardar_eventos_en_json()
 
-        # 8. Actualizar interfaz
+        # 7. Actualizar interfaz
         self.actualizar_contador()
         self.crear_checkboxes_recursos()
 
-        # 9. Cerrar ventana
+        # 8. Cerrar ventana
         ventana_eliminar.destroy()
 
-        # 10. Mostrar mensaje de éxito
+        # 9. Mostrar mensaje de éxito
         mensaje = f"✅ Se eliminaron {len(eventos_a_eliminar_indices)} evento(s)."
 
         if recursos_devueltos:
             mensaje += f"\n🔄 {len(recursos_devueltos)} equipo(s) liberado(s) para nuevas asignaciones."
 
-            for recurso in recursos_devueltos:
-                print(f"🔄 Liberando equipo: {recurso['nombre']}")
+        self.lbl_info.configure(text=mensaje, text_color="green")
 
     # ************** INTERFAZ *************#
     def crear_interfaz(self):
