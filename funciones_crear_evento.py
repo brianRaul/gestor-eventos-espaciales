@@ -1,0 +1,312 @@
+from datetime import datetime, timedelta
+
+# ========== FUNCIONES DE VALIDACIÓN ==========
+
+def validar_tipo_evento(tipo_evento, tipos_evento_data):
+    """Valida que el tipo de evento sea válido"""
+    if not tipo_evento or tipo_evento == "Elige un tipo de evento":
+        return False, "❌ Selecciona un tipo de evento"
+    
+    if tipo_evento not in tipos_evento_data:
+        return False, "❌ Tipo de evento no encontrado"
+    
+    return True, ""
+
+
+def validar_fecha_duracion(day, month, year, duracion_str, tipo_evento, tipos_evento_data):
+    """Valida la fecha y duración del evento"""
+    try:
+        fecha_inicio = datetime(int(year), int(month), int(day))
+        if fecha_inicio.date() < datetime.now().date():
+            return False, "❌ No puedes planificar en el pasado", None, None, None
+        
+        duracion = int(duracion_str)
+        if duracion <= 0:
+            return False, "❌ La duración debe ser mayor a 0", None, None, None
+        
+        fecha_fin = fecha_inicio + timedelta(days=duracion - 1)
+    except ValueError:
+        return False, "❌ Fecha o duración inválida", None, None, None
+    
+    # Validar duración min/max del evento
+    evento_data = tipos_evento_data[tipo_evento]
+    config_evento = evento_data.get("configuracion_evento", {})
+    d_min = config_evento.get("duracion_minima", 1)
+    d_max = config_evento.get("duracion_maxima", 30)
+    
+    if not (d_min <= duracion <= d_max):
+        return False, f"❌ Duración permitida: {d_min}-{d_max} días", None, None, None
+    
+    return True, "", fecha_inicio, fecha_fin, duracion
+
+
+def validar_recursos_seleccionados(recursos_seleccionados_nombres, recursos):
+    """Convierte nombres de recursos a objetos completos y valida"""
+    recursos_seleccionados = []
+    for nombre_mostrar in recursos_seleccionados_nombres:
+        for recurso in recursos:
+            if recurso["nombre_mostrar"] == nombre_mostrar:
+                recursos_seleccionados.append(recurso)
+                break
+    
+    if not recursos_seleccionados:
+        return False, "❌ Selecciona al menos un recurso", None
+    
+    return True, "", recursos_seleccionados
+
+
+def validar_reglas_exclusion(evento_data, recursos_seleccionados):
+    """Valida reglas de exclusión de recursos"""
+    reglas_exclusion = evento_data.get("reglas_exclusion", [])
+    
+    for regla in reglas_exclusion:
+        categoria_prohibida = regla.get("categoria", "")
+        tipos_prohibidos = regla.get("tipos_prohibidos", [])
+        
+        for recurso in recursos_seleccionados:
+            if (recurso["categoria"] == categoria_prohibida and 
+                recurso["tipo"] in tipos_prohibidos):
+                return False, f"⛔ RECURSO PROHIBIDO: '{recurso['nombre_mostrar']}' no está permitido para este evento."
+    
+    return True, ""
+
+
+def validar_requisitos_coexistentes(evento_data, recursos_seleccionados):
+    """Valida requisitos de recursos coexistentes"""
+    requisitos_coexistentes = evento_data.get("requisitos_coexistentes", [])
+    
+    for requisito in requisitos_coexistentes:
+        categoria_principal = requisito.get("categoria", "")
+        tipo_principal = requisito.get("tipo", "")
+        requiere_lista = requisito.get("requiere", [])
+        
+        # Verificar si el recurso principal está seleccionado
+        principal_seleccionado = False
+        for recurso in recursos_seleccionados:
+            if (recurso["categoria"] == categoria_principal and 
+                recurso["tipo"] == tipo_principal):
+                principal_seleccionado = True
+                break
+        
+        if principal_seleccionado:
+            # Verificar que todos los recursos requeridos estén seleccionados
+            for requerido in requiere_lista:
+                cat_req = requerido.get("categoria", "")
+                tipo_req = requerido.get("tipo", "")
+                encontrado = False
+                
+                for recurso in recursos_seleccionados:
+                    if (recurso["categoria"] == cat_req and 
+                        recurso["tipo"] == tipo_req):
+                        encontrado = True
+                        break
+                
+                if not encontrado:
+                    return False, f"❌ '{categoria_principal} {tipo_principal}' requiere también '{cat_req} {tipo_req}'"
+    
+    return True, ""
+
+
+def validar_recursos_requeridos(evento_data, recursos_seleccionados, recursos, eventos_planificados, fecha_inicio, fecha_fin):
+    """Valida que se cumplan los recursos requeridos"""
+    recursos_requeridos = evento_data.get("recursos_requeridos", [])
+    
+    # Agrupar recursos seleccionados por categoría y tipo
+    recursos_seleccionados_dict = {}
+    for recurso in recursos_seleccionados:
+        clave = f"{recurso['categoria']}-{recurso['tipo']}"
+        if clave not in recursos_seleccionados_dict:
+            recursos_seleccionados_dict[clave] = []
+        recursos_seleccionados_dict[clave].append(recurso)
+    
+    # Verificar cada recurso requerido
+    for recurso_req in recursos_requeridos:
+        categoria_req = recurso_req.get("categoria", "")
+        tipo_req = recurso_req.get("tipo", "")
+        cantidad_req = recurso_req.get("cantidad", 1)
+        
+        clave_req = f"{categoria_req}-{tipo_req}"
+        
+        if clave_req not in recursos_seleccionados_dict:
+            return False, f"❌ El recurso requerido '{categoria_req} {tipo_req}' no está seleccionado"
+        
+        recursos_del_tipo = recursos_seleccionados_dict[clave_req]
+        
+        # Para combustible, verificar cantidad disponible
+        if "COMBUSTIBLE" in categoria_req.upper():
+            total_disponible = sum(r["cantidad_disponible"] for r in recursos_del_tipo)
+            if total_disponible < cantidad_req:
+                return False, f"❌ No hay suficiente {categoria_req} {tipo_req}. Se necesitan {cantidad_req}, hay {total_disponible}"
+        else:
+            # Para equipos: verificar ocupación en esas fechas
+            capacidad_total = sum(r["cantidad_total"] for r in recursos_del_tipo)
+            
+            # Buscar eventos que se solapen
+            cantidad_ocupada = 0
+            for evento in eventos_planificados:
+                try:
+                    ev_inicio = datetime.strptime(evento["fecha_inicio"], "%d/%m/%Y").date()
+                    ev_fin = datetime.strptime(evento["fecha_fin"], "%d/%m/%Y").date()
+                except:
+                    continue
+                
+                # Verificar solapamiento
+                se_solapan = (fecha_inicio.date() <= ev_fin) and (fecha_fin.date() >= ev_inicio)
+                
+                if se_solapan:
+                    # Contar cuántos de este tipo usa el evento
+                    for rd in evento.get("recursos_detalle", []):
+                        if (rd["categoria"] == categoria_req and 
+                            rd["tipo"] == tipo_req):
+                            cantidad_ocupada += 1
+            
+            disponible = capacidad_total - cantidad_ocupada
+            
+            if disponible < cantidad_req:
+                return False, f"❌ Ocupado en esas fechas: {categoria_req} {tipo_req}. (Total: {capacidad_total}, Ocupados: {cantidad_ocupada}, Necesarios: {cantidad_req})"
+    
+    return True, ""
+
+
+def consumir_recursos(evento_data, recursos_seleccionados, recursos):
+    """Consume los recursos necesarios para el evento"""
+    recursos_requeridos = evento_data.get("recursos_requeridos", [])
+    recursos_consumidos = []
+    
+    for recurso in recursos_seleccionados:
+        if recurso["es_combustible"]:
+            # Buscar el recurso combustible en la lista principal
+            for r in recursos:
+                if r["nombre_mostrar"] == recurso["nombre_mostrar"]:
+                    # Encontrar cuánto combustible necesita
+                    cantidad_necesaria = 0
+                    for recurso_req in recursos_requeridos:
+                        if (recurso_req["categoria"] == r["categoria"] and 
+                            recurso_req["tipo"] == r["tipo"]):
+                            cantidad_necesaria = recurso_req["cantidad"]
+                            break
+                    
+                    # Consumir el recurso
+                    r["cantidad_disponible"] -= cantidad_necesaria
+                    recursos_consumidos.append({
+                        "recurso": r["nombre_mostrar"],
+                        "cantidad": cantidad_necesaria,
+                        "es_consumible": True,
+                    })
+                    break
+        else:
+            # Para recursos NO combustibles
+            recursos_consumidos.append({
+                "recurso": recurso["nombre_mostrar"],
+                "cantidad": 1,
+                "es_consumible": False,
+            })
+    
+    return recursos_consumidos
+
+
+def crear_evento_dict(tipo_evento, fecha_inicio, fecha_fin, duracion, 
+                     recursos_seleccionados_nombres, recursos_seleccionados,
+                     recursos_requeridos, recursos_consumidos):
+    """Crea el diccionario del evento"""
+    # Crear diccionario de recursos usados
+    uso_recursos_evento = {}
+    for recurso in recursos_seleccionados:
+        if recurso["es_combustible"]:
+            # Encontrar cuánto combustible necesita
+            for recurso_req in recursos_requeridos:
+                if (recurso_req["categoria"] == recurso["categoria"] and 
+                    recurso_req["tipo"] == recurso["tipo"]):
+                    uso_recursos_evento[recurso["nombre_mostrar"]] = recurso_req["cantidad"]
+                    break
+        else:
+            uso_recursos_evento[recurso["nombre_mostrar"]] = 1
+    
+    # Crear nuevo evento
+    nuevo_evento = {
+        "tipo": tipo_evento,
+        "fecha_inicio": fecha_inicio.strftime("%d/%m/%Y"),
+        "fecha_fin": fecha_fin.strftime("%d/%m/%Y"),
+        "duracion_dias": duracion,
+        "recursos": recursos_seleccionados_nombres,
+        "recursos_detalle": [
+            {
+                "nombre_mostrar": r["nombre_mostrar"],
+                "categoria": r["categoria"],
+                "modelo": r["modelo"],
+                "tipo": r["tipo"],
+                "es_combustible": r["es_combustible"],
+                "es_consumible": r["es_combustible"],
+            }
+            for r in recursos_seleccionados
+        ],
+        "recursos_usados": uso_recursos_evento,
+        "recursos_consumidos": recursos_consumidos,
+        "estado": "planificado",
+    }
+    
+    return nuevo_evento
+
+
+# ========== FUNCIÓN PRINCIPAL ==========
+
+def procesar_creacion_evento(tipo_evento, day, month, year, duracion_str,
+                            recursos_seleccionados_nombres, recursos,
+                            eventos_planificados, tipos_evento_data):
+    """
+    Función principal que procesa la creación de un evento
+    Retorna: (éxito, mensaje, evento_creado)
+    """
+    
+    # 1. Validar tipo de evento
+    valido, mensaje = validar_tipo_evento(tipo_evento, tipos_evento_data)
+    if not valido:
+        return False, mensaje, None
+    
+    # 2. Validar fecha y duración
+    valido, mensaje, fecha_inicio, fecha_fin, duracion = validar_fecha_duracion(
+        day, month, year, duracion_str, tipo_evento, tipos_evento_data
+    )
+    if not valido:
+        return False, mensaje, None
+    
+    # 3. Obtener datos del evento
+    evento_data = tipos_evento_data[tipo_evento]
+    
+    # 4. Convertir nombres a información completa de recursos
+    valido, mensaje, recursos_seleccionados = validar_recursos_seleccionados(
+        recursos_seleccionados_nombres, recursos
+    )
+    if not valido:
+        return False, mensaje, None
+    
+    # 5. Validar reglas de exclusión
+    valido, mensaje = validar_reglas_exclusion(evento_data, recursos_seleccionados)
+    if not valido:
+        return False, mensaje, None
+    
+    # 6. Validar requisitos coexistentes
+    valido, mensaje = validar_requisitos_coexistentes(evento_data, recursos_seleccionados)
+    if not valido:
+        return False, mensaje, None
+    
+    # 7. Validar recursos requeridos
+    valido, mensaje = validar_recursos_requeridos(
+        evento_data, recursos_seleccionados, recursos, 
+        eventos_planificados, fecha_inicio, fecha_fin
+    )
+    if not valido:
+        return False, mensaje, None
+    
+    # 8. Consumir recursos
+    recursos_consumidos = consumir_recursos(evento_data, recursos_seleccionados, recursos)
+    
+    # 9. Crear diccionario del evento
+    nuevo_evento = crear_evento_dict(
+        tipo_evento, fecha_inicio, fecha_fin, duracion,
+        recursos_seleccionados_nombres, recursos_seleccionados,
+        evento_data.get("recursos_requeridos", []), recursos_consumidos
+    )
+    
+    mensaje_exito = f"🚀 Evento '{tipo_evento}' creado exitosamente"
+    return True, mensaje_exito, nuevo_evento
