@@ -1,583 +1,729 @@
 {
   "Despegue de cohete": {
-    "recursos_necesarios": {
-      "COHETE-PESADO": 1,
-      "PLATAFORMA DE LANZAMIENTO-ESTATICA": 1,
-      "EQUIPO DE CONTROL-DIGITAL": 1,
-      "SALA DE CONTROL PRINCIPAL-PRIMARIA": 1,
-      "SISTEMA DE COMBUSTIBLE-LIQUIDO": 45000,
-      "TORRE DE SERVICIO-RETRACTIL": 1,
-      "SISTEMA DE SEGURIDAD-ACTIVA": 1,
-      "ESTACIÓN DE SEGUIMIENTO-SATELITAL": 1,
-      "SISTEMA DE NAVEGACIÓN-GPS": 1,
-      "SISTEMA ELÉCTRICO-PRINCIPAL": 1,
-      "SISTEMA DE CONTROL TÉRMICO-REFRIGERANTE": 1
-    },
-    "recursos_prohibidos": [
-      "COHETE-LIGERO",
-      "PLATAFORMA DE LANZAMIENTO-MOVIL",
-      "SISTEMA DE COMBUSTIBLE-SOLIDO",
-      "PLATAFORMA DE ATERRIZAJE-CONTINENTAL",
-      "PLATAFORMA DE ATERRIZAJE-MARITIMA",
-      "EQUIPO DE RECUPERACIÓN-AEREO",
-      "EQUIPO DE RECUPERACIÓN-TERRESTRE"
+    "recursos_requeridos": [
+      {
+        "categoria": "COHETE",
+        "tipo": "Pesado",
+        "cantidad": 1,
+        "descripcion": "Cohete pesado con capacidad de carga superior"
+      },
+      {
+        "categoria": "PLATAFORMA DE LANZAMIENTO",
+        "tipo": "Estatica",
+        "cantidad": 1,
+        "descripcion": "Plataforma fija de lanzamiento"
+      },
+      {
+        "categoria": "EQUIPO DE CONTROL",
+        "tipo": "Digital",
+        "cantidad": 1,
+        "descripcion": "Consola de control digital"
+      },
+      {
+        "categoria": "SALA DE CONTROL PRINCIPAL",
+        "tipo": "Primaria",
+        "cantidad": 1,
+        "descripcion": "Sala de control principal"
+      },
+      {
+        "categoria": "SISTEMA DE COMBUSTIBLE",
+        "tipo": "Liquido",
+        "cantidad": 45000,
+        "descripcion": "Combustible líquido para cohete pesado"
+      },
+      {
+        "categoria": "TORRE DE SERVICIO",
+        "tipo": "Retractil",
+        "cantidad": 1,
+        "descripcion": "Torre de servicio retráctil"
+      },
+      {
+        "categoria": "SISTEMA DE SEGURIDAD",
+        "tipo": "Activa",
+        "cantidad": 1,
+        "descripcion": "Sistema de seguridad activa"
+      },
+      {
+        "categoria": "ESTACIÓN DE SEGUIMIENTO",
+        "tipo": "Satelital",
+        "cantidad": 1,
+        "descripcion": "Estación de seguimiento satelital"
+      },
+      {
+        "categoria": "SISTEMA DE NAVEGACIÓN",
+        "tipo": "GPS",
+        "cantidad": 1,
+        "descripcion": "Sistema de navegación GPS"
+      },
+      {
+        "categoria": "SISTEMA ELÉCTRICO",
+        "tipo": "Principal",
+        "cantidad": 1,
+        "descripcion": "Sistema eléctrico principal"
+      },
+      {
+        "categoria": "SISTEMA DE CONTROL TÉRMICO",
+        "tipo": "Refrigerante",
+        "cantidad": 1,
+        "descripcion": "Sistema de control térmico refrigerante"
+      }
     ],
-    "recursos_corequisitos": {
-      "COHETE-PESADO": ["EQUIPO DE CONTROL-DIGITAL", "SISTEMA DE SEGURIDAD-ACTIVA"],
-      "SISTEMA DE COMBUSTIBLE-LIQUIDO": ["SISTEMA DE SEGURIDAD-ACTIVA"],
-      "PLATAFORMA DE LANZAMIENTO-ESTATICA": ["TORRE DE SERVICIO-RETRACTIL"]
-    },
-    "recursos_innecesarios": [
-      "EQUIPO DE CONTROL-ANALOGICO",
-      "SALA DE CONTROL PRINCIPAL-SECUNDARIA",
-      "TORRE DE SERVICIO-FIJA",
-      "SISTEMA DE SEGURIDAD-PASIVO",
-      "ESTACIÓN DE SEGUIMIENTO-TERRESTRE",
-      "SISTEMA DE NAVEGACIÓN-INERCIAL",
-      "SISTEMA ELÉCTRICO-EMERGENCIA",
-      "SISTEMA DE CONTROL TÉRMICO-AISLANTE",
-      "LABORATORIO DE PRUEBAS-QUIMICO",
-      "LABORATORIO DE PRUEBAS-FISICO"
+    "reglas_exclusion": [
+      {
+        "categoria": "COHETE",
+        "tipos_prohibidos": ["Ligero"]
+      },
+      {
+        "categoria": "PLATAFORMA DE LANZAMIENTO",
+        "tipos_prohibidos": ["Movil"]
+      },
+      {
+        "categoria": "SISTEMA DE COMBUSTIBLE",
+        "tipos_prohibidos": ["Solido"]
+      },
+      {
+        "categoria": "PLATAFORMA DE ATERRIZAJE",
+        "tipos_prohibidos": ["Continental", "Maritima"]
+      }
     ],
-    "duracion_minima": 1,
-    "duracion_maxima": 3
+    "requisitos_coexistentes": [
+      {
+        "categoria": "COHETE",
+        "tipo": "Pesado",
+        "requiere": [
+          {"categoria": "EQUIPO DE CONTROL", "tipo": "Digital"},
+          {"categoria": "SISTEMA DE SEGURIDAD", "tipo": "Activa"}
+        ]
+      },
+      {
+        "categoria": "SISTEMA DE COMBUSTIBLE",
+        "tipo": "Liquido",
+        "requiere": [
+          {"categoria": "SISTEMA DE SEGURIDAD", "tipo": "Activa"}
+        ]
+      },
+      {
+        "categoria": "PLATAFORMA DE LANZAMIENTO",
+        "tipo": "Estatica",
+        "requiere": [
+          {"categoria": "TORRE DE SERVICIO", "tipo": "Retractil"}
+        ]
+      }
+    ],
+    "recursos_opcionales": [
+      {
+        "categoria": "EQUIPO DE CONTROL",
+        "tipo": "Analogico",
+        "descripcion": "Equipo de control analógico alternativo"
+      },
+      {
+        "categoria": "SISTEMA ELÉCTRICO",
+        "tipo": "Emergencia",
+        "descripcion": "Sistema eléctrico de emergencia"
+      }
+    ],
+    "configuracion_evento": {
+      "duracion_minima": 1,
+      "duracion_maxima": 3,
+      "hora_inicio_recomendada": "06:00",
+      "hora_fin_recomendada": "12:00"
+    }
   },
   "Prueba estática de motor": {
-    "recursos_necesarios": {
-      "COHETE-LIGERO": 1,
-      "PLATAFORMA DE LANZAMIENTO-ESTATICA": 1,
-      "SISTEMA DE COMBUSTIBLE-LIQUIDO": 8000,
-      "SISTEMA DE SEGURIDAD-ACTIVA": 1,
-      "EQUIPO DE CONTROL-DIGITAL": 1
-    },
-    "recursos_prohibidos": [
-      "COHETE-PESADO",
-      "PLATAFORMA DE LANZAMIENTO-MOVIL",
-      "SISTEMA DE COMBUSTIBLE-SOLIDO",
-      "PLATAFORMA DE ATERRIZAJE-CONTINENTAL",
-      "PLATAFORMA DE ATERRIZAJE-MARITIMA",
-      "SISTEMA DE NAVEGACIÓN-GPS",
-      "SISTEMA DE NAVEGACIÓN-INERCIAL"
+    "recursos_requeridos": [
+      {
+        "categoria": "COHETE",
+        "tipo": "Ligero",
+        "cantidad": 1,
+        "descripcion": "Cohete ligero para pruebas"
+      },
+      {
+        "categoria": "PLATAFORMA DE LANZAMIENTO",
+        "tipo": "Estatica",
+        "cantidad": 1,
+        "descripcion": "Plataforma estática para prueba"
+      },
+      {
+        "categoria": "EQUIPO DE CONTROL",
+        "tipo": "Digital",
+        "cantidad": 1,
+        "descripcion": "Consola de control digital"
+      },
+      {
+        "categoria": "SISTEMA DE COMBUSTIBLE",
+        "tipo": "Liquido",
+        "cantidad": 8000,
+        "descripcion": "Combustible líquido para prueba"
+      },
+      {
+        "categoria": "SISTEMA DE SEGURIDAD",
+        "tipo": "Activa",
+        "cantidad": 1,
+        "descripcion": "Sistema de seguridad activa"
+      }
     ],
-    "recursos_corequisitos": {
-      "COHETE-LIGERO": ["SISTEMA DE SEGURIDAD-ACTIVA", "EQUIPO DE CONTROL-DIGITAL"],
-      "SISTEMA DE COMBUSTIBLE-LIQUIDO": ["SISTEMA DE SEGURIDAD-ACTIVA"]
-    },
-    "recursos_innecesarios": [
-      "EQUIPO DE CONTROL-ANALOGICO",
-      "SALA DE CONTROL PRINCIPAL-PRIMARIA",
-      "SALA DE CONTROL PRINCIPAL-SECUNDARIA",
-      "TORRE DE SERVICIO-FIJA",
-      "TORRE DE SERVICIO-RETRACTIL",
-      "SISTEMA DE SEGURIDAD-PASIVO",
-      "ESTACIÓN DE SEGUIMIENTO-TERRESTRE",
-      "ESTACIÓN DE SEGUIMIENTO-SATELITAL",
-      "SISTEMA ELÉCTRICO-PRINCIPAL",
-      "SISTEMA ELÉCTRICO-EMERGENCIA",
-      "SISTEMA DE CONTROL TÉRMICO-REFRIGERANTE",
-      "SISTEMA DE CONTROL TÉRMICO-AISLANTE",
-      "EQUIPO DE RECUPERACIÓN-AEREO",
-      "EQUIPO DE RECUPERACIÓN-TERRESTRE",
-      "LABORATORIO DE PRUEBAS-QUIMICO",
-      "LABORATORIO DE PRUEBAS-FISICO"
+    "reglas_exclusion": [
+      {
+        "categoria": "COHETE",
+        "tipos_prohibidos": ["Pesado"]
+      },
+      {
+        "categoria": "PLATAFORMA DE LANZAMIENTO",
+        "tipos_prohibidos": ["Movil"]
+      },
+      {
+        "categoria": "SISTEMA DE COMBUSTIBLE",
+        "tipos_prohibidos": ["Solido"]
+      }
     ],
-    "duracion_minima": 1,
-    "duracion_maxima": 1
-  },
-  "Pruebas de carga útil": {
-    "recursos_necesarios": {
-      "LABORATORIO DE PRUEBAS-FISICO": 1,
-      "SISTEMA ELÉCTRICO-PRINCIPAL": 1,
-      "EQUIPO DE CONTROL-DIGITAL": 1,
-      "TORRE DE SERVICIO-FIJA": 1
-    },
-    "recursos_prohibidos": [
-      "SISTEMA DE COMBUSTIBLE-LIQUIDO",
-      "SISTEMA DE COMBUSTIBLE-SOLIDO",
-      "COHETE-PESADO",
-      "COHETE-LIGERO",
-      "PLATAFORMA DE LANZAMIENTO-ESTATICA",
-      "PLATAFORMA DE LANZAMIENTO-MOVIL"
+    "requisitos_coexistentes": [
+      {
+        "categoria": "COHETE",
+        "tipo": "Ligero",
+        "requiere": [
+          {"categoria": "SISTEMA DE SEGURIDAD", "tipo": "Activa"},
+          {"categoria": "EQUIPO DE CONTROL", "tipo": "Digital"}
+        ]
+      },
+      {
+        "categoria": "SISTEMA DE COMBUSTIBLE",
+        "tipo": "Liquido",
+        "requiere": [
+          {"categoria": "SISTEMA DE SEGURIDAD", "tipo": "Activa"}
+        ]
+      }
     ],
-    "recursos_corequisitos": {
-      "LABORATORIO DE PRUEBAS-FISICO": ["SISTEMA ELÉCTRICO-PRINCIPAL"],
-      "EQUIPO DE CONTROL-DIGITAL": ["TORRE DE SERVICIO-FIJA"]
-    },
-    "recursos_innecesarios": [
-      "EQUIPO DE CONTROL-ANALOGICO",
-      "SALA DE CONTROL PRINCIPAL-PRIMARIA",
-      "SALA DE CONTROL PRINCIPAL-SECUNDARIA",
-      "TORRE DE SERVICIO-RETRACTIL",
-      "SISTEMA DE SEGURIDAD-PASIVO",
-      "SISTEMA DE SEGURIDAD-ACTIVA",
-      "ESTACIÓN DE SEGUIMIENTO-TERRESTRE",
-      "ESTACIÓN DE SEGUIMIENTO-SATELITAL",
-      "PLATAFORMA DE ATERRIZAJE-CONTINENTAL",
-      "PLATAFORMA DE ATERRIZAJE-MARITIMA",
-      "SISTEMA DE NAVEGACIÓN-GPS",
-      "SISTEMA DE NAVEGACIÓN-INERCIAL",
-      "SISTEMA ELÉCTRICO-EMERGENCIA",
-      "SISTEMA DE CONTROL TÉRMICO-REFRIGERANTE",
-      "SISTEMA DE CONTROL TÉRMICO-AISLANTE",
-      "EQUIPO DE RECUPERACIÓN-AEREO",
-      "EQUIPO DE RECUPERACIÓN-TERRESTRE",
-      "LABORATORIO DE PRUEBAS-QUIMICO"
-    ],
-    "duracion_minima": 2,
-    "duracion_maxima": 5
-  },
-  "Aterrizaje del cohete": {
-    "recursos_necesarios": {
-      "PLATAFORMA DE ATERRIZAJE-MARITIMA": 1,
-      "COHETE-PESADO": 1,
-      "EQUIPO DE RECUPERACIÓN-AEREO": 1,
-      "SISTEMA DE NAVEGACIÓN-INERCIAL": 1,
-      "SISTEMA DE CONTROL TÉRMICO-AISLANTE": 1,
-      "SALA DE CONTROL PRINCIPAL-SECUNDARIA": 1
-    },
-    "recursos_prohibidos": [
-      "PLATAFORMA DE LANZAMIENTO-ESTATICA",
-      "PLATAFORMA DE LANZAMIENTO-MOVIL",
-      "PLATAFORMA DE ATERRIZAJE-CONTINENTAL",
-      "COHETE-LIGERO",
-      "EQUIPO DE RECUPERACIÓN-TERRESTRE"
-    ],
-    "recursos_corequisitos": {
-      "PLATAFORMA DE ATERRIZAJE-MARITIMA": ["EQUIPO DE RECUPERACIÓN-AEREO"],
-      "COHETE-PESADO": ["SISTEMA DE CONTROL TÉRMICO-AISLANTE"]
-    },
-    "recursos_innecesarios": [
-      "EQUIPO DE CONTROL-DIGITAL",
-      "EQUIPO DE CONTROL-ANALOGICO",
-      "SALA DE CONTROL PRINCIPAL-PRIMARIA",
-      "SISTEMA DE COMBUSTIBLE-LIQUIDO",
-      "SISTEMA DE COMBUSTIBLE-SOLIDO",
-      "TORRE DE SERVICIO-FIJA",
-      "TORRE DE SERVICIO-RETRACTIL",
-      "SISTEMA DE SEGURIDAD-PASIVO",
-      "SISTEMA DE SEGURIDAD-ACTIVA",
-      "ESTACIÓN DE SEGUIMIENTO-TERRESTRE",
-      "ESTACIÓN DE SEGUIMIENTO-SATELITAL",
-      "SISTEMA DE NAVEGACIÓN-GPS",
-      "SISTEMA ELÉCTRICO-PRINCIPAL",
-      "SISTEMA ELÉCTRICO-EMERGENCIA",
-      "SISTEMA DE CONTROL TÉRMICO-REFRIGERANTE",
-      "LABORATORIO DE PRUEBAS-QUIMICO",
-      "LABORATORIO DE PRUEBAS-FISICO"
-    ],
-    "duracion_minima": 1,
-    "duracion_maxima": 1
-  },
-  "Carga de combustible": {
-    "recursos_necesarios": {
-      "SISTEMA DE COMBUSTIBLE-LIQUIDO": 35000,
-      "PLATAFORMA DE LANZAMIENTO-ESTATICA": 1,
-      "SISTEMA DE SEGURIDAD-ACTIVA": 1,
-      "EQUIPO DE CONTROL-ANALOGICO": 1
-    },
-    "recursos_prohibidos": [
-      "SISTEMA DE COMBUSTIBLE-SOLIDO",
-      "PLATAFORMA DE LANZAMIENTO-MOVIL",
-      "SISTEMA DE SEGURIDAD-PASIVO",
-      "COHETE-LIGERO",
-      "COHETE-PESADO"
-    ],
-    "recursos_corequisitos": {
-      "SISTEMA DE COMBUSTIBLE-LIQUIDO": ["SISTEMA DE SEGURIDAD-ACTIVA"],
-      "PLATAFORMA DE LANZAMIENTO-ESTATICA": ["SISTEMA DE SEGURIDAD-ACTIVA"]
-    },
-    "recursos_innecesarios": [
-      "EQUIPO DE CONTROL-DIGITAL",
-      "SALA DE CONTROL PRINCIPAL-PRIMARIA",
-      "SALA DE CONTROL PRINCIPAL-SECUNDARIA",
-      "TORRE DE SERVICIO-FIJA",
-      "TORRE DE SERVICIO-RETRACTIL",
-      "ESTACIÓN DE SEGUIMIENTO-TERRESTRE",
-      "ESTACIÓN DE SEGUIMIENTO-SATELITAL",
-      "PLATAFORMA DE ATERRIZAJE-CONTINENTAL",
-      "PLATAFORMA DE ATERRIZAJE-MARITIMA",
-      "SISTEMA DE NAVEGACIÓN-GPS",
-      "SISTEMA DE NAVEGACIÓN-INERCIAL",
-      "SISTEMA ELÉCTRICO-PRINCIPAL",
-      "SISTEMA ELÉCTRICO-EMERGENCIA",
-      "SISTEMA DE CONTROL TÉRMICO-REFRIGERANTE",
-      "SISTEMA DE CONTROL TÉRMICO-AISLANTE",
-      "EQUIPO DE RECUPERACIÓN-AEREO",
-      "EQUIPO DE RECUPERACIÓN-TERRESTRE",
-      "LABORATORIO DE PRUEBAS-QUIMICO",
-      "LABORATORIO DE PRUEBAS-FISICO"
-    ],
-    "duracion_minima": 1,
-    "duracion_maxima": 1
+    "configuracion_evento": {
+      "duracion_minima": 1,
+      "duracion_maxima": 1,
+      "hora_inicio_recomendada": "08:00",
+      "hora_fin_recomendada": "16:00"
+    }
   },
   "Simulación de aterrizaje": {
-    "recursos_necesarios": {
-      "PLATAFORMA DE ATERRIZAJE-CONTINENTAL": 1,
-      "EQUIPO DE CONTROL-DIGITAL": 1,
-      "SALA DE CONTROL PRINCIPAL-SECUNDARIA": 1,
-      "SISTEMA DE NAVEGACIÓN-INERCIAL": 1
-    },
-    "recursos_prohibidos": [
-      "PLATAFORMA DE ATERRIZAJE-MARITIMA",
-      "PLATAFORMA DE LANZAMIENTO-ESTATICA",
-      "PLATAFORMA DE LANZAMIENTO-MOVIL",
-      "COHETE-PESADO",
-      "COHETE-LIGERO"
+    "recursos_requeridos": [
+      {
+        "categoria": "EQUIPO DE CONTROL",
+        "tipo": "Digital",
+        "cantidad": 1,
+        "descripcion": "Consola de control digital"
+      },
+      {
+        "categoria": "SALA DE CONTROL PRINCIPAL",
+        "tipo": "Secundaria",
+        "cantidad": 1,
+        "descripcion": "Sala de control secundaria"
+      },
+      {
+        "categoria": "PLATAFORMA DE ATERRIZAJE",
+        "tipo": "Continental",
+        "cantidad": 1,
+        "descripcion": "Plataforma de aterrizaje continental"
+      },
+      {
+        "categoria": "SISTEMA DE NAVEGACIÓN",
+        "tipo": "Inercial",
+        "cantidad": 1,
+        "descripcion": "Sistema de navegación inercial"
+      }
     ],
-    "recursos_corequisitos": {
-      "PLATAFORMA DE ATERRIZAJE-CONTINENTAL": ["EQUIPO DE CONTROL-DIGITAL"],
-      "EQUIPO DE CONTROL-DIGITAL": ["SALA DE CONTROL PRINCIPAL-SECUNDARIA"]
-    },
-    "recursos_innecesarios": [
-      "EQUIPO DE CONTROL-ANALOGICO",
-      "SALA DE CONTROL PRINCIPAL-PRIMARIA",
-      "SISTEMA DE COMBUSTIBLE-LIQUIDO",
-      "SISTEMA DE COMBUSTIBLE-SOLIDO",
-      "TORRE DE SERVICIO-FIJA",
-      "TORRE DE SERVICIO-RETRACTIL",
-      "SISTEMA DE SEGURIDAD-PASIVO",
-      "SISTEMA DE SEGURIDAD-ACTIVA",
-      "ESTACIÓN DE SEGUIMiento-TERRESTRE",
-      "ESTACIÓN DE SEGUIMIENTO-SATELITAL",
-      "SISTEMA DE NAVEGACIÓN-GPS",
-      "SISTEMA ELÉCTRICO-PRINCIPAL",
-      "SISTEMA ELÉCTRICO-EMERGENCIA",
-      "SISTEMA DE CONTROL TÉRMICO-REFRIGERANTE",
-      "SISTEMA DE CONTROL TÉRMICO-AISLANTE",
-      "EQUIPO DE RECUPERACIÓN-AEREO",
-      "EQUIPO DE RECUPERACIÓN-TERRESTRE",
-      "LABORATORIO DE PRUEBAS-QUIMICO",
-      "LABORATORIO DE PRUEBAS-FISICO"
+    "reglas_exclusion": [
+      {
+        "categoria": "PLATAFORMA DE ATERRIZAJE",
+        "tipos_prohibidos": ["Maritima"]
+      },
+      {
+        "categoria": "COHETE",
+        "tipos_prohibidos": ["Pesado", "Ligero"]
+      }
     ],
-    "duracion_minima": 1,
-    "duracion_maxima": 2
+    "requisitos_coexistentes": [
+      {
+        "categoria": "PLATAFORMA DE ATERRIZAJE",
+        "tipo": "Continental",
+        "requiere": [
+          {"categoria": "EQUIPO DE CONTROL", "tipo": "Digital"}
+        ]
+      },
+      {
+        "categoria": "EQUIPO DE CONTROL",
+        "tipo": "Digital",
+        "requiere": [
+          {"categoria": "SALA DE CONTROL PRINCIPAL", "tipo": "Secundaria"}
+        ]
+      }
+    ],
+    "configuracion_evento": {
+      "duracion_minima": 1,
+      "duracion_maxima": 2,
+      "hora_inicio_recomendada": "09:00",
+      "hora_fin_recomendada": "17:00"
+    }
   },
-  "Inspección post aterrizaje": {
-    "recursos_necesarios": {
-      "COHETE-LIGERO": 1,
-      "LABORATORIO DE PRUEBAS-QUIMICO": 1,
-      "TORRE DE SERVICIO-RETRACTIL": 1
-    },
-    "recursos_prohibidos": [
-      "SISTEMA DE COMBUSTIBLE-LIQUIDO",
-      "SISTEMA DE COMBUSTIBLE-SOLIDO",
-      "PLATAFORMA DE LANZAMIENTO-ESTATICA",
-      "PLATAFORMA DE LANZAMIENTO-MOVIL"
+  "Aterrizaje del cohete": {
+    "recursos_requeridos": [
+      {
+        "categoria": "COHETE",
+        "tipo": "Pesado",
+        "cantidad": 1,
+        "descripcion": "Cohete pesado para aterrizaje"
+      },
+      {
+        "categoria": "SALA DE CONTROL PRINCIPAL",
+        "tipo": "Secundaria",
+        "cantidad": 1,
+        "descripcion": "Sala de control secundaria"
+      },
+      {
+        "categoria": "PLATAFORMA DE ATERRIZAJE",
+        "tipo": "Maritima",
+        "cantidad": 1,
+        "descripcion": "Plataforma de aterrizaje marítima"
+      },
+      {
+        "categoria": "SISTEMA DE NAVEGACIÓN",
+        "tipo": "Inercial",
+        "cantidad": 1,
+        "descripcion": "Sistema de navegación inercial"
+      },
+      {
+        "categoria": "SISTEMA DE CONTROL TÉRMICO",
+        "tipo": "Aislante",
+        "cantidad": 1,
+        "descripcion": "Sistema de control térmico aislante"
+      },
+      {
+        "categoria": "EQUIPO DE RECUPERACIÓN",
+        "tipo": "Aereo",
+        "cantidad": 1,
+        "descripcion": "Equipo de recuperación aéreo"
+      }
     ],
-    "recursos_corequisitos": {
-      "LABORATORIO DE PRUEBAS-QUIMICO": ["TORRE DE SERVICIO-RETRACTIL"]
-    },
-    "recursos_innecesarios": [
-      "COHETE-PESADO",
-      "EQUIPO DE CONTROL-DIGITAL",
-      "EQUIPO DE CONTROL-ANALOGICO",
-      "SALA DE CONTROL PRINCIPAL-PRIMARIA",
-      "SALA DE CONTROL PRINCIPAL-SECUNDARIA",
-      "TORRE DE SERVICIO-FIJA",
-      "SISTEMA DE SEGURIDAD-PASIVO",
-      "SISTEMA DE SEGURIDAD-ACTIVA",
-      "ESTACIÓN DE SEGUIMIENTO-TERRESTRE",
-      "ESTACIÓN DE SEGUIMIENTO-SATELITAL",
-      "PLATAFORMA DE ATERRIZAJE-CONTINENTAL",
-      "PLATAFORMA DE ATERRIZAJE-MARITIMA",
-      "SISTEMA DE NAVEGACIÓN-GPS",
-      "SISTEMA DE NAVEGACIÓN-INERCIAL",
-      "SISTEMA ELÉCTRICO-PRINCIPAL",
-      "SISTEMA ELÉCTRICO-EMERGENCIA",
-      "SISTEMA DE CONTROL TÉRMICO-REFRIGERANTE",
-      "SISTEMA DE CONTROL TÉRMICO-AISLANTE",
-      "EQUIPO DE RECUPERACIÓN-AEREO",
-      "EQUIPO DE RECUPERACIÓN-TERRESTRE",
-      "LABORATORIO DE PRUEBAS-FISICO"
+    "reglas_exclusion": [
+      {
+        "categoria": "PLATAFORMA DE ATERRIZAJE",
+        "tipos_prohibidos": ["Continental"]
+      },
+      {
+        "categoria": "EQUIPO DE RECUPERACIÓN",
+        "tipos_prohibidos": ["Terrestre"]
+      }
     ],
-    "duracion_minima": 1,
-    "duracion_maxima": 5
+    "requisitos_coexistentes": [
+      {
+        "categoria": "PLATAFORMA DE ATERRIZAJE",
+        "tipo": "Maritima",
+        "requiere": [
+          {"categoria": "EQUIPO DE RECUPERACIÓN", "tipo": "Aereo"}
+        ]
+      },
+      {
+        "categoria": "COHETE",
+        "tipo": "Pesado",
+        "requiere": [
+          {"categoria": "SISTEMA DE CONTROL TÉRMICO", "tipo": "Aislante"}
+        ]
+      }
+    ],
+    "configuracion_evento": {
+      "duracion_minima": 1,
+      "duracion_maxima": 1,
+      "hora_inicio_recomendada": "14:00",
+      "hora_fin_recomendada": "18:00"
+    }
   },
-  "Entrenamiento de equipos": {
-    "recursos_necesarios": {
-      "SALA DE CONTROL PRINCIPAL-SECUNDARIA": 1,
-      "SISTEMA DE NAVEGACIÓN-GPS": 1,
-      "EQUIPO DE CONTROL-ANALOGICO": 1
-    },
-    "recursos_prohibidos": [
-      "SISTEMA DE COMBUSTIBLE-LIQUIDO",
-      "SISTEMA DE COMBUSTIBLE-SOLIDO",
-      "COHETE-LIGERO",
-      "COHETE-PESADO"
+  "Carga de combustible": {
+    "recursos_requeridos": [
+      {
+        "categoria": "SISTEMA DE COMBUSTIBLE",
+        "tipo": "Liquido",
+        "cantidad": 35000,
+        "descripcion": "Combustible líquido para carga"
+      },
+      {
+        "categoria": "PLATAFORMA DE LANZAMIENTO",
+        "tipo": "Estatica",
+        "cantidad": 1,
+        "descripcion": "Plataforma estática para carga"
+      },
+      {
+        "categoria": "SISTEMA DE SEGURIDAD",
+        "tipo": "Activa",
+        "cantidad": 1,
+        "descripcion": "Sistema de seguridad activa"
+      },
+      {
+        "categoria": "EQUIPO DE CONTROL",
+        "tipo": "Analogico",
+        "cantidad": 1,
+        "descripcion": "Equipo de control analógico para carga"
+      }
     ],
-    "recursos_corequisitos": {
-      "SALA DE CONTROL PRINCIPAL-SECUNDARIA": ["EQUIPO DE CONTROL-ANALOGICO"]
-    },
-    "recursos_innecesarios": [
-      "PLATAFORMA DE LANZAMIENTO-ESTATICA",
-      "PLATAFORMA DE LANZAMIENTO-MOVIL",
-      "EQUIPO DE CONTROL-DIGITAL",
-      "SALA DE CONTROL PRINCIPAL-PRIMARIA",
-      "TORRE DE SERVICIO-FIJA",
-      "TORRE DE SERVICIO-RETRACTIL",
-      "SISTEMA DE SEGURIDAD-PASIVO",
-      "SISTEMA DE SEGURIDAD-ACTIVA",
-      "ESTACIÓN DE SEGUIMIENTO-TERRESTRE",
-      "ESTACIÓN DE SEGUIMIENTO-SATELITAL",
-      "PLATAFORMA DE ATERRIZAJE-CONTINENTAL",
-      "PLATAFORMA DE ATERRIZAJE-MARITIMA",
-      "SISTEMA DE NAVEGACIÓN-INERCIAL",
-      "SISTEMA ELÉCTRICO-PRINCIPAL",
-      "SISTEMA ELÉCTRICO-EMERGENCIA",
-      "SISTEMA DE CONTROL TÉRMICO-REFRIGERANTE",
-      "SISTEMA DE CONTROL TÉRMICO-AISLANTE",
-      "EQUIPO DE RECUPERACIÓN-AEREO",
-      "EQUIPO DE RECUPERACIÓN-TERRESTRE",
-      "LABORATORIO DE PRUEBAS-QUIMICO",
-      "LABORATORIO DE PRUEBAS-FISICO"
+    "reglas_exclusion": [
+      {
+        "categoria": "SISTEMA DE COMBUSTIBLE",
+        "tipos_prohibidos": ["Solido"]
+      },
+      {
+        "categoria": "COHETE",
+        "tipos_prohibidos": ["Pesado", "Ligero"]
+      }
     ],
-    "duracion_minima": 1,
-    "duracion_maxima": 2
+    "requisitos_coexistentes": [
+      {
+        "categoria": "SISTEMA DE COMBUSTIBLE",
+        "tipo": "Liquido",
+        "requiere": [
+          {"categoria": "SISTEMA DE SEGURIDAD", "tipo": "Activa"}
+        ]
+      },
+      {
+        "categoria": "PLATAFORMA DE LANZAMIENTO",
+        "tipo": "Estatica",
+        "requiere": [
+          {"categoria": "SISTEMA DE SEGURIDAD", "tipo": "Activa"}
+        ]
+      }
+    ],
+    "configuracion_evento": {
+      "duracion_minima": 1,
+      "duracion_maxima": 1,
+      "hora_inicio_recomendada": "07:00",
+      "hora_fin_recomendada": "15:00"
+    }
   },
-  "Pruebas de sistema de emergencia": {
-    "recursos_necesarios": {
-      "SISTEMA DE SEGURIDAD-ACTIVA": 1,
-      "EQUIPO DE RECUPERACIÓN-TERRESTRE": 1,
-      "EQUIPO DE CONTROL-DIGITAL": 1
-    },
-    "recursos_prohibidos": [
-      "COHETE-PESADO",
-      "COHETE-LIGERO",
-      "SISTEMA DE COMBUSTIBLE-LIQUIDO",
-      "SISTEMA DE COMBUSTIBLE-SOLIDO"
+  "Prueba de navegación avanzada": {
+    "recursos_requeridos": [
+      {
+        "categoria": "SISTEMA DE NAVEGACIÓN",
+        "tipo": "GPS",
+        "cantidad": 1,
+        "descripcion": "Sistema de navegación GPS para prueba"
+      },
+      {
+        "categoria": "SISTEMA DE NAVEGACIÓN",
+        "tipo": "Inercial",
+        "cantidad": 1,
+        "descripcion": "Sistema de navegación inercial para comparación"
+      },
+      {
+        "categoria": "EQUIPO DE CONTROL",
+        "tipo": "Digital",
+        "cantidad": 1,
+        "descripcion": "Consola de control digital para seguimiento"
+      },
+      {
+        "categoria": "ESTACIÓN DE SEGUIMIENTO",
+        "tipo": "Satelital",
+        "cantidad": 1,
+        "descripcion": "Estación de seguimiento satelital"
+      }
     ],
-    "recursos_corequisitos": {
-      "EQUIPO DE RECUPERACIÓN-TERRESTRE": ["SISTEMA DE SEGURIDAD-ACTIVA"]
-    },
-    "recursos_innecesarios": [
-      "PLATAFORMA DE LANZAMIENTO-ESTATICA",
-      "PLATAFORMA DE LANZAMIENTO-MOVIL",
-      "EQUIPO DE CONTROL-ANALOGICO",
-      "SALA DE CONTROL PRINCIPAL-PRIMARIA",
-      "SALA DE CONTROL PRINCIPAL-SECUNDARIA",
-      "TORRE DE SERVICIO-FIJA",
-      "TORRE DE SERVICIO-RETRACTIL",
-      "SISTEMA DE SEGURIDAD-PASIVO",
-      "ESTACIÓN DE SEGUIMIENTO-TERRESTRE",
-      "ESTACIÓN DE SEGUIMIENTO-SATELITAL",
-      "PLATAFORMA DE ATERRIZAJE-CONTINENTAL",
-      "PLATAFORMA DE ATERRIZAJE-MARITIMA",
-      "SISTEMA DE NAVEGACIÓN-GPS",
-      "SISTEMA DE NAVEGACIÓN-INERCIAL",
-      "SISTEMA ELÉCTRICO-PRINCIPAL",
-      "SISTEMA ELÉCTRICO-EMERGENCIA",
-      "SISTEMA DE CONTROL TÉRMICO-REFRIGERANTE",
-      "SISTEMA DE CONTROL TÉRMICO-AISLANTE",
-      "EQUIPO DE RECUPERACIÓN-AEREO",
-      "LABORATORIO DE PRUEBAS-QUIMICO",
-      "LABORATORIO DE PRUEBAS-FISICO"
+    "reglas_exclusion": [
+      {
+        "categoria": "COHETE",
+        "tipos_prohibidos": ["Pesado", "Ligero"]
+      },
+      {
+        "categoria": "SISTEMA DE COMBUSTIBLE",
+        "tipos_prohibidos": ["Liquido", "Solido"]
+      }
     ],
-    "duracion_minima": 1,
-    "duracion_maxima": 2
+    "requisitos_coexistentes": [
+      {
+        "categoria": "SISTEMA DE NAVEGACIÓN",
+        "tipo": "GPS",
+        "requiere": [
+          {"categoria": "EQUIPO DE CONTROL", "tipo": "Digital"}
+        ]
+      },
+      {
+        "categoria": "SISTEMA DE NAVEGACIÓN",
+        "tipo": "Inercial",
+        "requiere": [
+          {"categoria": "ESTACIÓN DE SEGUIMIENTO", "tipo": "Satelital"}
+        ]
+      }
+    ],
+    "recursos_opcionales": [
+      {
+        "categoria": "ESTACIÓN DE SEGUIMIENTO",
+        "tipo": "Terrestre",
+        "descripcion": "Estación de seguimiento terrestre como respaldo"
+      }
+    ],
+    "configuracion_evento": {
+      "duracion_minima": 2,
+      "duracion_maxima": 4,
+      "hora_inicio_recomendada": "10:00",
+      "hora_fin_recomendada": "18:00"
+    }
   },
-  "Ensayo general": {
-    "recursos_necesarios": {
-      "COHETE-PESADO": 1,
-      "EQUIPO DE CONTROL-DIGITAL": 1,
-      "SALA DE CONTROL PRINCIPAL-PRIMARIA": 1,
-      "SISTEMA ELÉCTRICO-PRINCIPAL": 1
-    },
-    "recursos_prohibidos": [
-      "LABORATORIO DE PRUEBAS-QUIMICO",
-      "LABORATORIO DE PRUEBAS-FISICO",
-      "COHETE-LIGERO"
+  "Prueba de sistemas eléctricos": {
+    "recursos_requeridos": [
+      {
+        "categoria": "SISTEMA ELÉCTRICO",
+        "tipo": "Principal",
+        "cantidad": 1,
+        "descripcion": "Sistema eléctrico principal para prueba"
+      },
+      {
+        "categoria": "SISTEMA ELÉCTRICO",
+        "tipo": "Emergencia",
+        "cantidad": 1,
+        "descripcion": "Sistema eléctrico de emergencia"
+      },
+      {
+        "categoria": "EQUIPO DE CONTROL",
+        "tipo": "Digital",
+        "cantidad": 1,
+        "descripcion": "Consola de control digital para monitoreo"
+      },
+      {
+        "categoria": "SALA DE CONTROL PRINCIPAL",
+        "tipo": "Secundaria",
+        "cantidad": 1,
+        "descripcion": "Sala de control secundaria para pruebas"
+      }
     ],
-    "recursos_corequisitos": {
-      "COHETE-PESADO": ["EQUIPO DE CONTROL-DIGITAL", "SISTEMA ELÉCTRICO-PRINCIPAL"]
-    },
-    "recursos_innecesarios": [
-      "PLATAFORMA DE LANZAMIENTO-ESTATICA",
-      "PLATAFORMA DE LANZAMIENTO-MOVIL",
-      "EQUIPO DE CONTROL-ANALOGICO",
-      "SALA DE CONTROL PRINCIPAL-SECUNDARIA",
-      "SISTEMA DE COMBUSTIBLE-LIQUIDO",
-      "SISTEMA DE COMBUSTIBLE-SOLIDO",
-      "TORRE DE SERVICIO-FIJA",
-      "TORRE DE SERVICIO-RETRACTIL",
-      "SISTEMA DE SEGURIDAD-PASIVO",
-      "SISTEMA DE SEGURIDAD-ACTIVA",
-      "ESTACIÓN DE SEGUIMIENTO-TERRESTRE",
-      "ESTACIÓN DE SEGUIMIENTO-SATELITAL",
-      "PLATAFORMA DE ATERRIZAJE-CONTINENTAL",
-      "PLATAFORMA DE ATERRIZAJE-MARITIMA",
-      "SISTEMA DE NAVEGACIÓN-GPS",
-      "SISTEMA DE NAVEGACIÓN-INERCIAL",
-      "SISTEMA ELÉCTRICO-EMERGENCIA",
-      "SISTEMA DE CONTROL TÉRMICO-REFRIGERANTE",
-      "SISTEMA DE CONTROL TÉRMICO-AISLANTE",
-      "EQUIPO DE RECUPERACIÓN-AEREO",
-      "EQUIPO DE RECUPERACIÓN-TERRESTRE"
+    "reglas_exclusion": [
+      {
+        "categoria": "COHETE",
+        "tipos_prohibidos": ["Pesado", "Ligero"]
+      },
+      {
+        "categoria": "SISTEMA DE COMBUSTIBLE",
+        "tipos_prohibidos": ["Liquido", "Solido"]
+      }
     ],
-    "duracion_minima": 1,
-    "duracion_maxima": 3
+    "requisitos_coexistentes": [
+      {
+        "categoria": "SISTEMA ELÉCTRICO",
+        "tipo": "Principal",
+        "requiere": [
+          {"categoria": "SISTEMA ELÉCTRICO", "tipo": "Emergencia"}
+        ]
+      },
+      {
+        "categoria": "EQUIPO DE CONTROL",
+        "tipo": "Digital",
+        "requiere": [
+          {"categoria": "SALA DE CONTROL PRINCIPAL", "tipo": "Secundaria"}
+        ]
+      }
+    ],
+    "recursos_opcionales": [
+      {
+        "categoria": "EQUIPO DE CONTROL",
+        "tipo": "Analogico",
+        "descripcion": "Equipo de control analógico alternativo"
+      }
+    ],
+    "configuracion_evento": {
+      "duracion_minima": 1,
+      "duracion_maxima": 2,
+      "hora_inicio_recomendada": "08:00",
+      "hora_fin_recomendada": "16:00"
+    }
   },
-  "Mantenimiento de plataforma": {
-    "recursos_necesarios": {
-      "PLATAFORMA DE LANZAMIENTO-ESTATICA": 1,
-      "TORRE DE SERVICIO-FIJA": 1,
-      "SISTEMA DE SEGURIDAD-PASIVO": 1
-    },
-    "recursos_prohibidos": [
-      "COHETE-PESADO",
-      "COHETE-LIGERO",
-      "SISTEMA DE COMBUSTIBLE-LIQUIDO",
-      "SISTEMA DE COMBUSTIBLE-SOLIDO"
+  "Prueba de control térmico": {
+    "recursos_requeridos": [
+      {
+        "categoria": "SISTEMA DE CONTROL TÉRMICO",
+        "tipo": "Refrigerante",
+        "cantidad": 1,
+        "descripcion": "Sistema de control térmico refrigerante"
+      },
+      {
+        "categoria": "SISTEMA DE CONTROL TÉRMICO",
+        "tipo": "Aislante",
+        "cantidad": 1,
+        "descripcion": "Sistema de control térmico aislante"
+      },
+      {
+        "categoria": "LABORATORIO DE PRUEBAS",
+        "tipo": "Fisico",
+        "cantidad": 1,
+        "descripcion": "Laboratorio físico para mediciones térmicas"
+      },
+      {
+        "categoria": "EQUIPO DE CONTROL",
+        "tipo": "Digital",
+        "cantidad": 1,
+        "descripcion": "Consola de control digital para monitoreo térmico"
+      }
     ],
-    "recursos_corequisitos": {
-      "PLATAFORMA DE LANZAMIENTO-ESTATICA": ["TORRE DE SERVICIO-FIJA", "SISTEMA DE SEGURIDAD-PASIVO"]
-    },
-    "recursos_innecesarios": [
-      "PLATAFORMA DE LANZAMIENTO-MOVIL",
-      "EQUIPO DE CONTROL-DIGITAL",
-      "EQUIPO DE CONTROL-ANALOGICO",
-      "SALA DE CONTROL PRINCIPAL-PRIMARIA",
-      "SALA DE CONTROL PRINCIPAL-SECUNDARIA",
-      "TORRE DE SERVICIO-RETRACTIL",
-      "SISTEMA DE SEGURIDAD-ACTIVA",
-      "ESTACIÓN DE SEGUIMIENTO-TERRESTRE",
-      "ESTACIÓN DE SEGUIMIENTO-SATELITAL",
-      "PLATAFORMA DE ATERRIZAJE-CONTINENTAL",
-      "PLATAFORMA DE ATERRIZAJE-MARITIMA",
-      "SISTEMA DE NAVEGACIÓN-GPS",
-      "SISTEMA DE NAVEGACIÓN-INERCIAL",
-      "SISTEMA ELÉCTRICO-PRINCIPAL",
-      "SISTEMA ELÉCTRICO-EMERGENCIA",
-      "SISTEMA DE CONTROL TÉRMICO-REFRIGERANTE",
-      "SISTEMA DE CONTROL TÉRMICO-AISLANTE",
-      "EQUIPO DE RECUPERACIÓN-AEREO",
-      "EQUIPO DE RECUPERACIÓN-TERRESTRE",
-      "LABORATORIO DE PRUEBAS-QUIMICO",
-      "LABORATORIO DE PRUEBAS-FISICO"
+    "reglas_exclusion": [
+      {
+        "categoria": "COHETE",
+        "tipos_prohibidos": ["Pesado", "Ligero"]
+      },
+      {
+        "categoria": "SISTEMA DE COMBUSTIBLE",
+        "tipos_prohibidos": ["Liquido", "Solido"]
+      }
     ],
-    "duracion_minima": 1,
-    "duracion_maxima": 4
+    "requisitos_coexistentes": [
+      {
+        "categoria": "SISTEMA DE CONTROL TÉRMICO",
+        "tipo": "Refrigerante",
+        "requiere": [
+          {"categoria": "SISTEMA DE CONTROL TÉRMICO", "tipo": "Aislante"}
+        ]
+      },
+      {
+        "categoria": "LABORATORIO DE PRUEBAS",
+        "tipo": "Fisico",
+        "requiere": [
+          {"categoria": "EQUIPO DE CONTROL", "tipo": "Digital"}
+        ]
+      }
+    ],
+    "recursos_opcionales": [
+      {
+        "categoria": "LABORATORIO DE PRUEBAS",
+        "tipo": "Quimico",
+        "descripcion": "Laboratorio químico para análisis adicional"
+      }
+    ],
+    "configuracion_evento": {
+      "duracion_minima": 3,
+      "duracion_maxima": 5,
+      "hora_inicio_recomendada": "09:00",
+      "hora_fin_recomendada": "17:00"
+    }
   },
-  "Prueba de comunicaciones": {
-    "recursos_necesarios": {
-      "ESTACIÓN DE SEGUIMIENTO-SATELITAL": 1,
-      "SALA DE CONTROL PRINCIPAL-PRIMARIA": 1,
-      "EQUIPO DE CONTROL-DIGITAL": 1
-    },
-    "recursos_prohibidos": [
-      "LABORATORIO DE PRUEBAS-FISICO",
-      "LABORATORIO DE PRUEBAS-QUIMICO",
-      "SISTEMA DE NAVEGACIÓN-INERCIAL"
+  "Ejercicio de recuperación": {
+    "recursos_requeridos": [
+      {
+        "categoria": "EQUIPO DE RECUPERACIÓN",
+        "tipo": "Aereo",
+        "cantidad": 2,
+        "descripcion": "Equipo de recuperación aéreo para ejercicio"
+      },
+      {
+        "categoria": "EQUIPO DE RECUPERACIÓN",
+        "tipo": "Terrestre",
+        "cantidad": 2,
+        "descripcion": "Equipo de recuperación terrestre"
+      },
+      {
+        "categoria": "PLATAFORMA DE ATERRIZAJE",
+        "tipo": "Maritima",
+        "cantidad": 1,
+        "descripcion": "Plataforma de aterrizaje marítima para simulación"
+      },
+      {
+        "categoria": "PLATAFORMA DE ATERRIZAJE",
+        "tipo": "Continental",
+        "cantidad": 1,
+        "descripcion": "Plataforma de aterrizaje continental"
+      },
+      {
+        "categoria": "SISTEMA DE NAVEGACIÓN",
+        "tipo": "GPS",
+        "cantidad": 1,
+        "descripcion": "Sistema de navegación GPS para seguimiento"
+      }
     ],
-    "recursos_corequisitos": {
-      "ESTACIÓN DE SEGUIMIENTO-SATELITAL": ["EQUIPO DE CONTROL-DIGITAL"]
-    },
-    "recursos_innecesarios": [
-      "COHETE-LIGERO",
-      "COHETE-PESADO",
-      "PLATAFORMA DE LANZAMIENTO-ESTATICA",
-      "PLATAFORMA DE LANZAMIENTO-MOVIL",
-      "EQUIPO DE CONTROL-ANALOGICO",
-      "SALA DE CONTROL PRINCIPAL-SECUNDARIA",
-      "SISTEMA DE COMBUSTIBLE-LIQUIDO",
-      "SISTEMA DE COMBUSTIBLE-SOLIDO",
-      "TORRE DE SERVICIO-FIJA",
-      "TORRE DE SERVICIO-RETRACTIL",
-      "SISTEMA DE SEGURIDAD-PASIVO",
-      "SISTEMA DE SEGURIDAD-ACTIVA",
-      "ESTACIÓN DE SEGUIMIENTO-TERRESTRE",
-      "PLATAFORMA DE ATERRIZAJE-CONTINENTAL",
-      "PLATAFORMA DE ATERRIZAJE-MARITIMA",
-      "SISTEMA DE NAVEGACIÓN-GPS",
-      "SISTEMA ELÉCTRICO-PRINCIPAL",
-      "SISTEMA ELÉCTRICO-EMERGENCIA",
-      "SISTEMA DE CONTROL TÉRMICO-REFRIGERANTE",
-      "SISTEMA DE CONTROL TÉRMICO-AISLANTE",
-      "EQUIPO DE RECUPERACIÓN-AEREO",
-      "EQUIPO DE RECUPERACIÓN-TERRESTRE"
+    "reglas_exclusion": [
+      {
+        "categoria": "COHETE",
+        "tipos_prohibidos": ["Pesado", "Ligero"]
+      },
+      {
+        "categoria": "SISTEMA DE COMBUSTIBLE",
+        "tipos_prohibidos": ["Liquido", "Solido"]
+      }
     ],
-    "duracion_minima": 1,
-    "duracion_maxima": 1
+    "requisitos_coexistentes": [
+      {
+        "categoria": "EQUIPO DE RECUPERACIÓN",
+        "tipo": "Aereo",
+        "requiere": [
+          {"categoria": "SISTEMA DE NAVEGACIÓN", "tipo": "GPS"}
+        ]
+      },
+      {
+        "categoria": "PLATAFORMA DE ATERRIZAJE",
+        "tipo": "Maritima",
+        "requiere": [
+          {"categoria": "EQUIPO DE RECUPERACIÓN", "tipo": "Aereo"}
+        ]
+      }
+    ],
+    "configuracion_evento": {
+      "duracion_minima": 1,
+      "duracion_maxima": 1,
+      "hora_inicio_recomendada": "08:00",
+      "hora_fin_recomendada": "16:00"
+    }
   },
-  "Entrenamiento de recuperación": {
-    "recursos_necesarios": {
-      "EQUIPO DE RECUPERACIÓN-TERRESTRE": 1,
-      "SISTEMA DE SEGURIDAD-PASIVO": 1,
-      "ESTACIÓN DE SEGUIMIENTO-TERRESTRE": 1
-    },
-    "recursos_prohibidos": [
-      "SISTEMA DE COMBUSTIBLE-LIQUIDO",
-      "SISTEMA DE COMBUSTIBLE-SOLIDO",
-      "COHETE-PESADO"
+  "Análisis de laboratorio": {
+    "recursos_requeridos": [
+      {
+        "categoria": "LABORATORIO DE PRUEBAS",
+        "tipo": "Quimico",
+        "cantidad": 1,
+        "descripcion": "Laboratorio químico para análisis"
+      },
+      {
+        "categoria": "LABORATORIO DE PRUEBAS",
+        "tipo": "Fisico",
+        "cantidad": 1,
+        "descripcion": "Laboratorio físico para pruebas"
+      },
+      {
+        "categoria": "EQUIPO DE CONTROL",
+        "tipo": "Digital",
+        "cantidad": 1,
+        "descripcion": "Consola de control digital para registro de datos"
+      },
+      {
+        "categoria": "SISTEMA ELÉCTRICO",
+        "tipo": "Principal",
+        "cantidad": 1,
+        "descripcion": "Sistema eléctrico principal para equipos de laboratorio"
+      }
     ],
-    "recursos_corequisitos": {
-      "EQUIPO DE RECUPERACIÓN-TERRESTRE": ["ESTACIÓN DE SEGUIMIENTO-TERRESTRE"]
-    },
-    "recursos_innecesarios": [
-      "COHETE-LIGERO",
-      "PLATAFORMA DE LANZAMIENTO-ESTATICA",
-      "PLATAFORMA DE LANZAMIENTO-MOVIL",
-      "EQUIPO DE CONTROL-DIGITAL",
-      "EQUIPO DE CONTROL-ANALOGICO",
-      "SALA DE CONTROL PRINCIPAL-PRIMARIA",
-      "SALA DE CONTROL PRINCIPAL-SECUNDARIA",
-      "TORRE DE SERVICIO-FIJA",
-      "TORRE DE SERVICIO-RETRACTIL",
-      "SISTEMA DE SEGURIDAD-ACTIVA",
-      "ESTACIÓN DE SEGUIMIENTO-SATELITAL",
-      "PLATAFORMA DE ATERRIZAJE-CONTINENTAL",
-      "PLATAFORMA DE ATERRIZAJE-MARITIMA",
-      "SISTEMA DE NAVEGACIÓN-GPS",
-      "SISTEMA DE NAVEGACIÓN-INERCIAL",
-      "SISTEMA ELÉCTRICO-PRINCIPAL",
-      "SISTEMA ELÉCTRICO-EMERGENCIA",
-      "SISTEMA DE CONTROL TÉRMICO-REFRIGERANTE",
-      "SISTEMA DE CONTROL TÉRMICO-AISLANTE",
-      "EQUIPO DE RECUPERACIÓN-AEREO",
-      "LABORATORIO DE PRUEBAS-QUIMICO",
-      "LABORATORIO DE PRUEBAS-FISICO"
+    "reglas_exclusion": [
+      {
+        "categoria": "COHETE",
+        "tipos_prohibidos": ["Pesado", "Ligero"]
+      },
+      {
+        "categoria": "PLATAFORMA DE LANZAMIENTO",
+        "tipos_prohibidos": ["Estatica", "Movil"]
+      }
     ],
-    "duracion_minima": 1,
-    "duracion_maxima": 3
-  },
-  "Prueba de sistema de aterrizaje": {
-    "recursos_necesarios": {
-      "SISTEMA DE NAVEGACIÓN-GPS": 1,
-      "SISTEMA ELÉCTRICO-EMERGENCIA": 1,
-      "EQUIPO DE CONTROL-ANALOGICO": 1
-    },
-    "recursos_prohibidos": [
-      "COHETE-PESADO",
-      "COHETE-LIGERO",
-      "PLATAFORMA DE LANZAMIENTO-ESTATICA"
+    "requisitos_coexistentes": [
+      {
+        "categoria": "LABORATORIO DE PRUEBAS",
+        "tipo": "Quimico",
+        "requiere": [
+          {"categoria": "LABORATORIO DE PRUEBAS", "tipo": "Fisico"}
+        ]
+      },
+      {
+        "categoria": "LABORATORIO DE PRUEBAS",
+        "tipo": "Fisico",
+        "requiere": [
+          {"categoria": "SISTEMA ELÉCTRICO", "tipo": "Principal"}
+        ]
+      }
     ],
-    "recursos_corequisitos": {
-      "SISTEMA DE NAVEGACIÓN-GPS": ["EQUIPO DE CONTROL-ANALOGICO"]
-    },
-    "recursos_innecesarios": [
-      "PLATAFORMA DE LANZAMIENTO-MOVIL",
-      "EQUIPO DE CONTROL-DIGITAL",
-      "SALA DE CONTROL PRINCIPAL-PRIMARIA",
-      "SALA DE CONTROL PRINCIPAL-SECUNDARIA",
-      "SISTEMA DE COMBUSTIBLE-LIQUIDO",
-      "SISTEMA DE COMBUSTIBLE-SOLIDO",
-      "TORRE DE SERVICIO-FIJA",
-      "TORRE DE SERVICIO-RETRACTIL",
-      "SISTEMA DE SEGURIDAD-PASIVO",
-      "SISTEMA DE SEGURIDAD-ACTIVA",
-      "ESTACIÓN DE SEGUIMIENTO-TERRESTRE",
-      "ESTACIÓN DE SEGUIMIENTO-SATELITAL",
-      "PLATAFORMA DE ATERRIZAJE-CONTINENTAL",
-      "PLATAFORMA DE ATERRIZAJE-MARITIMA",
-      "SISTEMA DE NAVEGACIÓN-INERCIAL",
-      "SISTEMA ELÉCTRICO-PRINCIPAL",
-      "SISTEMA DE CONTROL TÉRMICO-REFRIGERANTE",
-      "SISTEMA DE CONTROL TÉRMICO-AISLANTE",
-      "EQUIPO DE RECUPERACIÓN-AEREO",
-      "EQUIPO DE RECUPERACIÓN-TERRESTRE",
-      "LABORATORIO DE PRUEBAS-QUIMICO",
-      "LABORATORIO DE PRUEBAS-FISICO"
+    "recursos_opcionales": [
+      {
+        "categoria": "SISTEMA ELÉCTRICO",
+        "tipo": "Emergencia",
+        "descripcion": "Sistema eléctrico de emergencia como respaldo"
+      }
     ],
-    "duracion_minima": 1,
-    "duracion_maxima": 2
+    "configuracion_evento": {
+      "duracion_minima": 2,
+      "duracion_maxima": 3,
+      "hora_inicio_recomendada": "09:00",
+      "hora_fin_recomendada": "17:00"
+    }
   }
 }

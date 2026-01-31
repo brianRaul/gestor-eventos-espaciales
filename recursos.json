@@ -1,60 +1,186 @@
 {
   "recursos": {
-    "COHETE": {
-      "Ligero": 10,
-      "Pesado": 10
-    },
-    "PLATAFORMA DE LANZAMIENTO": {
-      "Estatica": 10,
-      "Movil": 10
-    },
-    "EQUIPO DE CONTROL": {
-      "Digital": 10,
-      "Analogico": 10
-    },
-    "SALA DE CONTROL PRINCIPAL": {
-      "Primaria": 10,
-      "Secundaria": 10
-    },
-    "SISTEMA DE COMBUSTIBLE": {
-      "Liquido": 200000,
-      "Solido": 300000
-    },
-    "TORRE DE SERVICIO": {
-      "Fija": 10,
-      "Retractil": 10
-    },
-    "SISTEMA DE SEGURIDAD": {
-      "Pasivo": 10,
-      "Activa": 10
-    },
-    "ESTACIÓN DE SEGUIMIENTO": {
-      "Terrestre": 10,
-      "Satelital": 10
-    },
-    "PLATAFORMA DE ATERRIZAJE": {
-      "Continental": 10,
-      "Maritima": 10
-    },
-    "SISTEMA DE NAVEGACIÓN": {
-      "GPS": 10,
-      "Inercial": 10
-    },
-    "SISTEMA ELÉCTRICO": {
-      "Principal": 10,
-      "Emergencia": 10
-    },
-    "SISTEMA DE CONTROL TÉRMICO": {
-      "Refrigerante": 10,
-      "Aislante": 10
-    },
-    "EQUIPO DE RECUPERACIÓN": {
-      "Aereo": 10,
-      "Terrestre": 10
-    },
-    "LABORATORIO DE PRUEBAS": {
-      "Quimico": 10,
-      "Fisico": 10
-    }
+    "COHETE": [
+      {
+        "modelo": "Apolo-1",
+        "tipo": "Pesado",
+        "cantidad_total": 3
+      },
+      {
+        "modelo": "Explorador-1",
+        "tipo": "Ligero",
+        "cantidad_total": 4
+      }
+    ],
+    "PLATAFORMA DE LANZAMIENTO": [
+      {
+        "modelo": "LC-39A",
+        "tipo": "Estatica",
+        "cantidad_total": 2
+      },
+      {
+        "modelo": "Barca Ocean",
+        "tipo": "Movil",
+        "cantidad_total": 2
+      }
+    ],
+    "EQUIPO DE CONTROL": [
+      {
+        "modelo": "Consola-MCD-01",
+        "tipo": "Digital",
+        "cantidad_total": 3
+      },
+      {
+        "modelo": "Panel-Legacy-01",
+        "tipo": "Analogico",
+        "cantidad_total": 1
+      }
+    ],
+    "SALA DE CONTROL PRINCIPAL": [
+      {
+        "modelo": "Firing Room-1",
+        "tipo": "Primaria",
+        "cantidad_total": 1
+      },
+      {
+        "modelo": "Firing Room-2",
+        "tipo": "Secundaria",
+        "cantidad_total": 1
+      }
+    ],
+    "SISTEMA DE COMBUSTIBLE": [
+      {
+        "modelo": "Deposito-Liquido",
+        "tipo": "Liquido",
+        "cantidad_total": 500000,
+        "cantidad_disponible": 455000
+      },
+      {
+        "modelo": "Tanque-Solido",
+        "tipo": "Solido",
+        "cantidad_total": 200000,
+        "cantidad_disponible": 200000
+      }
+    ],
+    "TORRE DE SERVICIO": [
+      {
+        "modelo": "Torre-Movil-A",
+        "tipo": "Retractil",
+        "cantidad_total": 2
+      },
+      {
+        "modelo": "Torre-Fija-B",
+        "tipo": "Fija",
+        "cantidad_total": 1
+      }
+    ],
+    "SISTEMA DE SEGURIDAD": [
+      {
+        "modelo": "Sistema-Activo-B",
+        "tipo": "Activa",
+        "cantidad_total": 5
+      },
+      {
+        "modelo": "Escudo-Pasivo-A",
+        "tipo": "Pasiva",
+        "cantidad_total": 3
+      }
+    ],
+    "ESTACIÓN DE SEGUIMIENTO": [
+      {
+        "modelo": "Sat-Tracker-1",
+        "tipo": "Satelital",
+        "cantidad_total": 2
+      },
+      {
+        "modelo": "Antena-Terrestre",
+        "tipo": "Terrestre",
+        "cantidad_total": 3
+      }
+    ],
+    "SISTEMA DE NAVEGACIÓN": [
+      {
+        "modelo": "GPS-System-A",
+        "tipo": "GPS",
+        "cantidad_total": 4
+      },
+      {
+        "modelo": "Inertial-Unit-1",
+        "tipo": "Inercial",
+        "cantidad_total": 2
+      }
+    ],
+    "SISTEMA ELÉCTRICO": [
+      {
+        "modelo": "Generador-Principal",
+        "tipo": "Principal",
+        "cantidad_total": 3
+      },
+      {
+        "modelo": "Backup-Generator",
+        "tipo": "Emergencia",
+        "cantidad_total": 2
+      }
+    ],
+    "SISTEMA DE CONTROL TÉRMICO": [
+      {
+        "modelo": "Cooling-System-A",
+        "tipo": "Refrigerante",
+        "cantidad_total": 3
+      },
+      {
+        "modelo": "Aislamiento-Termico",
+        "tipo": "Aislante",
+        "cantidad_total": 10
+      }
+    ],
+    "EQUIPO DE RECUPERACIÓN": [
+      {
+        "modelo": "Helicoptero-Rec-1",
+        "tipo": "Aereo",
+        "cantidad_total": 2
+      },
+      {
+        "modelo": "Vehiculo-Anfibio",
+        "tipo": "Terrestre",
+        "cantidad_total": 4
+      }
+    ],
+    "LABORATORIO DE PRUEBAS": [
+      {
+        "modelo": "Lab-Chem-01",
+        "tipo": "Quimico",
+        "cantidad_total": 1
+      },
+      {
+        "modelo": "Lab-Phys-01",
+        "tipo": "Fisico",
+        "cantidad_total": 1
+      }
+    ],
+    "PLATAFORMA DE ATERRIZAJE": [
+      {
+        "modelo": "Landing-Pad-A",
+        "tipo": "Continental",
+        "cantidad_total": 2
+      },
+      {
+        "modelo": "Barge-Of-I",
+        "tipo": "Maritima",
+        "cantidad_total": 2
+      }
+    ],
+    "EQUIPO DE COMUNICACIÓN": [
+      {
+        "modelo": "Radio-UHF-Gen",
+        "tipo": "Radio",
+        "cantidad_total": 10
+      },
+      {
+        "modelo": "Comms-Sat-Link",
+        "tipo": "Satelital",
+        "cantidad_total": 2
+      }
+    ]
   }
 }
