@@ -4,7 +4,7 @@ from funciones_datos import *
 from datetime import datetime, date, timedelta
 
 
-class GestorEventosSimple(ctk.CTk):
+class GestorEventos(ctk.CTk):
 
     def __init__(self):
         super().__init__()
@@ -64,21 +64,15 @@ class GestorEventosSimple(ctk.CTk):
                 if categoria not in estructura_original["recursos"]:
                     estructura_original["recursos"][categoria] = []
 
-                # Para combustible, guardar ambos campos
-                if recurso.get("es_combustible", False):
-                    recurso_data = {
-                        "modelo": recurso["modelo"],
-                        "tipo": recurso["tipo"],
-                        "cantidad_total": recurso["cantidad_total"],
-                        "cantidad_disponible": recurso["cantidad_disponible"],
-                    }
-                else:
-                    # Para NO combustibles, solo cantidad_total
-                    recurso_data = {
-                        "modelo": recurso["modelo"],
-                        "tipo": recurso["tipo"],
-                        "cantidad_total": recurso["cantidad_total"],
-                    }
+                # Para TODOS los recursos, guardar ambos campos
+                recurso_data = {
+                    "modelo": recurso["modelo"],
+                    "tipo": recurso["tipo"],
+                    "cantidad_total": recurso["cantidad_total"],
+                    "cantidad_disponible": recurso[
+                        "cantidad_disponible"
+                    ],  # ¡GUARDAR DISPONIBILIDAD!
+                }
 
                 estructura_original["recursos"][categoria].append(recurso_data)
 
@@ -91,12 +85,12 @@ class GestorEventosSimple(ctk.CTk):
             print(f"Error al guardar recursos: {e}")
             return False
 
-    # *********** LOGICA *************#
+    ################## LOGICA ##################
     def actualizar_contador(self):
         total = len(self.eventos_planificados)
         self.lbl_contador.configure(text=f"Eventos planificados: {total}")
 
-    # ========== Crear checkboxes de recursos ==========
+    # .1 ========== Crear checkboxes de recursos ==========
     def crear_checkboxes_recursos(self):
         for widget in self.frame_checkboxes.winfo_children():
             widget.destroy()
@@ -136,11 +130,21 @@ class GestorEventosSimple(ctk.CTk):
                 var = ctk.BooleanVar(value=False)
                 self.checkbox_vars[recurso["nombre_mostrar"]] = var
 
-                # Mostrar cantidad total
+                # Mostrar cantidad DISPONIBLE vs TOTAL
                 if recurso["es_combustible"]:
-                    texto = f"{recurso['nombre_mostrar']} - {recurso['cantidad_total']}L totales"
-                    color = "#4CAF50"
+                    # Para combustible: mostrar disponible/total
+                    texto = f"{recurso['nombre_mostrar']} - {recurso['cantidad_disponible']}/{recurso['cantidad_total']}L"
+                    # Color según disponibilidad
+                    if recurso["cantidad_disponible"] <= 0:
+                        color = "#FF5252"  # Rojo si no hay
+                    elif (
+                        recurso["cantidad_disponible"] < recurso["cantidad_total"] * 0.2
+                    ):
+                        color = "#FF9800"  # Naranja si queda poco (<20%)
+                    else:
+                        color = "#4CAF50"  # Verde si hay suficiente
                 else:
+                    # Para equipos: solo mostrar cantidad total
                     texto = f"{recurso['nombre_mostrar']} - {recurso['cantidad_total']} unidades"
                     color = "#2196F3"
 
@@ -155,7 +159,7 @@ class GestorEventosSimple(ctk.CTk):
                 )
                 checkbox.pack(anchor="w", padx=20, pady=2)
 
-    # ========== Botón para marcar recursos recomendados ==========
+    # .2 ========== Botón para marcar recursos recomendados ==========
     def marcar_recursos_recomendados(self, event=None):
 
         tipo_evento = self.combo_evento.get()
@@ -227,7 +231,7 @@ class GestorEventosSimple(ctk.CTk):
                     if recursos_encontrados >= cantidad_req:
                         break
 
-    # ========== Crear evento ==========
+    # .3 ========== Crear evento ==========
     def crear_evento(self):
         # Obtención y validación de los datos
         tipo_evento = self.combo_evento.get()
@@ -550,7 +554,7 @@ class GestorEventosSimple(ctk.CTk):
         )
         print(f"Evento creado: {nuevo_evento}")
 
-    # ========== Limpiar selección ==========
+    # .4 ========== Limpiar selección ==========
     def limpiar_seleccion_recursos(self):
         """Desmarcar todos los checkboxes de recursos"""
         if hasattr(self, "checkbox_vars"):
@@ -560,7 +564,7 @@ class GestorEventosSimple(ctk.CTk):
                 text="Todos los recursos desmarcados", text_color="orange"
             )
 
-    # =========== Mostrar eventos planificados ========
+    # .5 =========== Mostrar eventos planificados ========
     def mostrar_eventos_planificados(self):
 
         # Crear una nueva ventana emergente
@@ -631,7 +635,7 @@ class GestorEventosSimple(ctk.CTk):
         )
         btn_cerrar.pack(pady=10)
 
-    # ============ Seccioón Sugerir Fecha =============
+    # .6 ============ Seccioón Sugerir Fecha =============
     def sugerir_fecha_disponible(self):
         """Busca la próxima fecha disponible basada en solapamientos reales"""
         tipo_evento = self.combo_evento.get()
@@ -700,8 +704,9 @@ class GestorEventosSimple(ctk.CTk):
             text_color="red",
         )
 
-    def verificar_disponibilidad_fecha(self, fecha_inicio, fecha_fin, recursos_necesarios):
-        """Verifica si hay disponibilidad para todos los recursos en un rango de fechas"""
+    def verificar_disponibilidad_fecha(
+        self, fecha_inicio, fecha_fin, recursos_necesarios
+    ):
 
         print(f"\n🔍 Verificando disponibilidad para: {fecha_inicio} a {fecha_fin}")
 
@@ -822,6 +827,110 @@ class GestorEventosSimple(ctk.CTk):
 
         self.entry_year.delete(0, "end")
         self.entry_year.insert(0, str(fecha.year))
+
+    def ver_combustible(self):
+        """Abre ventana para ver el estado del combustible"""
+
+        # Crear ventana nueva
+        ventana = ctk.CTkToplevel(self)
+        ventana.title("📊 Estado de Combustible")
+        ventana.geometry("400x350")
+
+        # Título
+        ctk.CTkLabel(
+            ventana,
+            text="📊 ESTADO DE COMBUSTIBLE",
+            font=("Arial", 16, "bold"),
+            text_color="#FF9800",
+        ).pack(pady=10)
+
+        # Frame con scroll
+        frame_scroll = ctk.CTkScrollableFrame(ventana, width=350, height=250)
+        frame_scroll.pack(pady=10, padx=10)
+
+        # Buscar combustibles
+        combustibles = []
+        for recurso in self.recursos:
+            if (
+                recurso.get("es_combustible", False)
+                or "COMBUSTIBLE" in recurso.get("categoria", "").upper()
+            ):
+                combustibles.append(recurso)
+
+        if not combustibles:
+            ctk.CTkLabel(
+                frame_scroll, text="No hay sistemas de combustible", text_color="gray"
+            ).pack(pady=20)
+        else:
+            for recurso in combustibles:
+                disponible = recurso["cantidad_disponible"]
+                total = recurso["cantidad_total"]
+                porcentaje = (disponible / total * 100) if total > 0 else 0
+
+                # Color según porcentaje
+                if porcentaje >= 80:
+                    color = "#4CAF50"
+                elif porcentaje >= 30:
+                    color = "#FF9800"
+                else:
+                    color = "#F44336"
+
+                # Frame para cada combustible
+                frame_tanque = ctk.CTkFrame(frame_scroll)
+                frame_tanque.pack(fill="x", pady=5, padx=5)
+
+                # Mostrar información
+                texto = f"• {recurso['nombre_mostrar']}: {disponible:,}/{total:,}L ({porcentaje:.1f}%)"
+                ctk.CTkLabel(
+                    frame_tanque, text=texto, font=("Arial", 11), text_color=color
+                ).pack(anchor="w", padx=10, pady=5)
+
+        # Botón para cerrar
+        ctk.CTkButton(ventana, text="Cerrar", command=ventana.destroy).pack(pady=10)
+
+    def rellenar_combustible(self):
+        """Rellena todo el combustible"""
+
+        litros_agregados = 0
+
+        for recurso in self.recursos:
+            if (
+                recurso.get("es_combustible", False)
+                or "COMBUSTIBLE" in recurso.get("categoria", "").upper()
+            ):
+                disponible = recurso["cantidad_disponible"]
+                total = recurso["cantidad_total"]
+
+                if disponible < total:
+                    litros_faltantes = total - disponible
+                    recurso["cantidad_disponible"] = total
+                    litros_agregados += litros_faltantes
+
+        if litros_agregados > 0:
+            # Guardar cambios
+            self.guardar_recursos()
+
+            # Mensaje de éxito
+            mensaje = f"✅ Combustible rellenado\n⛽ +{litros_agregados:,} litros"
+            self.lbl_info.configure(text=mensaje, text_color="green")
+        else:
+            self.lbl_info.configure(
+                text="ℹ️ Todo el combustible ya está lleno", text_color="orange"
+            )
+
+    def rellenar_combustible_con_actualizacion(self):
+        """Rellena y actualiza la ventana si está abierta"""
+        self.rellenar_combustible()
+
+        # Buscar si hay ventana de combustible abierta
+        for ventana in self.winfo_children():
+            if (
+                isinstance(ventana, ctk.CTkToplevel)
+                and "Combustible" in ventana.title()
+            ):
+                ventana.destroy()
+                self.ver_combustible()  # Abrir de nuevo con datos actualizados
+                break
 
     def eliminar_eventos_planificados(self):
         if len(self.eventos_planificados) == 0:
@@ -1123,6 +1232,32 @@ class GestorEventosSimple(ctk.CTk):
         )
         self.btn_eliminar.pack(side="left", padx=10)
 
+        # ========== BOTONES DE COMBUSTIBLE ==========
+        frame_combustible = ctk.CTkFrame(self)
+        frame_combustible.pack(pady=5, padx=20)
+
+        # Botón 1: Ver combustible
+        btn_ver = ctk.CTkButton(
+            frame_combustible,
+            text="📊 Ver Combustible",
+            width=180,
+            fg_color="#2196F3",
+            hover_color="#1976D2",
+            command=self.ver_combustible,
+        )
+        btn_ver.pack(side="left", padx=10)
+
+        # Botón 2: Rellenar todo
+        btn_rellenar = ctk.CTkButton(
+            frame_combustible,
+            text="⛽ Rellenar Todo",
+            width=180,
+            fg_color="#FF9800",
+            hover_color="#F57C00",
+            command=self.rellenar_combustible,
+        )
+        btn_rellenar.pack(side="left", padx=10)
+
         # ========== BOTÓN DE SUGERENCIA ==========
         self.btn_sugerir = ctk.CTkButton(
             self,
@@ -1133,7 +1268,7 @@ class GestorEventosSimple(ctk.CTk):
             hover_color="#14375e",
             command=self.sugerir_fecha_disponible,
         )
-        self.btn_sugerir.pack(pady=5)
+        self.btn_sugerir.pack(pady=10)
 
         # ========== 7. BOTÓN PRINCIPAL ==========
         self.btn_crear = ctk.CTkButton(
@@ -1167,11 +1302,11 @@ class GestorEventosSimple(ctk.CTk):
         self.lbl_contador.pack(pady=5)
         self.actualizar_contador()
 
-        # ========== 10. CREAR CHECKBOXES INICIALES ==========
+        # ========== 11. CREAR CHECKBOXES INICIALES ==========
         self.crear_checkboxes_recursos()
 
 
 # Ejecutar la aplicación
 if __name__ == "__main__":
-    app = GestorEventosSimple()
+    app = GestorEventos()
     app.mainloop()

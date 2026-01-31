@@ -21,15 +21,15 @@ def cargar_recursos_desde_json():
         categorias_recursos = datos.get("recursos", {})
         lista_recursos = []
 
-        # Primero: Cargar todos los recursos con cantidad_disponible = cantidad_total
         for categoria, lista_modelos in categorias_recursos.items():
             for recurso_info in lista_modelos:
                 modelo = recurso_info.get("modelo", "")
                 tipo = recurso_info.get("tipo", "")
                 
-                # Obtener cantidad_total (no hay cantidad_disponible en el JSON)
+                # Obtener cantidad_total y cantidad_disponible
                 cantidad_total = recurso_info.get("cantidad_total", 0)
-
+                cantidad_disponible = recurso_info.get("cantidad_disponible", cantidad_total)
+                
                 # Determinar si es combustible
                 es_combustible = "COMBUSTIBLE" in categoria.upper()
                 
@@ -48,14 +48,13 @@ def cargar_recursos_desde_json():
                     "modelo": modelo,
                     "tipo": tipo,
                     "cantidad_total": cantidad_total,
-                    "cantidad_disponible": cantidad_total,  # Inicialmente, todo disponible
+                    "cantidad_disponible": cantidad_disponible,  # Usa el valor del archivo
                     "unidad": unidad,
                     "es_combustible": es_combustible,
-                    "es_consumible": es_combustible  # Los combustibles son consumibles
+                    "es_consumible": es_combustible
                 })
 
         print(f"✅ Se cargaron {len(lista_recursos)} recursos.")
-        
         return lista_recursos
 
     except FileNotFoundError:
