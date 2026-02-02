@@ -136,7 +136,7 @@ def validar_recursos_requeridos(evento_data, recursos_seleccionados, recursos, e
         if "COMBUSTIBLE" in categoria_req.upper():
             total_disponible = sum(r["cantidad_disponible"] for r in recursos_del_tipo)
             if total_disponible < cantidad_req:
-                return False, f"❌ No hay suficiente {categoria_req} {tipo_req}. Se necesitan {cantidad_req}, hay {total_disponible}"
+                return False, f"❌ COMBUSTIBLE INSUFICIENTE: {categoria_req} {tipo_req}. Se necesitan {cantidad_req}L, hay {total_disponible}L disponible"
         else:
             # Para equipos: verificar ocupación en esas fechas
             capacidad_total = sum(r["cantidad_total"] for r in recursos_del_tipo)
@@ -252,11 +252,7 @@ def crear_evento_dict(tipo_evento, fecha_inicio, fecha_fin, duracion,
 
 def procesar_creacion_evento(tipo_evento, day, month, year, duracion_str,
                             recursos_seleccionados_nombres, recursos,
-                            eventos_planificados, tipos_evento_data):
-    """
-    Función principal que procesa la creación de un evento
-    Retorna: (éxito, mensaje, evento_creado)
-    """
+                            eventos_planificados, tipos_evento_data,modo_validacion=False):
     
     # 1. Validar tipo de evento
     valido, mensaje = validar_tipo_evento(tipo_evento, tipos_evento_data)
