@@ -110,18 +110,6 @@
         ]
       }
     ],
-    "recursos_opcionales": [
-      {
-        "categoria": "EQUIPO DE CONTROL",
-        "tipo": "Analogico",
-        "descripcion": "Equipo de control analógico alternativo"
-      },
-      {
-        "categoria": "SISTEMA ELÉCTRICO",
-        "tipo": "Emergencia",
-        "descripcion": "Sistema eléctrico de emergencia"
-      }
-    ],
     "configuracion_evento": {
       "duracion_minima": 1,
       "duracion_maxima": 3
@@ -435,13 +423,6 @@
         ]
       }
     ],
-    "recursos_opcionales": [
-      {
-        "categoria": "ESTACIÓN DE SEGUIMIENTO",
-        "tipo": "Terrestre",
-        "descripcion": "Estación de seguimiento terrestre como respaldo"
-      }
-    ],
     "configuracion_evento": {
       "duracion_minima": 2,
       "duracion_maxima": 4
@@ -500,13 +481,6 @@
         ]
       }
     ],
-    "recursos_opcionales": [
-      {
-        "categoria": "EQUIPO DE CONTROL",
-        "tipo": "Analogico",
-        "descripcion": "Equipo de control analógico alternativo"
-      }
-    ],
     "configuracion_evento": {
       "duracion_minima": 1,
       "duracion_maxima": 2
@@ -563,13 +537,6 @@
         "requiere": [
           {"categoria": "EQUIPO DE CONTROL", "tipo": "Digital"}
         ]
-      }
-    ],
-    "recursos_opcionales": [
-      {
-        "categoria": "LABORATORIO DE PRUEBAS",
-        "tipo": "Quimico",
-        "descripcion": "Laboratorio químico para análisis adicional"
       }
     ],
     "configuracion_evento": {
@@ -692,13 +659,6 @@
         "requiere": [
           {"categoria": "SISTEMA ELÉCTRICO", "tipo": "Principal"}
         ]
-      }
-    ],
-    "recursos_opcionales": [
-      {
-        "categoria": "SISTEMA ELÉCTRICO",
-        "tipo": "Emergencia",
-        "descripcion": "Sistema eléctrico de emergencia como respaldo"
       }
     ],
     "configuracion_evento": {
