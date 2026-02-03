@@ -124,9 +124,7 @@
     ],
     "configuracion_evento": {
       "duracion_minima": 1,
-      "duracion_maxima": 3,
-      "hora_inicio_recomendada": "06:00",
-      "hora_fin_recomendada": "12:00"
+      "duracion_maxima": 3
     }
   },
   "Prueba estática de motor": {
@@ -195,9 +193,7 @@
     ],
     "configuracion_evento": {
       "duracion_minima": 1,
-      "duracion_maxima": 1,
-      "hora_inicio_recomendada": "08:00",
-      "hora_fin_recomendada": "16:00"
+      "duracion_maxima": 1
     }
   },
   "Simulación de aterrizaje": {
@@ -255,9 +251,7 @@
     ],
     "configuracion_evento": {
       "duracion_minima": 1,
-      "duracion_maxima": 2,
-      "hora_inicio_recomendada": "09:00",
-      "hora_fin_recomendada": "17:00"
+      "duracion_maxima": 2
     }
   },
   "Aterrizaje del cohete": {
@@ -327,9 +321,7 @@
     ],
     "configuracion_evento": {
       "duracion_minima": 1,
-      "duracion_maxima": 1,
-      "hora_inicio_recomendada": "14:00",
-      "hora_fin_recomendada": "18:00"
+      "duracion_maxima": 1
     }
   },
   "Carga de combustible": {
@@ -387,9 +379,7 @@
     ],
     "configuracion_evento": {
       "duracion_minima": 1,
-      "duracion_maxima": 1,
-      "hora_inicio_recomendada": "07:00",
-      "hora_fin_recomendada": "15:00"
+      "duracion_maxima": 1
     }
   },
   "Prueba de navegación avanzada": {
@@ -454,9 +444,7 @@
     ],
     "configuracion_evento": {
       "duracion_minima": 2,
-      "duracion_maxima": 4,
-      "hora_inicio_recomendada": "10:00",
-      "hora_fin_recomendada": "18:00"
+      "duracion_maxima": 4
     }
   },
   "Prueba de sistemas eléctricos": {
@@ -521,9 +509,7 @@
     ],
     "configuracion_evento": {
       "duracion_minima": 1,
-      "duracion_maxima": 2,
-      "hora_inicio_recomendada": "08:00",
-      "hora_fin_recomendada": "16:00"
+      "duracion_maxima": 2
     }
   },
   "Prueba de control térmico": {
@@ -588,9 +574,7 @@
     ],
     "configuracion_evento": {
       "duracion_minima": 3,
-      "duracion_maxima": 5,
-      "hora_inicio_recomendada": "09:00",
-      "hora_fin_recomendada": "17:00"
+      "duracion_maxima": 5
     }
   },
   "Ejercicio de recuperación": {
@@ -654,9 +638,7 @@
     ],
     "configuracion_evento": {
       "duracion_minima": 1,
-      "duracion_maxima": 1,
-      "hora_inicio_recomendada": "08:00",
-      "hora_fin_recomendada": "16:00"
+      "duracion_maxima": 1
     }
   },
   "Análisis de laboratorio": {
@@ -721,9 +703,7 @@
     ],
     "configuracion_evento": {
       "duracion_minima": 2,
-      "duracion_maxima": 3,
-      "hora_inicio_recomendada": "09:00",
-      "hora_fin_recomendada": "17:00"
+      "duracion_maxima": 3
     }
   }
 }
