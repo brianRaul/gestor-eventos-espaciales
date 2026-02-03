@@ -20,6 +20,22 @@ def validar_fecha_duracion(day, month, year, duracion_str, tipo_evento, tipos_ev
         if fecha_inicio.date() < datetime.now().date():
             return False, "❌ No puedes planificar en el pasado", None, None, None
         
+        LIMITE_FUTURO_DIAS = 1095 
+        fecha_maxima = datetime.now().date() + timedelta(days=LIMITE_FUTURO_DIAS)
+        
+        if fecha_inicio.date() > fecha_maxima:
+            return False, f"❌ No puedes planificar eventos a más de 3 años en el futuro", None, None, None
+        
+        duracion = int(duracion_str)
+        if duracion <= 0:
+            return False, "❌ La duración debe ser mayor a 0", None, None, None
+        
+        fecha_fin = fecha_inicio + timedelta(days=duracion - 1)
+        
+        # Validar que el evento completo no exceda los 3 años
+        if fecha_fin.date() > fecha_maxima:
+            return False, f"❌ El evento no puede terminar después de 3 años a partir de hoy", None, None, None
+        
         duracion = int(duracion_str)
         if duracion <= 0:
             return False, "❌ La duración debe ser mayor a 0", None, None, None
@@ -210,37 +226,51 @@ def consumir_recursos(evento_data, recursos_seleccionados, recursos):
 def crear_evento_dict(tipo_evento, fecha_inicio, fecha_fin, duracion, 
                      recursos_seleccionados_nombres, recursos_seleccionados,
                      recursos_requeridos, recursos_consumidos):
-    # Crear diccionario de recursos usados
+    
+    # 1. Crear recursos_detalle completo CON CANTIDAD
+    recursos_detalle = []
+    for recurso in recursos_seleccionados:
+        # Determinar cantidad (1 para equipos, cantidad específica para combustible)
+        cantidad = 1
+        if recurso["es_combustible"]:
+            # Buscar la cantidad en recursos_requeridos
+            for req in recursos_requeridos:
+                if (req["categoria"] == recurso["categoria"] and 
+                    req["tipo"] == recurso["tipo"]):
+                    cantidad = req.get("cantidad", 1)
+                    break
+        
+        recursos_detalle.append({
+            "nombre_mostrar": recurso["nombre_mostrar"],
+            "categoria": recurso["categoria"],
+            "modelo": recurso["modelo"],
+            "tipo": recurso["tipo"],
+            "es_combustible": recurso["es_combustible"],
+            "es_consumible": recurso["es_combustible"],
+            "cantidad": cantidad  # ← CLAVE: cantidad específica para combustible
+        })
+    
+    # 2. Crear diccionario con recursos usados (para compatibilidad)
     uso_recursos_evento = {}
     for recurso in recursos_seleccionados:
         if recurso["es_combustible"]:
             # Encontrar cuánto combustible necesita
-            for recurso_req in recursos_requeridos:
-                if (recurso_req["categoria"] == recurso["categoria"] and 
-                    recurso_req["tipo"] == recurso["tipo"]):
-                    uso_recursos_evento[recurso["nombre_mostrar"]] = recurso_req["cantidad"]
+            for req in recursos_requeridos:
+                if (req["categoria"] == recurso["categoria"] and 
+                    req["tipo"] == recurso["tipo"]):
+                    uso_recursos_evento[recurso["nombre_mostrar"]] = req.get("cantidad", 1)
                     break
         else:
             uso_recursos_evento[recurso["nombre_mostrar"]] = 1
     
-    # Crear nuevo evento
+    # 3. Crear evento con estructura UNIFICADA
     nuevo_evento = {
         "tipo": tipo_evento,
         "fecha_inicio": fecha_inicio.strftime("%d/%m/%Y"),
         "fecha_fin": fecha_fin.strftime("%d/%m/%Y"),
         "duracion_dias": duracion,
         "recursos": recursos_seleccionados_nombres,
-        "recursos_detalle": [
-            {
-                "nombre_mostrar": r["nombre_mostrar"],
-                "categoria": r["categoria"],
-                "modelo": r["modelo"],
-                "tipo": r["tipo"],
-                "es_combustible": r["es_combustible"],
-                "es_consumible": r["es_combustible"],
-            }
-            for r in recursos_seleccionados
-        ],
+        "recursos_detalle": recursos_detalle,      # ← ESTRUCTURA COMPLETA
         "recursos_usados": uso_recursos_evento,
         "recursos_consumidos": recursos_consumidos,
         "estado": "planificado",
@@ -253,7 +283,7 @@ def crear_evento_dict(tipo_evento, fecha_inicio, fecha_fin, duracion,
 
 def procesar_creacion_evento(tipo_evento, day, month, year, duracion_str,
                             recursos_seleccionados_nombres, recursos,
-                            eventos_planificados, tipos_evento_data,modo_validacion=False):
+                            eventos_planificados, tipos_evento_data, modo_validacion=False):
     
     # 1. Validar tipo de evento
     valido, mensaje = validar_tipo_evento(tipo_evento, tipos_evento_data)
@@ -295,10 +325,14 @@ def procesar_creacion_evento(tipo_evento, day, month, year, duracion_str,
     if not valido:
         return False, mensaje, None
     
+    # Si estamos en modo validación, solo devolver éxito
+    if modo_validacion:
+        return True, "✅ Validación exitosa", None
+    
     # 8. Consumir recursos
     recursos_consumidos = consumir_recursos(evento_data, recursos_seleccionados, recursos)
     
-    # 9. Crear diccionario del evento
+    # 9. Crear diccionario del evento CON ESTRUCTURA UNIFICADA
     nuevo_evento = crear_evento_dict(
         tipo_evento, fecha_inicio, fecha_fin, duracion,
         recursos_seleccionados_nombres, recursos_seleccionados,
