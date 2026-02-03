@@ -1,14 +1,11 @@
-"""
-Módulo para series recurrentes - REUTILIZA funciones existentes
-"""
 from datetime import datetime, date, timedelta
-from funciones_crear_evento import procesar_creacion_evento
-from funciones_buscar_hueco import preparar_recursos_requeridos
+from funciones_crear_evento import *
+from funciones_buscar_hueco import *
 
 def crear_serie_recurrente(
     tipo_evento,
     recursos_seleccionados_nombres,
-    fecha_inicio_str,      # "DD/MM/YYYY"
+    fecha_inicio_str,     
     duracion_dias,
     intervalo_dias,
     num_eventos,
@@ -17,13 +14,14 @@ def crear_serie_recurrente(
     tipos_evento_data,
     app=None
 ):
-    """Crea serie de eventos - VERSIÓN MEJORADA (valida combustible para TODA la serie)"""
-    
     # 1. Convertir fecha
     try:
         fecha_inicial = datetime.strptime(fecha_inicio_str, "%d/%m/%Y").date()
     except:
         return False, "❌ Fecha inválida", [], None
+    
+    if intervalo_dias < duracion_dias:
+        return False, f"❌ El intervalo ({intervalo_dias} días) no puede ser menor que la duración ({duracion_dias} días)", [], None
     
     # 2. Obtener datos del tipo de evento
     if tipo_evento not in tipos_evento_data:
@@ -33,7 +31,7 @@ def crear_serie_recurrente(
     recursos_requeridos = evento_data.get("recursos_requeridos", [])
     recursos_necesarios = preparar_recursos_requeridos(recursos_requeridos)
     
-    # 3. VERIFICAR COMBUSTIBLE PARA TODA LA SERIE ANTES DE NADA
+    # 3. Verificar combustible para toda la serie antes de nada
     # Calcular combustible total necesario
     total_combustible_necesario = {}
     
@@ -55,8 +53,8 @@ def crear_serie_recurrente(
                 stock_disponible += recurso["cantidad_disponible"]
         
         if stock_disponible < cantidad_necesaria:
-            return False, f"❌ COMBUSTIBLE INSUFICIENTE PARA TODA LA SERIE\nSe necesitan {cantidad_necesaria}L de {categoria} {tipo}\nSolo hay {stock_disponible}L disponibles", [], None
-    
+          faltante = cantidad_necesaria - stock_disponible
+          return False, f"❌ COMBUSTIBLE INSUFICIENTE PARA TODA LA SERIE\n\nSe necesitan {cantidad_necesaria}L de {categoria} {tipo} para {num_eventos} eventos.\nStock actual: {stock_disponible}L\nFaltan: {faltante}L\n\n💡 Usa 'Rellenar Todo' o elimina eventos existentes para liberar combustible.", [], None
     eventos_creados = []
     
     # 4. PRIMERO: VALIDAR TODOS LOS EVENTOS (sin crear)
@@ -79,7 +77,7 @@ def crear_serie_recurrente(
         )
         
         if not exito:
-            return False, f"❌ Evento {i+1} falló en validación: {mensaje}", [], fecha_temp
+            return False, mensaje, [], fecha_temp
         
         # Si pasa validación, guardar información temporal del evento
         evento_simulado = {
@@ -129,9 +127,9 @@ def crear_serie_recurrente(
             duracion_str=str(duracion_dias),
             recursos_seleccionados_nombres=recursos_seleccionados_nombres,
             recursos=recursos,
-            eventos_planificados=eventos_planificados,  # ← Ahora la lista REAL que se va actualizando
+            eventos_planificados=eventos_planificados,  #  Ahora la lista REAL que se va actualizando
             tipos_evento_data=tipos_evento_data,
-            modo_validacion=False  # ← CREAR REAL
+            modo_validacion=False  #  CREAR REAL
         )
         
         if exito and nuevo_evento:
@@ -153,7 +151,6 @@ def crear_serie_recurrente(
     
     return True, f"✅ Serie creada: {len(eventos_creados)} eventos", eventos_creados, None
 
-
 def buscar_serie_completa_disponible(
     tipo_evento,
     recursos_seleccionados_nombres,
@@ -162,105 +159,71 @@ def buscar_serie_completa_disponible(
     num_eventos,
     recursos,
     eventos_planificados,
-    tipos_evento_data,
-    fecha_inicio_busqueda=None
+    tipos_evento_data
 ):
-    """Busca fecha que pueda acomodar TODA la serie """
+    # --- 1. VALIDACIÓN PREVIA DE COMBUSTIBLE ---
+    # Calculamos cuánto se necesita para TODA la serie
+    evento_data = tipos_evento_data.get(tipo_evento)
+    recursos_req = evento_data.get("recursos_requeridos", [])
     
-    if fecha_inicio_busqueda is None:
-        fecha_inicio_busqueda = date.today()
-    
-    # 1. Primero verificar combustible para toda la serie
-    if tipo_evento not in tipos_evento_data:
-        return False, None, "❌ Tipo de evento no encontrado"
-    
-    evento_data = tipos_evento_data[tipo_evento]
-    recursos_requeridos = evento_data.get("recursos_requeridos", [])
-    recursos_necesarios = preparar_recursos_requeridos(recursos_requeridos)
-    
-    # Calcular combustible total necesario
+    # Primero, calcular el combustible total necesario
     total_combustible_necesario = {}
-    for clave, req in recursos_necesarios.items():
-        if req["es_combustible"]:
-            categoria_tipo = f"{req['categoria']}|{req['tipo']}"
-            total_combustible_necesario[categoria_tipo] = req["cantidad"] * num_eventos
-    
+    for req in recursos_req:
+        if "COMBUSTIBLE" in req["categoria"].upper():
+            clave = f"{req['categoria']}|{req['tipo']}"
+            if clave not in total_combustible_necesario:
+                total_combustible_necesario[clave] = 0
+            total_combustible_necesario[clave] += req["cantidad"] * num_eventos
+
     # Verificar si hay suficiente combustible
-    for categoria_tipo, cantidad_necesaria in total_combustible_necesario.items():
-        categoria, tipo = categoria_tipo.split("|")
-        stock_disponible = 0
+    for clave, cantidad_necesaria in total_combustible_necesario.items():
+        categoria, tipo = clave.split("|")
+        stock_actual = 0
         
-        for recurso in recursos:
-            if (recurso["es_combustible"] and 
-                recurso["categoria"] == categoria and 
-                recurso["tipo"] == tipo):
-                stock_disponible += recurso["cantidad_disponible"]
+        # Sumar todos los recursos del mismo tipo
+        for r in recursos:
+            if (r["categoria"] == categoria and 
+                r["tipo"] == tipo and
+                r.get("es_combustible", False)):
+                stock_actual += r["cantidad_disponible"]
         
-        if stock_disponible < cantidad_necesaria:
-            return False, None, f"❌ COMBUSTIBLE INSUFICIENTE PARA {num_eventos} EVENTOS\n{categoria} {tipo}: Se necesitan {cantidad_necesaria}L, hay {stock_disponible}L"
+        if stock_actual < cantidad_necesaria:
+         faltante = cantidad_necesaria - stock_actual
+         return False, None, f"❌ COMBUSTIBLE INSUFICIENTE\n\nPara {num_eventos} eventos necesitas {cantidad_necesaria}L de {categoria} {tipo}.\nStock actual: {stock_actual}L\nFaltan: {faltante}L.\n\n💡 NOTA: Ya verificamos el combustible al inicio, pero otros eventos\npueden haber consumido combustible durante la búsqueda.\nRevisa el calendario o rellena los tanques."
+    # --- 2. BÚSQUEDA PROGRESIVA EN EL CALENDARIO ---
+    fecha_inicio_busqueda = datetime.now().date()
+    limite_busqueda = 730  # Buscamos en los próximos 2 años 
     
-    # 2. Buscar fecha que pueda acomodar toda la serie
-    for dias in range(365):
-        fecha_candidata = fecha_inicio_busqueda + timedelta(days=dias)
-        puede_serie = True
+    ultimo_error = "No se encontró un hueco libre en el calendario."
+
+    for dias_offset in range(limite_busqueda):
+        fecha_candidata = fecha_inicio_busqueda + timedelta(days=dias_offset)
+        puede_toda_la_serie = True
+        eventos_simulados = []
         
-        # Lista temporal para simular eventos de esta serie
-        eventos_simulados_serie = []
-        fecha_temp = fecha_candidata
-        
-        # Validar cada evento de la serie
         for i in range(num_eventos):
-            exito, mensaje, _ = procesar_creacion_evento(
-                tipo_evento=tipo_evento,
-                day=str(fecha_temp.day),
-                month=str(fecha_temp.month),
-                year=str(fecha_temp.year),
-                duracion_str=str(duracion_dias),
-                recursos_seleccionados_nombres=recursos_seleccionados_nombres,
-                recursos=recursos,
-                eventos_planificados=eventos_planificados + eventos_simulados_serie,  # ← Eventos reales + simulados
-                tipos_evento_data=tipos_evento_data,
-                modo_validacion=True
+            f_actual = fecha_candidata + timedelta(days=i * intervalo_dias)
+            
+            # Validamos cada evento de la serie
+            exito, msg, _ = procesar_creacion_evento(
+                tipo_evento, str(f_actual.day), str(f_actual.month), str(f_actual.year),
+                str(duracion_dias), recursos_seleccionados_nombres, recursos,
+                eventos_planificados + eventos_simulados, tipos_evento_data, modo_validacion=True
             )
             
             if not exito:
-                puede_serie = False
+                puede_toda_la_serie = False
+                ultimo_error = f"En la fecha {f_actual.strftime('%d/%m/%Y')}: {msg}"
                 break
             
-            # Si pasa validación, simular el evento para los siguientes
-            evento_simulado = {
-                "fecha_inicio": fecha_temp.strftime("%d/%m/%Y"),
-                "fecha_fin": (fecha_temp + timedelta(days=duracion_dias - 1)).strftime("%d/%m/%Y"),
-                "recursos_detalle": [],
-                "recursos_usados": {}
-            }
+            # Añadir a la simulación para que el siguiente evento vea los recursos ocupados
+            eventos_simulados.append({
+                "fecha_inicio": f_actual.strftime("%d/%m/%Y"),
+                "fecha_fin": (f_actual + timedelta(days=duracion_dias-1)).strftime("%d/%m/%Y"),
+                "recursos_usados": {n: 1 for n in recursos_seleccionados_nombres}
+            })
             
-            # Llenar recursos_detalle y recursos_usados
-            for nombre_recurso in recursos_seleccionados_nombres:
-                for recurso in recursos:
-                    if recurso["nombre_mostrar"] == nombre_recurso:
-                        evento_simulado["recursos_detalle"].append({
-                            "nombre_mostrar": recurso["nombre_mostrar"],
-                            "categoria": recurso["categoria"],
-                            "tipo": recurso["tipo"],
-                            "es_combustible": recurso.get("es_combustible", False)
-                        })
-                        
-                        # Calcular cantidad
-                        cantidad = 1
-                        if recurso.get("es_combustible", False):
-                            for req in recursos_requeridos:
-                                if req["categoria"] == recurso["categoria"] and req["tipo"] == recurso["tipo"]:
-                                    cantidad = req.get("cantidad", 1)
-                                    break
-                        
-                        evento_simulado["recursos_usados"][nombre_recurso] = cantidad
-                        break
-            
-            eventos_simulados_serie.append(evento_simulado)
-            fecha_temp += timedelta(days=intervalo_dias)
-        
-        if puede_serie:
-            return True, fecha_candidata, f"✅ Serie disponible desde {fecha_candidata.strftime('%d/%m/%Y')}"
-    
-    return False, None, "❌ No se encontró fecha para toda la serie"
+        if puede_toda_la_serie:
+            return True, fecha_candidata, f"✅ SERIE DISPONIBLE\n\nIniciando el {fecha_candidata.strftime('%d/%m/%Y')}.\nSe han verificado los recursos para los {num_eventos} eventos."
+
+    return False, None, f"❌ IMPOSIBLE PROGRAMAR SERIE\n\n{ultimo_error}"

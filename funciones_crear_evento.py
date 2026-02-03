@@ -2,8 +2,8 @@ from datetime import datetime, timedelta
 
 # ========== FUNCIONES DE VALIDACIÓN ==========
 
+# Valida que el tipo de evento sea válido
 def validar_tipo_evento(tipo_evento, tipos_evento_data):
-    """Valida que el tipo de evento sea válido"""
     if not tipo_evento or tipo_evento == "Elige un tipo de evento":
         return False, "❌ Selecciona un tipo de evento"
     
@@ -13,8 +13,8 @@ def validar_tipo_evento(tipo_evento, tipos_evento_data):
     return True, ""
 
 
+# Valida la fecha y duración del evento
 def validar_fecha_duracion(day, month, year, duracion_str, tipo_evento, tipos_evento_data):
-    """Valida la fecha y duración del evento"""
     try:
         fecha_inicio = datetime(int(year), int(month), int(day))
         if fecha_inicio.date() < datetime.now().date():
@@ -40,8 +40,8 @@ def validar_fecha_duracion(day, month, year, duracion_str, tipo_evento, tipos_ev
     return True, "", fecha_inicio, fecha_fin, duracion
 
 
+# Convierte nombres de recursos a objetos completos y valida
 def validar_recursos_seleccionados(recursos_seleccionados_nombres, recursos):
-    """Convierte nombres de recursos a objetos completos y valida"""
     recursos_seleccionados = []
     for nombre_mostrar in recursos_seleccionados_nombres:
         for recurso in recursos:
@@ -55,8 +55,8 @@ def validar_recursos_seleccionados(recursos_seleccionados_nombres, recursos):
     return True, "", recursos_seleccionados
 
 
+# Valida reglas de exclusión de recursos
 def validar_reglas_exclusion(evento_data, recursos_seleccionados):
-    """Valida reglas de exclusión de recursos"""
     reglas_exclusion = evento_data.get("reglas_exclusion", [])
     
     for regla in reglas_exclusion:
@@ -71,8 +71,8 @@ def validar_reglas_exclusion(evento_data, recursos_seleccionados):
     return True, ""
 
 
+# Valida requisitos de recursos coexistentes
 def validar_requisitos_coexistentes(evento_data, recursos_seleccionados):
-    """Valida requisitos de recursos coexistentes"""
     requisitos_coexistentes = evento_data.get("requisitos_coexistentes", [])
     
     for requisito in requisitos_coexistentes:
@@ -107,8 +107,8 @@ def validar_requisitos_coexistentes(evento_data, recursos_seleccionados):
     return True, ""
 
 
+# Valida que se cumplan los recursos requeridos
 def validar_recursos_requeridos(evento_data, recursos_seleccionados, recursos, eventos_planificados, fecha_inicio, fecha_fin):
-    """Valida que se cumplan los recursos requeridos"""
     recursos_requeridos = evento_data.get("recursos_requeridos", [])
     
     # Agrupar recursos seleccionados por categoría y tipo
@@ -136,7 +136,8 @@ def validar_recursos_requeridos(evento_data, recursos_seleccionados, recursos, e
         if "COMBUSTIBLE" in categoria_req.upper():
             total_disponible = sum(r["cantidad_disponible"] for r in recursos_del_tipo)
             if total_disponible < cantidad_req:
-                return False, f"❌ COMBUSTIBLE INSUFICIENTE: {categoria_req} {tipo_req}. Se necesitan {cantidad_req}L, hay {total_disponible}L disponible"
+              faltante = cantidad_req - total_disponible
+              return False, f"❌ COMBUSTIBLE INSUFICIENTE: {categoria_req} {tipo_req}\nSe necesitan: {cantidad_req}L\nDisponible: {total_disponible}L\nFaltan: {faltante}L\n\n💡 Usa 'Rellenar Todo' para reponer combustible."
         else:
             # Para equipos: verificar ocupación en esas fechas
             capacidad_total = sum(r["cantidad_total"] for r in recursos_del_tipo)
@@ -168,8 +169,8 @@ def validar_recursos_requeridos(evento_data, recursos_seleccionados, recursos, e
     return True, ""
 
 
+# Consume los recursos necesarios para el evento
 def consumir_recursos(evento_data, recursos_seleccionados, recursos):
-    """Consume los recursos necesarios para el evento"""
     recursos_requeridos = evento_data.get("recursos_requeridos", [])
     recursos_consumidos = []
     
@@ -205,10 +206,10 @@ def consumir_recursos(evento_data, recursos_seleccionados, recursos):
     return recursos_consumidos
 
 
+# Crea el diccionario del evento
 def crear_evento_dict(tipo_evento, fecha_inicio, fecha_fin, duracion, 
                      recursos_seleccionados_nombres, recursos_seleccionados,
                      recursos_requeridos, recursos_consumidos):
-    """Crea el diccionario del evento"""
     # Crear diccionario de recursos usados
     uso_recursos_evento = {}
     for recurso in recursos_seleccionados:
