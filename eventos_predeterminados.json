@@ -71,19 +71,28 @@
     "reglas_exclusion": [
       {
         "categoria": "COHETE",
-        "tipos_prohibidos": ["Ligero"]
+        "tipos_prohibidos": [
+          "Ligero"
+        ]
       },
       {
         "categoria": "PLATAFORMA DE LANZAMIENTO",
-        "tipos_prohibidos": ["Movil"]
+        "tipos_prohibidos": [
+          "Movil"
+        ]
       },
       {
         "categoria": "SISTEMA DE COMBUSTIBLE",
-        "tipos_prohibidos": ["Solido"]
+        "tipos_prohibidos": [
+          "Solido"
+        ]
       },
       {
         "categoria": "PLATAFORMA DE ATERRIZAJE",
-        "tipos_prohibidos": ["Continental", "Maritima"]
+        "tipos_prohibidos": [
+          "Continental",
+          "Maritima"
+        ]
       }
     ],
     "requisitos_coexistentes": [
@@ -91,22 +100,34 @@
         "categoria": "COHETE",
         "tipo": "Pesado",
         "requiere": [
-          {"categoria": "EQUIPO DE CONTROL", "tipo": "Digital"},
-          {"categoria": "SISTEMA DE SEGURIDAD", "tipo": "Activa"}
+          {
+            "categoria": "EQUIPO DE CONTROL",
+            "tipo": "Digital"
+          },
+          {
+            "categoria": "SISTEMA DE SEGURIDAD",
+            "tipo": "Activa"
+          }
         ]
       },
       {
         "categoria": "SISTEMA DE COMBUSTIBLE",
         "tipo": "Liquido",
         "requiere": [
-          {"categoria": "SISTEMA DE SEGURIDAD", "tipo": "Activa"}
+          {
+            "categoria": "SISTEMA DE SEGURIDAD",
+            "tipo": "Activa"
+          }
         ]
       },
       {
         "categoria": "PLATAFORMA DE LANZAMIENTO",
         "tipo": "Estatica",
         "requiere": [
-          {"categoria": "TORRE DE SERVICIO", "tipo": "Retractil"}
+          {
+            "categoria": "TORRE DE SERVICIO",
+            "tipo": "Retractil"
+          }
         ]
       }
     ],
@@ -151,15 +172,21 @@
     "reglas_exclusion": [
       {
         "categoria": "COHETE",
-        "tipos_prohibidos": ["Pesado"]
+        "tipos_prohibidos": [
+          "Pesado"
+        ]
       },
       {
         "categoria": "PLATAFORMA DE LANZAMIENTO",
-        "tipos_prohibidos": ["Movil"]
+        "tipos_prohibidos": [
+          "Movil"
+        ]
       },
       {
         "categoria": "SISTEMA DE COMBUSTIBLE",
-        "tipos_prohibidos": ["Solido"]
+        "tipos_prohibidos": [
+          "Solido"
+        ]
       }
     ],
     "requisitos_coexistentes": [
@@ -167,15 +194,24 @@
         "categoria": "COHETE",
         "tipo": "Ligero",
         "requiere": [
-          {"categoria": "SISTEMA DE SEGURIDAD", "tipo": "Activa"},
-          {"categoria": "EQUIPO DE CONTROL", "tipo": "Digital"}
+          {
+            "categoria": "SISTEMA DE SEGURIDAD",
+            "tipo": "Activa"
+          },
+          {
+            "categoria": "EQUIPO DE CONTROL",
+            "tipo": "Digital"
+          }
         ]
       },
       {
         "categoria": "SISTEMA DE COMBUSTIBLE",
         "tipo": "Liquido",
         "requiere": [
-          {"categoria": "SISTEMA DE SEGURIDAD", "tipo": "Activa"}
+          {
+            "categoria": "SISTEMA DE SEGURIDAD",
+            "tipo": "Activa"
+          }
         ]
       }
     ],
@@ -214,11 +250,16 @@
     "reglas_exclusion": [
       {
         "categoria": "PLATAFORMA DE ATERRIZAJE",
-        "tipos_prohibidos": ["Maritima"]
+        "tipos_prohibidos": [
+          "Maritima"
+        ]
       },
       {
         "categoria": "COHETE",
-        "tipos_prohibidos": ["Pesado", "Ligero"]
+        "tipos_prohibidos": [
+          "Pesado",
+          "Ligero"
+        ]
       }
     ],
     "requisitos_coexistentes": [
@@ -226,14 +267,20 @@
         "categoria": "PLATAFORMA DE ATERRIZAJE",
         "tipo": "Continental",
         "requiere": [
-          {"categoria": "EQUIPO DE CONTROL", "tipo": "Digital"}
+          {
+            "categoria": "EQUIPO DE CONTROL",
+            "tipo": "Digital"
+          }
         ]
       },
       {
         "categoria": "EQUIPO DE CONTROL",
         "tipo": "Digital",
         "requiere": [
-          {"categoria": "SALA DE CONTROL PRINCIPAL", "tipo": "Secundaria"}
+          {
+            "categoria": "SALA DE CONTROL PRINCIPAL",
+            "tipo": "Secundaria"
+          }
         ]
       }
     ],
@@ -284,11 +331,15 @@
     "reglas_exclusion": [
       {
         "categoria": "PLATAFORMA DE ATERRIZAJE",
-        "tipos_prohibidos": ["Continental"]
+        "tipos_prohibidos": [
+          "Continental"
+        ]
       },
       {
         "categoria": "EQUIPO DE RECUPERACIÓN",
-        "tipos_prohibidos": ["Terrestre"]
+        "tipos_prohibidos": [
+          "Terrestre"
+        ]
       }
     ],
     "requisitos_coexistentes": [
@@ -296,14 +347,20 @@
         "categoria": "PLATAFORMA DE ATERRIZAJE",
         "tipo": "Maritima",
         "requiere": [
-          {"categoria": "EQUIPO DE RECUPERACIÓN", "tipo": "Aereo"}
+          {
+            "categoria": "EQUIPO DE RECUPERACIÓN",
+            "tipo": "Aereo"
+          }
         ]
       },
       {
         "categoria": "COHETE",
         "tipo": "Pesado",
         "requiere": [
-          {"categoria": "SISTEMA DE CONTROL TÉRMICO", "tipo": "Aislante"}
+          {
+            "categoria": "SISTEMA DE CONTROL TÉRMICO",
+            "tipo": "Aislante"
+          }
         ]
       }
     ],
@@ -342,11 +399,16 @@
     "reglas_exclusion": [
       {
         "categoria": "SISTEMA DE COMBUSTIBLE",
-        "tipos_prohibidos": ["Solido"]
+        "tipos_prohibidos": [
+          "Solido"
+        ]
       },
       {
         "categoria": "COHETE",
-        "tipos_prohibidos": ["Pesado", "Ligero"]
+        "tipos_prohibidos": [
+          "Pesado",
+          "Ligero"
+        ]
       }
     ],
     "requisitos_coexistentes": [
@@ -354,14 +416,20 @@
         "categoria": "SISTEMA DE COMBUSTIBLE",
         "tipo": "Liquido",
         "requiere": [
-          {"categoria": "SISTEMA DE SEGURIDAD", "tipo": "Activa"}
+          {
+            "categoria": "SISTEMA DE SEGURIDAD",
+            "tipo": "Activa"
+          }
         ]
       },
       {
         "categoria": "PLATAFORMA DE LANZAMIENTO",
         "tipo": "Estatica",
         "requiere": [
-          {"categoria": "SISTEMA DE SEGURIDAD", "tipo": "Activa"}
+          {
+            "categoria": "SISTEMA DE SEGURIDAD",
+            "tipo": "Activa"
+          }
         ]
       }
     ],
@@ -400,11 +468,17 @@
     "reglas_exclusion": [
       {
         "categoria": "COHETE",
-        "tipos_prohibidos": ["Pesado", "Ligero"]
+        "tipos_prohibidos": [
+          "Pesado",
+          "Ligero"
+        ]
       },
       {
         "categoria": "SISTEMA DE COMBUSTIBLE",
-        "tipos_prohibidos": ["Liquido", "Solido"]
+        "tipos_prohibidos": [
+          "Liquido",
+          "Solido"
+        ]
       }
     ],
     "requisitos_coexistentes": [
@@ -412,14 +486,20 @@
         "categoria": "SISTEMA DE NAVEGACIÓN",
         "tipo": "GPS",
         "requiere": [
-          {"categoria": "EQUIPO DE CONTROL", "tipo": "Digital"}
+          {
+            "categoria": "EQUIPO DE CONTROL",
+            "tipo": "Digital"
+          }
         ]
       },
       {
         "categoria": "SISTEMA DE NAVEGACIÓN",
         "tipo": "Inercial",
         "requiere": [
-          {"categoria": "ESTACIÓN DE SEGUIMIENTO", "tipo": "Satelital"}
+          {
+            "categoria": "ESTACIÓN DE SEGUIMIENTO",
+            "tipo": "Satelital"
+          }
         ]
       }
     ],
@@ -458,11 +538,17 @@
     "reglas_exclusion": [
       {
         "categoria": "COHETE",
-        "tipos_prohibidos": ["Pesado", "Ligero"]
+        "tipos_prohibidos": [
+          "Pesado",
+          "Ligero"
+        ]
       },
       {
         "categoria": "SISTEMA DE COMBUSTIBLE",
-        "tipos_prohibidos": ["Liquido", "Solido"]
+        "tipos_prohibidos": [
+          "Liquido",
+          "Solido"
+        ]
       }
     ],
     "requisitos_coexistentes": [
@@ -470,14 +556,20 @@
         "categoria": "SISTEMA ELÉCTRICO",
         "tipo": "Principal",
         "requiere": [
-          {"categoria": "SISTEMA ELÉCTRICO", "tipo": "Emergencia"}
+          {
+            "categoria": "SISTEMA ELÉCTRICO",
+            "tipo": "Emergencia"
+          }
         ]
       },
       {
         "categoria": "EQUIPO DE CONTROL",
         "tipo": "Digital",
         "requiere": [
-          {"categoria": "SALA DE CONTROL PRINCIPAL", "tipo": "Secundaria"}
+          {
+            "categoria": "SALA DE CONTROL PRINCIPAL",
+            "tipo": "Secundaria"
+          }
         ]
       }
     ],
@@ -516,11 +608,17 @@
     "reglas_exclusion": [
       {
         "categoria": "COHETE",
-        "tipos_prohibidos": ["Pesado", "Ligero"]
+        "tipos_prohibidos": [
+          "Pesado",
+          "Ligero"
+        ]
       },
       {
         "categoria": "SISTEMA DE COMBUSTIBLE",
-        "tipos_prohibidos": ["Liquido", "Solido"]
+        "tipos_prohibidos": [
+          "Liquido",
+          "Solido"
+        ]
       }
     ],
     "requisitos_coexistentes": [
@@ -528,14 +626,20 @@
         "categoria": "SISTEMA DE CONTROL TÉRMICO",
         "tipo": "Refrigerante",
         "requiere": [
-          {"categoria": "SISTEMA DE CONTROL TÉRMICO", "tipo": "Aislante"}
+          {
+            "categoria": "SISTEMA DE CONTROL TÉRMICO",
+            "tipo": "Aislante"
+          }
         ]
       },
       {
         "categoria": "LABORATORIO DE PRUEBAS",
         "tipo": "Fisico",
         "requiere": [
-          {"categoria": "EQUIPO DE CONTROL", "tipo": "Digital"}
+          {
+            "categoria": "EQUIPO DE CONTROL",
+            "tipo": "Digital"
+          }
         ]
       }
     ],
@@ -580,11 +684,17 @@
     "reglas_exclusion": [
       {
         "categoria": "COHETE",
-        "tipos_prohibidos": ["Pesado", "Ligero"]
+        "tipos_prohibidos": [
+          "Pesado",
+          "Ligero"
+        ]
       },
       {
         "categoria": "SISTEMA DE COMBUSTIBLE",
-        "tipos_prohibidos": ["Liquido", "Solido"]
+        "tipos_prohibidos": [
+          "Liquido",
+          "Solido"
+        ]
       }
     ],
     "requisitos_coexistentes": [
@@ -592,14 +702,20 @@
         "categoria": "EQUIPO DE RECUPERACIÓN",
         "tipo": "Aereo",
         "requiere": [
-          {"categoria": "SISTEMA DE NAVEGACIÓN", "tipo": "GPS"}
+          {
+            "categoria": "SISTEMA DE NAVEGACIÓN",
+            "tipo": "GPS"
+          }
         ]
       },
       {
         "categoria": "PLATAFORMA DE ATERRIZAJE",
         "tipo": "Maritima",
         "requiere": [
-          {"categoria": "EQUIPO DE RECUPERACIÓN", "tipo": "Aereo"}
+          {
+            "categoria": "EQUIPO DE RECUPERACIÓN",
+            "tipo": "Aereo"
+          }
         ]
       }
     ],
@@ -638,11 +754,17 @@
     "reglas_exclusion": [
       {
         "categoria": "COHETE",
-        "tipos_prohibidos": ["Pesado", "Ligero"]
+        "tipos_prohibidos": [
+          "Pesado",
+          "Ligero"
+        ]
       },
       {
         "categoria": "PLATAFORMA DE LANZAMIENTO",
-        "tipos_prohibidos": ["Estatica", "Movil"]
+        "tipos_prohibidos": [
+          "Estatica",
+          "Movil"
+        ]
       }
     ],
     "requisitos_coexistentes": [
@@ -650,20 +772,396 @@
         "categoria": "LABORATORIO DE PRUEBAS",
         "tipo": "Quimico",
         "requiere": [
-          {"categoria": "LABORATORIO DE PRUEBAS", "tipo": "Fisico"}
+          {
+            "categoria": "LABORATORIO DE PRUEBAS",
+            "tipo": "Fisico"
+          }
         ]
       },
       {
         "categoria": "LABORATORIO DE PRUEBAS",
         "tipo": "Fisico",
         "requiere": [
-          {"categoria": "SISTEMA ELÉCTRICO", "tipo": "Principal"}
+          {
+            "categoria": "SISTEMA ELÉCTRICO",
+            "tipo": "Principal"
+          }
         ]
       }
     ],
     "configuracion_evento": {
       "duracion_minima": 2,
       "duracion_maxima": 3
+    }
+  },
+  "Prueba de propulsor sólido": {
+    "recursos_requeridos": [
+      {
+        "categoria": "COHETE",
+        "tipo": "Ligero",
+        "cantidad": 1,
+        "descripcion": "Cohete ligero para prueba de propulsor sólido"
+      },
+      {
+        "categoria": "PLATAFORMA DE LANZAMIENTO",
+        "tipo": "Movil",
+        "cantidad": 1,
+        "descripcion": "Plataforma móvil para prueba"
+      },
+      {
+        "categoria": "SISTEMA DE COMBUSTIBLE",
+        "tipo": "Solido",
+        "cantidad": 5000,
+        "descripcion": "Combustible sólido para propulsor"
+      },
+      {
+        "categoria": "EQUIPO DE CONTROL",
+        "tipo": "Analogico",
+        "cantidad": 1,
+        "descripcion": "Panel de control analógico para prueba"
+      },
+      {
+        "categoria": "SISTEMA DE SEGURIDAD",
+        "tipo": "Pasiva",
+        "cantidad": 1,
+        "descripcion": "Sistema de seguridad pasiva"
+      }
+    ],
+    "reglas_exclusion": [
+      {
+        "categoria": "SISTEMA DE COMBUSTIBLE",
+        "tipos_prohibidos": [
+          "Liquido"
+        ]
+      },
+      {
+        "categoria": "TORRE DE SERVICIO",
+        "tipos_prohibidos": [
+          "Retractil"
+        ]
+      }
+    ],
+    "requisitos_coexistentes": [
+      {
+        "categoria": "SISTEMA DE COMBUSTIBLE",
+        "tipo": "Solido",
+        "requiere": [
+          {
+            "categoria": "SISTEMA DE SEGURIDAD",
+            "tipo": "Pasiva"
+          }
+        ]
+      },
+      {
+        "categoria": "PLATAFORMA DE LANZAMIENTO",
+        "tipo": "Movil",
+        "requiere": [
+          {
+            "categoria": "EQUIPO DE CONTROL",
+            "tipo": "Analogico"
+          }
+        ]
+      }
+    ],
+    "configuracion_evento": {
+      "duracion_minima": 1,
+      "duracion_maxima": 2
+    }
+  },
+  "Prueba de comunicaciones satelitales": {
+    "recursos_requeridos": [
+      {
+        "categoria": "EQUIPO DE COMUNICACIÓN",
+        "tipo": "Satelital",
+        "cantidad": 2,
+        "descripcion": "Equipo de comunicación satelital"
+      },
+      {
+        "categoria": "ESTACIÓN DE SEGUIMIENTO",
+        "tipo": "Terrestre",
+        "cantidad": 2,
+        "descripcion": "Estación de seguimiento terrestre"
+      },
+      {
+        "categoria": "SALA DE CONTROL PRINCIPAL",
+        "tipo": "Secundaria",
+        "cantidad": 1,
+        "descripcion": "Sala de control secundaria para comunicaciones"
+      },
+      {
+        "categoria": "SISTEMA ELÉCTRICO",
+        "tipo": "Emergencia",
+        "cantidad": 1,
+        "descripcion": "Sistema eléctrico de emergencia"
+      }
+    ],
+    "reglas_exclusion": [
+      {
+        "categoria": "ESTACIÓN DE SEGUIMIENTO",
+        "tipos_prohibidos": [
+          "Satelital"
+        ]
+      },
+      {
+        "categoria": "COHETE",
+        "tipos_prohibidos": [
+          "Pesado",
+          "Ligero"
+        ]
+      }
+    ],
+    "requisitos_coexistentes": [
+      {
+        "categoria": "EQUIPO DE COMUNICACIÓN",
+        "tipo": "Satelital",
+        "requiere": [
+          {
+            "categoria": "ESTACIÓN DE SEGUIMIENTO",
+            "tipo": "Terrestre"
+          }
+        ]
+      },
+      {
+        "categoria": "ESTACIÓN DE SEGUIMIENTO",
+        "tipo": "Terrestre",
+        "requiere": [
+          {
+            "categoria": "SISTEMA ELÉCTRICO",
+            "tipo": "Emergencia"
+          }
+        ]
+      }
+    ],
+    "configuracion_evento": {
+      "duracion_minima": 2,
+      "duracion_maxima": 3
+    }
+  },
+  "Mantenimiento de torre fija": {
+    "recursos_requeridos": [
+      {
+        "categoria": "TORRE DE SERVICIO",
+        "tipo": "Fija",
+        "cantidad": 1,
+        "descripcion": "Torre de servicio fija para mantenimiento"
+      },
+      {
+        "categoria": "Milly, la mecánica",
+        "tipo": "La mecánica",
+        "cantidad": 1,
+        "descripcion": "Milly para mantenimiento especializado"
+      },
+      {
+        "categoria": "Llave inglesa de papá",
+        "tipo": "Papá",
+        "cantidad": 1,
+        "descripcion": "Llave inglesa especializada"
+      },
+      {
+        "categoria": "SISTEMA DE SEGURIDAD",
+        "tipo": "Activa",
+        "cantidad": 2,
+        "descripcion": "Sistemas de seguridad activa"
+      }
+    ],
+    "reglas_exclusion": [
+      {
+        "categoria": "TORRE DE SERVICIO",
+        "tipos_prohibidos": [
+          "Retractil"
+        ]
+      },
+      {
+        "categoria": "PLATAFORMA DE LANZAMIENTO",
+        "tipos_prohibidos": [
+          "Movil"
+        ]
+      }
+    ],
+    "requisitos_coexistentes": [
+      {
+        "categoria": "Milly, la mecánica",
+        "tipo": "La mecánica",
+        "requiere": [
+          {
+            "categoria": "Llave inglesa de papá",
+            "tipo": "Papá"
+          },
+          {
+            "categoria": "SISTEMA DE SEGURIDAD",
+            "tipo": "Activa"
+          }
+        ]
+      },
+      {
+        "categoria": "TORRE DE SERVICIO",
+        "tipo": "Fija",
+        "requiere": [
+          {
+            "categoria": "SISTEMA DE SEGURIDAD",
+            "tipo": "Activa"
+          }
+        ]
+      }
+    ],
+    "configuracion_evento": {
+      "duracion_minima": 3,
+      "duracion_maxima": 5
+    }
+  },
+  "Prueba de comunicaciones por radio": {
+    "recursos_requeridos": [
+      {
+        "categoria": "EQUIPO DE COMUNICACIÓN",
+        "tipo": "Radio",
+        "cantidad": 4,
+        "descripcion": "Equipos de radio UHF"
+      },
+      {
+        "categoria": "ESTACIÓN DE SEGUIMIENTO",
+        "tipo": "Terrestre",
+        "cantidad": 1,
+        "descripcion": "Estación terrestre para enlace"
+      },
+      {
+        "categoria": "SISTEMA ELÉCTRICO",
+        "tipo": "Principal",
+        "cantidad": 1,
+        "descripcion": "Sistema eléctrico principal para potencia"
+      },
+      {
+        "categoria": "SISTEMA DE SEGURIDAD",
+        "tipo": "Pasiva",
+        "cantidad": 1,
+        "descripcion": "Sistema de seguridad pasiva"
+      }
+    ],
+    "reglas_exclusion": [
+      {
+        "categoria": "EQUIPO DE COMUNICACIÓN",
+        "tipos_prohibidos": [
+          "Satelital"
+        ]
+      },
+      {
+        "categoria": "COHETE",
+        "tipos_prohibidos": [
+          "Pesado",
+          "Ligero"
+        ]
+      }
+    ],
+    "requisitos_coexistentes": [
+      {
+        "categoria": "EQUIPO DE COMUNICACIÓN",
+        "tipo": "Radio",
+        "requiere": [
+          {
+            "categoria": "SISTEMA ELÉCTRICO",
+            "tipo": "Principal"
+          }
+        ]
+      },
+      {
+        "categoria": "ESTACIÓN DE SEGUIMIENTO",
+        "tipo": "Terrestre",
+        "requiere": [
+          {
+            "categoria": "SISTEMA DE SEGURIDAD",
+            "tipo": "Pasiva"
+          }
+        ]
+      }
+    ],
+    "configuracion_evento": {
+      "duracion_minima": 1,
+      "duracion_maxima": 2
+    }
+  },
+  "Prueba mixta combustible sólido-líquido": {
+    "recursos_requeridos": [
+      {
+        "categoria": "SISTEMA DE COMBUSTIBLE",
+        "tipo": "Solido",
+        "cantidad": 10000,
+        "descripcion": "Combustible sólido para prueba mixta"
+      },
+      {
+        "categoria": "SISTEMA DE COMBUSTIBLE",
+        "tipo": "Liquido",
+        "cantidad": 15000,
+        "descripcion": "Combustible líquido para prueba mixta"
+      },
+      {
+        "categoria": "SISTEMA DE SEGURIDAD",
+        "tipo": "Activa",
+        "cantidad": 2,
+        "descripcion": "Sistemas de seguridad activa doble"
+      },
+      {
+        "categoria": "EQUIPO DE CONTROL",
+        "tipo": "Digital",
+        "cantidad": 1,
+        "descripcion": "Control digital para gestión mixta"
+      },
+      {
+        "categoria": "SISTEMA ELÉCTRICO",
+        "tipo": "Principal",
+        "cantidad": 1,
+        "descripcion": "Sistema eléctrico principal"
+      }
+    ],
+    "reglas_exclusion": [
+      {
+        "categoria": "COHETE",
+        "tipos_prohibidos": [
+          "Pesado",
+          "Ligero"
+        ]
+      },
+      {
+        "categoria": "PLATAFORMA DE LANZAMIENTO",
+        "tipos_prohibidos": [
+          "Movil",
+          "Estatica"
+        ]
+      }
+    ],
+    "requisitos_coexistentes": [
+      {
+        "categoria": "SISTEMA DE COMBUSTIBLE",
+        "tipo": "Solido",
+        "requiere": [
+          {
+            "categoria": "SISTEMA DE SEGURIDAD",
+            "tipo": "Activa"
+          }
+        ]
+      },
+      {
+        "categoria": "SISTEMA DE COMBUSTIBLE",
+        "tipo": "Liquido",
+        "requiere": [
+          {
+            "categoria": "SISTEMA DE SEGURIDAD",
+            "tipo": "Activa"
+          }
+        ]
+      },
+      {
+        "categoria": "EQUIPO DE CONTROL",
+        "tipo": "Digital",
+        "requiere": [
+          {
+            "categoria": "SISTEMA ELÉCTRICO",
+            "tipo": "Principal"
+          }
+        ]
+      }
+    ],
+    "configuracion_evento": {
+      "duracion_minima": 2,
+      "duracion_maxima": 4
     }
   }
 }
