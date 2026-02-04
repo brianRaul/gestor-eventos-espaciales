@@ -15,7 +15,7 @@ class GestorEventos(ctk.CTk):
 
         # 1.Configurar ventana
         self.title("Gestor de Eventos Espaciales")
-        self.geometry("650x930")
+        self.geometry("670x930")
 
         self.evento_seleccionado = None
 
@@ -162,7 +162,7 @@ class GestorEventos(ctk.CTk):
                 else:
                     # Para equipos: solo mostrar cantidad total
                     texto = f"{recurso['nombre_mostrar']} - {recurso['cantidad_total']} unidades"
-                    color = "#2196F3"
+                    color = "#F0F3F4"
 
                 # Crear checkbox
                 checkbox = ctk.CTkCheckBox(
@@ -1114,7 +1114,7 @@ class GestorEventos(ctk.CTk):
 
         return True, ""
 
-    # .14 ========= Sugerir serie de eventos ==========
+    # .14 ========= Crear serie de eventos ==========
     def crear_serie_recurrente(self):
 
         # 1. Validar tipo de evento
@@ -1267,6 +1267,7 @@ class GestorEventos(ctk.CTk):
             # Error de validación: mostrar solo el error
             self.lbl_info.configure(text=mensaje, text_color="red")
 
+    # .15 ========= sugerir serie ===================
     def sugerir_serie_completa(self):
         # --- 1. CAPTURA DE DATOS DE LA INTERFAZ ---
         tipo = self.combo_evento.get()
@@ -1361,7 +1362,7 @@ class GestorEventos(ctk.CTk):
             self,
             text="GESTOR DE EVENTOS ESPACIALES",
             font=("Monaco", 25, "bold"),
-            text_color="#4FC3F7",
+            text_color="#1087BF",
         )
         lbl_titulo.pack(pady=20)
 

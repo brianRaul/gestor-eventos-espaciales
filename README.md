@@ -92,7 +92,7 @@ gestor-eventos-espaciales/
 
 ## 📋 **Tipos de Eventos Disponibles**
 
-La aplicación incluye **16 tipos de eventos aeroespaciales** preconfigurados:
+La aplicación incluye **15 tipos de eventos aeroespaciales** preconfigurados:
 
 1. **Despegue de cohete** - Lanzamiento de cohete pesado
 2. **Prueba estática de motor** - Prueba de motor con cohete ligero
@@ -109,8 +109,6 @@ La aplicación incluye **16 tipos de eventos aeroespaciales** preconfigurados:
 13. **Mantenimiento de torre fija** - Mantenimiento especializado
 14. **Prueba de comunicaciones por radio** - Comunicaciones UHF
 15. **Prueba mixta combustible sólido-líquido** - Prueba con ambos combustibles
-16. **Ejercicio de recuperación multimodal** - Recuperación combinada
-
 ---
 
 ## 🔩 **Recursos del Sistema**
