@@ -188,9 +188,10 @@ def crear_serie_recurrente(
         eventos_validados.append(evento_simulado)
         fecha_temp += timedelta(days=intervalo_dias)
     
-    # 11. CREAR LOS EVENTOS REALES (CON ESTRUCTURA UNIFICADA)
+    # 11. CREAR LOS EVENTOS REALES (CON ESTRUCTURA UNIFICADA) - CON CAMBIOS
     fecha_temp = fecha_inicial
     eventos_creados = []
+    recursos_opcionales_serie = set()  # ← NUEVO: conjunto para recursos opcionales únicos
     
     for i in range(num_eventos):
         # Crear el evento real (ya tiene estructura unificada)
@@ -210,13 +211,33 @@ def crear_serie_recurrente(
         if exito and nuevo_evento:
             eventos_creados.append(nuevo_evento)
             eventos_planificados.append(nuevo_evento)
+            
+            # NUEVO: Extraer recursos opcionales del mensaje
+            if "RECURSOS OPCIONALES INCLUIDOS" in mensaje:
+                # Buscar líneas con recursos opcionales (empiezan con "•")
+                lineas = mensaje.split('\n')
+                for linea in lineas:
+                    linea = linea.strip()
+                    if linea.startswith('•'):
+                        # Quitar el "• " al inicio
+                        recurso = linea[2:].strip()
+                        recursos_opcionales_serie.add(recurso)
         else:
             return False, f"❌ Error en evento {i+1}: {mensaje}", eventos_creados, fecha_temp
         
         fecha_temp += timedelta(days=intervalo_dias)
     
-    return True, f"✅ Serie creada: {len(eventos_creados)} eventos", eventos_creados, None
-
+    # 12. Mensaje final de la serie - CON CAMBIOS
+    mensaje_final = f"✅ Serie creada: {len(eventos_creados)} eventos"
+    
+    # NUEVO: Añadir información sobre recursos opcionales si los hay
+    if recursos_opcionales_serie:
+        mensaje_final += f"\n\nℹ️ RECURSOS OPCIONALES EN LA SERIE:\n"
+        for recurso in sorted(recursos_opcionales_serie):
+            mensaje_final += f"• {recurso}\n"
+        mensaje_final += "\n⚠️ Estos recursos no eran necesarios pero se asignaron en todos los eventos."
+    
+    return True, mensaje_final, eventos_creados, None
 
 def buscar_serie_completa_disponible(
     tipo_evento,
