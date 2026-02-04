@@ -17,8 +17,8 @@ def validar_tipo_evento(tipo_evento, tipos_evento_data):
 def validar_fecha_duracion(day, month, year, duracion_str, tipo_evento, tipos_evento_data):
     try:
         # PRIMERO: Verificar si algún número es demasiado grande
-        if len(duracion_str) > 4:  # Más de 4 dígitos es demasiado
-            return False, "❌ Número inválido: demasiado grande", None, None, None
+        if len(day) > 2 or len(month) > 2 or len(year) > 4 or len(duracion_str) > 4:
+            return False,"❌ Fecha o duración inválida", None, None, None
             
         # Convertir duración
         duracion = int(duracion_str)
@@ -57,8 +57,8 @@ def validar_fecha_duracion(day, month, year, duracion_str, tipo_evento, tipos_ev
     except ValueError:
         return False, "❌ Fecha o duración inválida", None, None, None
     except OverflowError:
-        return False, "❌ Número inválido: demasiado grande", None, None, None
-
+        return False, "❌ Fecha o duración inválida", None, None, None
+    
 # Convierte nombres de recursos a objetos completos y valida
 def validar_recursos_seleccionados(recursos_seleccionados_nombres, recursos):
     recursos_seleccionados = []

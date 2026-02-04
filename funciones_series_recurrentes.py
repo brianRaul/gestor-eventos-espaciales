@@ -14,17 +14,21 @@ def crear_serie_recurrente(
     tipos_evento_data,
     app=None
 ):
-    # 1. Convertir fecha
+    # 1. Validar que no sean números demasiado largos
+    if len(str(duracion_dias)) > 4 or len(str(intervalo_dias)) > 4 or len(str(num_eventos)) > 4:
+        return False, "❌ Número inválido: demasiado grande", [], None
+    
+    # 2. Convertir fecha
     try:
         fecha_inicial = datetime.strptime(fecha_inicio_str, "%d/%m/%Y").date()
     except:
         return False, "❌ FECHA INVÁLIDA\nFormato requerido: DD/MM/AAAA", [], None
     
-    # 2. Verificar que el intervalo no sea menor que la duración
+    # 3. Verificar que el intervalo no sea menor que la duración
     if num_eventos > 1 and intervalo_dias < duracion_dias:
         return False, "❌ CONFIGURACIÓN INVÁLIDA\nEl intervalo debe ser mayor o igual a la duración del evento.", [], None
     
-    # 3. LÍMITES DE TIEMPO
+    # 4. LÍMITES DE TIEMPO
     HOY = datetime.now().date()
     LIMITE_FUTURO_DIAS = 1095  # 3 años
     LIMITE_SERIE_DIAS = 365    # 1 año para la serie
@@ -37,7 +41,7 @@ def crear_serie_recurrente(
     if fecha_inicial > HOY + timedelta(days=LIMITE_FUTURO_DIAS):
         return False, f"❌ FECHA FUERA DE RANGO\nLa fecha de inicio no puede ser a más de 3 años en el futuro.", [], None
     
-    # 4. Calcular fechas de la serie completa
+    # 5. Calcular fechas de la serie completa
     fecha_inicio_ultimo = fecha_inicial + timedelta(days=(num_eventos - 1) * intervalo_dias)
     fecha_fin_ultimo = fecha_inicio_ultimo + timedelta(days=duracion_dias - 1)
     duracion_total_serie = (fecha_fin_ultimo - fecha_inicial).days + 1
@@ -54,7 +58,7 @@ def crear_serie_recurrente(
             f"Máximo eventos posibles: {eventos_posibles}"
         ), [], None
     
-    # 5. Verificar que toda la serie esté dentro de 3 años
+    # 6. Verificar que toda la serie esté dentro de 3 años
     if fecha_fin_ultimo > HOY + timedelta(days=LIMITE_FUTURO_DIAS):
         # Calcular cuántos eventos caben en los 3 años
         dias_disponibles = (HOY + timedelta(days=LIMITE_FUTURO_DIAS) - fecha_inicial).days
@@ -72,14 +76,14 @@ def crear_serie_recurrente(
             f"Máximo eventos posibles: {eventos_posibles}"
         ), [], None
     
-    # 6. Obtener datos del tipo de evento
+    # 7. Obtener datos del tipo de evento
     if tipo_evento not in tipos_evento_data:
         return False, "❌ TIPO DE EVENTO NO ENCONTRADO", [], None
     
     evento_data = tipos_evento_data[tipo_evento]
     recursos_requeridos = evento_data.get("recursos_requeridos", [])
     
-    # 7. VERIFICACIÓN DE CAPACIDAD Y COMBUSTIBLE
+    # 8. VERIFICACIÓN DE CAPACIDAD Y COMBUSTIBLE
     for req in recursos_requeridos:
         if "COMBUSTIBLE" in req["categoria"].upper():
             capacidad_total = 0
@@ -103,7 +107,7 @@ def crear_serie_recurrente(
                 eventos_posibles = int(eventos_posibles)
                 return False, f"❌ CAPACIDAD INSUFICIENTE\n\nPara {num_eventos} eventos se necesitan {total_necesario}L.\nCapacidad máxima: {capacidad_total}L\n\nMáximo eventos posibles: {eventos_posibles}.", [], None
     
-    # 8. Verificar combustible disponible actual
+    # 9. Verificar combustible disponible actual
     total_combustible_necesario = {}
     for req in recursos_requeridos:
         if "COMBUSTIBLE" in req["categoria"].upper():
@@ -124,7 +128,7 @@ def crear_serie_recurrente(
             faltante = cantidad_necesaria - stock_disponible
             return False, f"❌ COMBUSTIBLE INSUFICIENTE\n\nSe necesitan {cantidad_necesaria}L de {categoria} {tipo}.\nStock actual: {stock_disponible}L\nFaltan: {faltante}L.", [], None
     
-    # 9. VALIDAR TODOS LOS EVENTOS (sin crear)
+    # 10. VALIDAR TODOS LOS EVENTOS (sin crear)
     eventos_validados = []
     
     fecha_temp = fecha_inicial
@@ -184,7 +188,7 @@ def crear_serie_recurrente(
         eventos_validados.append(evento_simulado)
         fecha_temp += timedelta(days=intervalo_dias)
     
-    # 10. CREAR LOS EVENTOS REALES (CON ESTRUCTURA UNIFICADA)
+    # 11. CREAR LOS EVENTOS REALES (CON ESTRUCTURA UNIFICADA)
     fecha_temp = fecha_inicial
     eventos_creados = []
     
@@ -212,6 +216,8 @@ def crear_serie_recurrente(
         fecha_temp += timedelta(days=intervalo_dias)
     
     return True, f"✅ Serie creada: {len(eventos_creados)} eventos", eventos_creados, None
+
+
 def buscar_serie_completa_disponible(
     tipo_evento,
     recursos_seleccionados_nombres,
