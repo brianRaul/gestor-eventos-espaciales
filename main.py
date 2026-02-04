@@ -15,7 +15,7 @@ class GestorEventos(ctk.CTk):
 
         # 1.Configurar ventana
         self.title("Gestor de Eventos Espaciales")
-        self.geometry("650x930")
+        self.geometry("670x930")
 
         self.evento_seleccionado = None
 
@@ -162,7 +162,7 @@ class GestorEventos(ctk.CTk):
                 else:
                     # Para equipos: solo mostrar cantidad total
                     texto = f"{recurso['nombre_mostrar']} - {recurso['cantidad_total']} unidades"
-                    color = "#2196F3"
+                    color = "#F0F3F4"
 
                 # Crear checkbox
                 checkbox = ctk.CTkCheckBox(
@@ -1114,7 +1114,7 @@ class GestorEventos(ctk.CTk):
 
         return True, ""
 
-    # .14 ========= Sugerir serie de eventos ==========
+    # .14 ========= Crear serie de eventos ==========
     def crear_serie_recurrente(self):
 
         # 1. Validar tipo de evento
@@ -1141,6 +1141,20 @@ class GestorEventos(ctk.CTk):
         # 3. Validar campos de recurrencia
         intervalo = self.entry_intervalo.get() or "7"
         repeticiones = self.entry_repeticiones.get() or "1"
+
+        # VALIDACIÓN NUEVA: verificar que no sean strings
+        if not intervalo.isdigit() or not repeticiones.isdigit():
+            self.lbl_info.configure(
+                text="❌ Usa solo números válidos en todos los campos", text_color="red"
+            )
+            return
+
+        # VALIDACIÓN NUEVA: verificar que no sean números demasiado largos
+        if len(intervalo) > 4 or len(repeticiones) > 4 or len(duracion) > 4:
+            self.lbl_info.configure(
+                text="❌ Número demasiado largo (máximo 4 dígitos)", text_color="red"
+            )
+            return
 
         try:
             intervalo_int = int(intervalo)
@@ -1179,7 +1193,6 @@ class GestorEventos(ctk.CTk):
             return
 
         # 6. Verificar límite de 1 año ANTES de confirmar
-        # Calcular duración total aproximada
         duracion_total_aproximada = (
             repeticiones_int - 1
         ) * intervalo_int + duracion_int
@@ -1267,92 +1280,113 @@ class GestorEventos(ctk.CTk):
             # Error de validación: mostrar solo el error
             self.lbl_info.configure(text=mensaje, text_color="red")
 
+    # .15 ========= sugerir serie ===================
     def sugerir_serie_completa(self):
-        # --- 1. CAPTURA DE DATOS DE LA INTERFAZ ---
-        tipo = self.combo_evento.get()
-        duracion = self.entry_duracion.get()
-        repeticiones = self.entry_repeticiones.get()
-        intervalo = self.entry_intervalo.get()
+    # --- 1. CAPTURA DE DATOS DE LA INTERFAZ ---
+     tipo = self.combo_evento.get()
+     duracion = self.entry_duracion.get()
+     repeticiones = self.entry_repeticiones.get()
+     intervalo = self.entry_intervalo.get()
 
-        # Obtenemos qué recursos marcó el usuario en los checkboxes
-        recursos_check = [k for k, v in self.checkbox_vars.items() if v.get()]
+    # Obtenemos qué recursos marcó el usuario en los checkboxes
+     recursos_check = [k for k, v in self.checkbox_vars.items() if v.get()]
 
-        # --- 2. VALIDACIONES PREVIAS ---
-        if tipo == "Elige un tipo de evento" or not duracion or not repeticiones:
-            self.lbl_info.configure(
-                text="❌ Rellena Tipo, Duración y Repeticiones primero.",
-                text_color="red",
-            )
-            return
-
-        if not recursos_check:
-            self.lbl_info.configure(
-                text="❌ Selecciona al menos un recurso.", text_color="red"
-            )
-            return
-
-        # NO recargar recursos desde JSON aquí - usar los que ya están en memoria
-        # self.recursos = cargar_recursos_desde_json()  # ← REMOVER ESTA LÍNEA
-        # self.eventos_planificados = cargar_eventos_planificados()  # ← REMOVER ESTA LÍNEA
-
-        # Intentamos convertir a números
-        try:
-            dur_int = int(duracion)
-            rep_int = int(repeticiones)
-            # Si el intervalo está vacío, ponemos 7 días por defecto
-            int_int = int(intervalo) if (intervalo and intervalo.strip()) else 7
-        except ValueError:
-            self.lbl_info.configure(
-                text="❌ Duración, Repeticiones e Intervalo deben ser números.",
-                text_color="red",
-            )
-            return
-
-        # --- 3. VERIFICAR LÍMITE DE 1 AÑO ANTES DE BUSCAR ---
-        duracion_total_aproximada = (rep_int - 1) * int_int + dur_int
-
-        if duracion_total_aproximada > 365:
-            eventos_posibles = (365 - dur_int) // int_int + 1
-            eventos_posibles = max(1, eventos_posibles)
-
-            mensaje = (
-                f"❌ SERIE DEMASIADO LARGA\n\n"
-                f"Duración total: {duracion_total_aproximada} días\n"
-                f"Límite máximo: 365 días (1 año)\n\n"
-                f"Máximo eventos posibles: {eventos_posibles}"
-            )
-
-            self.lbl_info.configure(text=mensaje, text_color="red")
-            return
-
-        # --- 4. LLAMADA AL MOTOR DE BÚSQUEDA ---
+    # --- 2. VALIDACIONES PREVIAS ---
+     if tipo == "Elige un tipo de evento" or not duracion or not repeticiones:
         self.lbl_info.configure(
-            text="🔍 Buscando fechas disponibles...", text_color="orange"
+            text="❌ Rellena Tipo, Duración y Repeticiones primero.",
+            text_color="red",
         )
-        self.update()
+        return
 
-        # Esta función ya incluye todas las validaciones
-        exito, fecha, mensaje = buscar_serie_completa_disponible(
-            tipo_evento=tipo,
-            recursos_seleccionados_nombres=recursos_check,
-            duracion_dias=dur_int,
-            intervalo_dias=int_int,
-            num_eventos=rep_int,
-            recursos=self.recursos,
-            eventos_planificados=self.eventos_planificados,
-            tipos_evento_data=self.tipos_evento_data,
-            app=self,
+     if not recursos_check:
+        self.lbl_info.configure(
+            text="❌ Selecciona al menos un recurso.", text_color="red"
+        )
+        return
+
+    # VALIDACIÓN NUEVA: verificar que no sean strings
+     if not duracion.isdigit() or not repeticiones.isdigit():
+        self.lbl_info.configure(
+            text="❌ Usa solo números válidos en Duración y Repeticiones.",
+            text_color="red",
+        )
+        return
+
+    # VALIDACIÓN NUEVA: verificar que intervalo sea número (si no está vacío)
+     if intervalo and not intervalo.strip().isdigit():
+        self.lbl_info.configure(
+            text="❌ Usa solo números válidos en todos los campos.",
+            text_color="red",
+        )
+        return
+
+    # Intentamos convertir a números
+     try:
+        dur_int = int(duracion)
+        rep_int = int(repeticiones)
+        # Si el intervalo está vacío, ponemos 7 días por defecto
+        int_int = int(intervalo) if (intervalo and intervalo.strip()) else 7
+
+        # VALIDACIÓN NUEVA: verificar que no sean números demasiado largos
+        if len(str(dur_int)) > 4 or len(str(rep_int)) > 4 or len(str(int_int)) > 4:
+            self.lbl_info.configure(
+                text="❌ Número demasiado largo (máximo 4 dígitos)",
+                text_color="red",
+            )
+            return
+
+     except ValueError:
+        self.lbl_info.configure(
+            text="❌ Duración, Repeticiones e Intervalo deben ser números.",
+            text_color="red",
+        )
+        return
+
+    # --- 3. VERIFICAR LÍMITE DE 1 AÑO ANTES DE BUSCAR ---
+     duracion_total_aproximada = (rep_int - 1) * int_int + dur_int
+
+     if duracion_total_aproximada > 365:
+        eventos_posibles = (365 - dur_int) // int_int + 1
+        eventos_posibles = max(1, eventos_posibles)
+
+        mensaje = (
+            f"❌ SERIE DEMASIADO LARGA\n\n"
+            f"Duración total: {duracion_total_aproximada} días\n"
+            f"Límite máximo: 365 días (1 año)\n\n"
+            f"Máximo eventos posibles: {eventos_posibles}"
         )
 
-        # --- 5. GESTIÓN DEL RESULTADO ---
-        if exito:
-            # Si encontramos fecha, llenamos los campos automáticamente
-            self.actualizar_campos_fecha(fecha)
-            self.lbl_info.configure(text=mensaje, text_color="#4CAF50")
-        else:
-            # Mostrar el mensaje de error (ya formateado)
-            self.lbl_info.configure(text=mensaje, text_color="red")
+        self.lbl_info.configure(text=mensaje, text_color="red")
+        return
 
+    # --- 4. LLAMADA AL MOTOR DE BÚSQUEDA ---
+     self.lbl_info.configure(
+        text="🔍 Buscando fechas disponibles...", text_color="orange"
+    )
+     self.update()
+
+    # Esta función ya incluye todas las validaciones
+     exito, fecha, mensaje = buscar_serie_completa_disponible(
+        tipo_evento=tipo,
+        recursos_seleccionados_nombres=recursos_check,
+        duracion_dias=dur_int,
+        intervalo_dias=int_int,
+        num_eventos=rep_int,
+        recursos=self.recursos,
+        eventos_planificados=self.eventos_planificados,
+        tipos_evento_data=self.tipos_evento_data,
+        app=self,
+    )
+
+    # --- 5. GESTIÓN DEL RESULTADO ---
+     if exito:
+        # Si encontramos fecha, llenamos los campos automáticamente
+        self.actualizar_campos_fecha(fecha)
+        self.lbl_info.configure(text=mensaje, text_color="#4CAF50")
+     else:
+        # Mostrar el mensaje de error (ya formateado)
+        self.lbl_info.configure(text=mensaje, text_color="red")
     ################## INTERFAZ ###################
 
     def crear_interfaz(self):
@@ -1361,7 +1395,7 @@ class GestorEventos(ctk.CTk):
             self,
             text="GESTOR DE EVENTOS ESPACIALES",
             font=("Monaco", 25, "bold"),
-            text_color="#4FC3F7",
+            text_color="#1087BF",
         )
         lbl_titulo.pack(pady=20)
 

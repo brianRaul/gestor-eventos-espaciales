@@ -16,6 +16,17 @@ def validar_tipo_evento(tipo_evento, tipos_evento_data):
 # Valida la fecha y duración del evento
 def validar_fecha_duracion(day, month, year, duracion_str, tipo_evento, tipos_evento_data):
     try:
+        # PRIMERO: Verificar si algún número es demasiado grande
+        if len(day) > 2 or len(month) > 2 or len(year) > 4 or len(duracion_str) > 4:
+            return False,"❌ Fecha o duración inválida", None, None, None
+            
+        # Convertir duración
+        duracion = int(duracion_str)
+        
+        # Validaciones normales que ya tenías
+        if duracion <= 0:
+            return False, "❌ La duración debe ser mayor a 0", None, None, None
+        
         fecha_inicio = datetime(int(year), int(month), int(day))
         if fecha_inicio.date() < datetime.now().date():
             return False, "❌ No puedes planificar en el pasado", None, None, None
@@ -26,36 +37,28 @@ def validar_fecha_duracion(day, month, year, duracion_str, tipo_evento, tipos_ev
         if fecha_inicio.date() > fecha_maxima:
             return False, f"❌ No puedes planificar eventos a más de 3 años en el futuro", None, None, None
         
-        duracion = int(duracion_str)
-        if duracion <= 0:
-            return False, "❌ La duración debe ser mayor a 0", None, None, None
-        
         fecha_fin = fecha_inicio + timedelta(days=duracion - 1)
         
         # Validar que el evento completo no exceda los 3 años
         if fecha_fin.date() > fecha_maxima:
             return False, f"❌ El evento no puede terminar después de 3 años a partir de hoy", None, None, None
         
-        duracion = int(duracion_str)
-        if duracion <= 0:
-            return False, "❌ La duración debe ser mayor a 0", None, None, None
+        # Validar duración min/max del evento
+        evento_data = tipos_evento_data[tipo_evento]
+        config_evento = evento_data.get("configuracion_evento", {})
+        d_min = config_evento.get("duracion_minima", 1)
+        d_max = config_evento.get("duracion_maxima", 30)
         
-        fecha_fin = fecha_inicio + timedelta(days=duracion - 1)
+        if not (d_min <= duracion <= d_max):
+            return False, f"❌ Duración permitida: {d_min}-{d_max} días", None, None, None
+        
+        return True, "", fecha_inicio, fecha_fin, duracion
+        
     except ValueError:
         return False, "❌ Fecha o duración inválida", None, None, None
+    except OverflowError:
+        return False, "❌ Fecha o duración inválida", None, None, None
     
-    # Validar duración min/max del evento
-    evento_data = tipos_evento_data[tipo_evento]
-    config_evento = evento_data.get("configuracion_evento", {})
-    d_min = config_evento.get("duracion_minima", 1)
-    d_max = config_evento.get("duracion_maxima", 30)
-    
-    if not (d_min <= duracion <= d_max):
-        return False, f"❌ Duración permitida: {d_min}-{d_max} días", None, None, None
-    
-    return True, "", fecha_inicio, fecha_fin, duracion
-
-
 # Convierte nombres de recursos a objetos completos y valida
 def validar_recursos_seleccionados(recursos_seleccionados_nombres, recursos):
     recursos_seleccionados = []
