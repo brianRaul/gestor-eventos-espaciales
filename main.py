@@ -15,7 +15,7 @@ class GestorEventos(ctk.CTk):
 
         # 1.Configurar ventana
         self.title("Gestor de Eventos Espaciales")
-        self.geometry("670x930")
+        self.geometry("670x950")
 
         self.evento_seleccionado = None
 
@@ -321,12 +321,9 @@ class GestorEventos(ctk.CTk):
             self.limpiar_seleccion_recursos()
 
             # Mostrar mensaje de éxito
-            fecha_str = datetime.strptime(
-                nuevo_evento["fecha_inicio"], "%d/%m/%Y"
-            ).strftime("%d/%m")
             self.lbl_info.configure(
-                text=f"🚀 Evento '{tipo_evento}' creado exitosamente ({fecha_str})",
-                text_color="green",
+                text=mensaje,  
+                text_color="green"
             )
         else:
             # Error: mostrar mensaje
@@ -1261,9 +1258,9 @@ class GestorEventos(ctk.CTk):
             self.limpiar_seleccion_recursos()
 
             self.lbl_info.configure(
-                text=f"✅ Serie creada: {len(eventos_creados)} eventos",
-                text_color="green",
-            )
+            text=mensaje,  
+            text_color="green",
+        )
 
         elif fecha_problema:
             # SOLO sugerir buscar fecha alternativa si es error de solapamiento

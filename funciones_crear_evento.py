@@ -281,6 +281,33 @@ def crear_evento_dict(tipo_evento, fecha_inicio, fecha_fin, duracion,
     
     return nuevo_evento
 
+# Valida si hay recursos seleccionados que no son necesarios ni prohibidos
+def validar_recursos_opcionales(evento_data, recursos_seleccionados):
+    recursos_requeridos = evento_data.get("recursos_requeridos", [])
+    reglas_exclusion = evento_data.get("reglas_exclusion", [])
+    
+    # Crear conjunto de claves de recursos requeridos
+    requeridos_keys = set()
+    for req in recursos_requeridos:
+        clave = f"{req['categoria']}|{req['tipo']}"
+        requeridos_keys.add(clave)
+    
+    # Crear conjunto de claves de recursos prohibidos
+    prohibidos_keys = set()
+    for regla in reglas_exclusion:
+        categoria = regla.get("categoria", "")
+        for tipo in regla.get("tipos_prohibidos", []):
+            clave = f"{categoria}|{tipo}"
+            prohibidos_keys.add(clave)
+    
+    # Identificar recursos opcionales (seleccionados pero no requeridos ni prohibidos)
+    recursos_opcionales = []
+    for recurso in recursos_seleccionados:
+        clave = f"{recurso['categoria']}|{recurso['tipo']}"
+        if clave not in requeridos_keys and clave not in prohibidos_keys:
+            recursos_opcionales.append(recurso)
+    
+    return recursos_opcionales
 
 # ========== FUNCIÓN PRINCIPAL ==========
 
@@ -332,6 +359,33 @@ def procesar_creacion_evento(tipo_evento, day, month, year, duracion_str,
     if modo_validacion:
         return True, "✅ Validación exitosa", None
     
+    # 8.1. Validar recursos opcionales 
+    recursos_opcionales = validar_recursos_opcionales(evento_data, recursos_seleccionados)
+    
+    # Si estamos en modo validación, devolver advertencia
+    if modo_validacion and recursos_opcionales:
+        nombres_opcionales = [r["nombre_mostrar"] for r in recursos_opcionales]
+        mensaje_advertencia = (
+            f"ℹ️ RECURSOS OPCIONALES DETECTADOS:\n"
+            f"Los siguientes recursos no son necesarios pero se incluirán:\n"
+            f"{', '.join(nombres_opcionales)}\n\n"
+            f"✅ No hay problema, puedes continuar."
+        )
+        return True, mensaje_advertencia, None
+    
+    # Si estamos creando el evento, añadir advertencia al mensaje final
+    mensaje_opcional = ""
+    if recursos_opcionales:
+        nombres_opcionales = [r["nombre_mostrar"] for r in recursos_opcionales]
+        mensaje_opcional = (
+            f"\n\nℹ️ NOTA: Se incluyeron recursos opcionales (no necesarios):\n"
+            f"{', '.join(nombres_opcionales)}"
+        )
+    
+    # Si estamos en modo validación, solo devolver éxito
+    if modo_validacion:
+        return True, "✅ Validación exitosa", None
+    
     # 8. Consumir recursos
     recursos_consumidos = consumir_recursos(evento_data, recursos_seleccionados, recursos)
     
@@ -341,6 +395,9 @@ def procesar_creacion_evento(tipo_evento, day, month, year, duracion_str,
         recursos_seleccionados_nombres, recursos_seleccionados,
         evento_data.get("recursos_requeridos", []), recursos_consumidos
     )
-    
+
     mensaje_exito = f"🚀 Evento '{tipo_evento}' creado exitosamente"
-    return True, mensaje_exito, nuevo_evento
+    if mensaje_opcional:
+        mensaje_exito += mensaje_opcional
+    
+        return True, mensaje_exito, nuevo_evento
