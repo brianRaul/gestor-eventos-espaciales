@@ -946,18 +946,6 @@
         "descripcion": "Torre de servicio fija para mantenimiento"
       },
       {
-        "categoria": "Milly, la mecánica",
-        "tipo": "La mecánica",
-        "cantidad": 1,
-        "descripcion": "Milly para mantenimiento especializado"
-      },
-      {
-        "categoria": "Llave inglesa de papá",
-        "tipo": "Papá",
-        "cantidad": 1,
-        "descripcion": "Llave inglesa especializada"
-      },
-      {
         "categoria": "SISTEMA DE SEGURIDAD",
         "tipo": "Activa",
         "cantidad": 2,
@@ -979,20 +967,6 @@
       }
     ],
     "requisitos_coexistentes": [
-      {
-        "categoria": "Milly, la mecánica",
-        "tipo": "La mecánica",
-        "requiere": [
-          {
-            "categoria": "Llave inglesa de papá",
-            "tipo": "Papá"
-          },
-          {
-            "categoria": "SISTEMA DE SEGURIDAD",
-            "tipo": "Activa"
-          }
-        ]
-      },
       {
         "categoria": "TORRE DE SERVICIO",
         "tipo": "Fija",

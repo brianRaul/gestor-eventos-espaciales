@@ -1,1 +1,350 @@
-[]
+[
+    {
+        "tipo": "Prueba de propulsor sólido",
+        "fecha_inicio": "04/02/2026",
+        "fecha_fin": "04/02/2026",
+        "duracion_dias": 1,
+        "recursos": [
+            "Explorador-1 (Ligero)",
+            "Barca Ocean (Movil)",
+            "Panel-Legacy-01 (Analogico)",
+            "Tanque-Solido (Solido)",
+            "Escudo-Pasivo-A (Pasiva)"
+        ],
+        "recursos_detalle": [
+            {
+                "nombre_mostrar": "Explorador-1 (Ligero)",
+                "categoria": "COHETE",
+                "modelo": "Explorador-1",
+                "tipo": "Ligero",
+                "es_combustible": false,
+                "es_consumible": false,
+                "cantidad": 1
+            },
+            {
+                "nombre_mostrar": "Barca Ocean (Movil)",
+                "categoria": "PLATAFORMA DE LANZAMIENTO",
+                "modelo": "Barca Ocean",
+                "tipo": "Movil",
+                "es_combustible": false,
+                "es_consumible": false,
+                "cantidad": 1
+            },
+            {
+                "nombre_mostrar": "Panel-Legacy-01 (Analogico)",
+                "categoria": "EQUIPO DE CONTROL",
+                "modelo": "Panel-Legacy-01",
+                "tipo": "Analogico",
+                "es_combustible": false,
+                "es_consumible": false,
+                "cantidad": 1
+            },
+            {
+                "nombre_mostrar": "Tanque-Solido (Solido)",
+                "categoria": "SISTEMA DE COMBUSTIBLE",
+                "modelo": "Tanque-Solido",
+                "tipo": "Solido",
+                "es_combustible": true,
+                "es_consumible": true,
+                "cantidad": 5000
+            },
+            {
+                "nombre_mostrar": "Escudo-Pasivo-A (Pasiva)",
+                "categoria": "SISTEMA DE SEGURIDAD",
+                "modelo": "Escudo-Pasivo-A",
+                "tipo": "Pasiva",
+                "es_combustible": false,
+                "es_consumible": false,
+                "cantidad": 1
+            }
+        ],
+        "recursos_usados": {
+            "Explorador-1 (Ligero)": 1,
+            "Barca Ocean (Movil)": 1,
+            "Panel-Legacy-01 (Analogico)": 1,
+            "Tanque-Solido (Solido)": 5000,
+            "Escudo-Pasivo-A (Pasiva)": 1
+        },
+        "recursos_consumidos": [
+            {
+                "recurso": "Explorador-1 (Ligero)",
+                "cantidad": 1,
+                "es_consumible": false
+            },
+            {
+                "recurso": "Barca Ocean (Movil)",
+                "cantidad": 1,
+                "es_consumible": false
+            },
+            {
+                "recurso": "Panel-Legacy-01 (Analogico)",
+                "cantidad": 1,
+                "es_consumible": false
+            },
+            {
+                "recurso": "Tanque-Solido (Solido)",
+                "cantidad": 5000,
+                "es_consumible": true
+            },
+            {
+                "recurso": "Escudo-Pasivo-A (Pasiva)",
+                "cantidad": 1,
+                "es_consumible": false
+            }
+        ],
+        "estado": "planificado"
+    },
+    {
+        "tipo": "Prueba de comunicaciones satelitales",
+        "fecha_inicio": "04/02/2026",
+        "fecha_fin": "05/02/2026",
+        "duracion_dias": 2,
+        "recursos": [
+            "Firing Room-2 (Secundaria)",
+            "Antena-Terrestre (Terrestre)",
+            "Backup-Generator (Emergencia)",
+            "Comms-Sat-Link (Satelital)"
+        ],
+        "recursos_detalle": [
+            {
+                "nombre_mostrar": "Firing Room-2 (Secundaria)",
+                "categoria": "SALA DE CONTROL PRINCIPAL",
+                "modelo": "Firing Room-2",
+                "tipo": "Secundaria",
+                "es_combustible": false,
+                "es_consumible": false,
+                "cantidad": 1
+            },
+            {
+                "nombre_mostrar": "Antena-Terrestre (Terrestre)",
+                "categoria": "ESTACIÓN DE SEGUIMIENTO",
+                "modelo": "Antena-Terrestre",
+                "tipo": "Terrestre",
+                "es_combustible": false,
+                "es_consumible": false,
+                "cantidad": 1
+            },
+            {
+                "nombre_mostrar": "Backup-Generator (Emergencia)",
+                "categoria": "SISTEMA ELÉCTRICO",
+                "modelo": "Backup-Generator",
+                "tipo": "Emergencia",
+                "es_combustible": false,
+                "es_consumible": false,
+                "cantidad": 1
+            },
+            {
+                "nombre_mostrar": "Comms-Sat-Link (Satelital)",
+                "categoria": "EQUIPO DE COMUNICACIÓN",
+                "modelo": "Comms-Sat-Link",
+                "tipo": "Satelital",
+                "es_combustible": false,
+                "es_consumible": false,
+                "cantidad": 1
+            }
+        ],
+        "recursos_usados": {
+            "Firing Room-2 (Secundaria)": 1,
+            "Antena-Terrestre (Terrestre)": 1,
+            "Backup-Generator (Emergencia)": 1,
+            "Comms-Sat-Link (Satelital)": 1
+        },
+        "recursos_consumidos": [
+            {
+                "recurso": "Firing Room-2 (Secundaria)",
+                "cantidad": 1,
+                "es_consumible": false
+            },
+            {
+                "recurso": "Antena-Terrestre (Terrestre)",
+                "cantidad": 1,
+                "es_consumible": false
+            },
+            {
+                "recurso": "Backup-Generator (Emergencia)",
+                "cantidad": 1,
+                "es_consumible": false
+            },
+            {
+                "recurso": "Comms-Sat-Link (Satelital)",
+                "cantidad": 1,
+                "es_consumible": false
+            }
+        ],
+        "estado": "planificado"
+    },
+    {
+        "tipo": "Prueba mixta combustible sólido-líquido",
+        "fecha_inicio": "04/02/2026",
+        "fecha_fin": "05/02/2026",
+        "duracion_dias": 2,
+        "recursos": [
+            "Consola-MCD-01 (Digital)",
+            "Deposito-Liquido (Liquido)",
+            "Tanque-Solido (Solido)",
+            "Sistema-Activo-B (Activa)",
+            "Generador-Principal (Principal)"
+        ],
+        "recursos_detalle": [
+            {
+                "nombre_mostrar": "Consola-MCD-01 (Digital)",
+                "categoria": "EQUIPO DE CONTROL",
+                "modelo": "Consola-MCD-01",
+                "tipo": "Digital",
+                "es_combustible": false,
+                "es_consumible": false,
+                "cantidad": 1
+            },
+            {
+                "nombre_mostrar": "Deposito-Liquido (Liquido)",
+                "categoria": "SISTEMA DE COMBUSTIBLE",
+                "modelo": "Deposito-Liquido",
+                "tipo": "Liquido",
+                "es_combustible": true,
+                "es_consumible": true,
+                "cantidad": 15000
+            },
+            {
+                "nombre_mostrar": "Tanque-Solido (Solido)",
+                "categoria": "SISTEMA DE COMBUSTIBLE",
+                "modelo": "Tanque-Solido",
+                "tipo": "Solido",
+                "es_combustible": true,
+                "es_consumible": true,
+                "cantidad": 10000
+            },
+            {
+                "nombre_mostrar": "Sistema-Activo-B (Activa)",
+                "categoria": "SISTEMA DE SEGURIDAD",
+                "modelo": "Sistema-Activo-B",
+                "tipo": "Activa",
+                "es_combustible": false,
+                "es_consumible": false,
+                "cantidad": 1
+            },
+            {
+                "nombre_mostrar": "Generador-Principal (Principal)",
+                "categoria": "SISTEMA ELÉCTRICO",
+                "modelo": "Generador-Principal",
+                "tipo": "Principal",
+                "es_combustible": false,
+                "es_consumible": false,
+                "cantidad": 1
+            }
+        ],
+        "recursos_usados": {
+            "Consola-MCD-01 (Digital)": 1,
+            "Deposito-Liquido (Liquido)": 15000,
+            "Tanque-Solido (Solido)": 10000,
+            "Sistema-Activo-B (Activa)": 1,
+            "Generador-Principal (Principal)": 1
+        },
+        "recursos_consumidos": [
+            {
+                "recurso": "Consola-MCD-01 (Digital)",
+                "cantidad": 1,
+                "es_consumible": false
+            },
+            {
+                "recurso": "Deposito-Liquido (Liquido)",
+                "cantidad": 15000,
+                "es_consumible": true
+            },
+            {
+                "recurso": "Tanque-Solido (Solido)",
+                "cantidad": 10000,
+                "es_consumible": true
+            },
+            {
+                "recurso": "Sistema-Activo-B (Activa)",
+                "cantidad": 1,
+                "es_consumible": false
+            },
+            {
+                "recurso": "Generador-Principal (Principal)",
+                "cantidad": 1,
+                "es_consumible": false
+            }
+        ],
+        "estado": "planificado"
+    },
+    {
+        "tipo": "Prueba de comunicaciones por radio",
+        "fecha_inicio": "06/02/2026",
+        "fecha_fin": "07/02/2026",
+        "duracion_dias": 2,
+        "recursos": [
+            "Escudo-Pasivo-A (Pasiva)",
+            "Antena-Terrestre (Terrestre)",
+            "Generador-Principal (Principal)",
+            "Radio-UHF-Gen (Radio)"
+        ],
+        "recursos_detalle": [
+            {
+                "nombre_mostrar": "Escudo-Pasivo-A (Pasiva)",
+                "categoria": "SISTEMA DE SEGURIDAD",
+                "modelo": "Escudo-Pasivo-A",
+                "tipo": "Pasiva",
+                "es_combustible": false,
+                "es_consumible": false,
+                "cantidad": 1
+            },
+            {
+                "nombre_mostrar": "Antena-Terrestre (Terrestre)",
+                "categoria": "ESTACIÓN DE SEGUIMIENTO",
+                "modelo": "Antena-Terrestre",
+                "tipo": "Terrestre",
+                "es_combustible": false,
+                "es_consumible": false,
+                "cantidad": 1
+            },
+            {
+                "nombre_mostrar": "Generador-Principal (Principal)",
+                "categoria": "SISTEMA ELÉCTRICO",
+                "modelo": "Generador-Principal",
+                "tipo": "Principal",
+                "es_combustible": false,
+                "es_consumible": false,
+                "cantidad": 1
+            },
+            {
+                "nombre_mostrar": "Radio-UHF-Gen (Radio)",
+                "categoria": "EQUIPO DE COMUNICACIÓN",
+                "modelo": "Radio-UHF-Gen",
+                "tipo": "Radio",
+                "es_combustible": false,
+                "es_consumible": false,
+                "cantidad": 1
+            }
+        ],
+        "recursos_usados": {
+            "Escudo-Pasivo-A (Pasiva)": 1,
+            "Antena-Terrestre (Terrestre)": 1,
+            "Generador-Principal (Principal)": 1,
+            "Radio-UHF-Gen (Radio)": 1
+        },
+        "recursos_consumidos": [
+            {
+                "recurso": "Escudo-Pasivo-A (Pasiva)",
+                "cantidad": 1,
+                "es_consumible": false
+            },
+            {
+                "recurso": "Antena-Terrestre (Terrestre)",
+                "cantidad": 1,
+                "es_consumible": false
+            },
+            {
+                "recurso": "Generador-Principal (Principal)",
+                "cantidad": 1,
+                "es_consumible": false
+            },
+            {
+                "recurso": "Radio-UHF-Gen (Radio)",
+                "cantidad": 1,
+                "es_consumible": false
+            }
+        ],
+        "estado": "planificado"
+    }
+]
