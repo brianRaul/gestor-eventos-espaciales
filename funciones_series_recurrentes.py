@@ -2,7 +2,6 @@ from datetime import datetime, date, timedelta
 from funciones_crear_evento import *
 from funciones_buscar_hueco import *
 
-
 def crear_serie_recurrente(
     tipo_evento,
     recursos_seleccionados_nombres,
@@ -21,19 +20,19 @@ def crear_serie_recurrente(
         or len(str(intervalo_dias)) > 4
         or len(str(num_eventos)) > 4
     ):
-        return False, "❌ Número inválido: demasiado grande", [], None
+        return False, "❌ Número inválido", [], None
 
     # 2. Convertir fecha
     try:
         fecha_inicial = datetime.strptime(fecha_inicio_str, "%d/%m/%Y").date()
     except:
-        return False, "❌ FECHA INVÁLIDA\nFormato requerido: DD/MM/AAAA", [], None
+        return False, "❌ Fecha inválida", [], None
 
     # 3. Verificar que el intervalo no sea menor que la duración
     if num_eventos > 1 and intervalo_dias < duracion_dias:
         return (
             False,
-            "❌ CONFIGURACIÓN INVÁLIDA\nEl intervalo debe ser mayor o igual a la duración del evento.",
+            "❌ Intervalo menor que duración",
             [],
             None,
         )
@@ -51,7 +50,7 @@ def crear_serie_recurrente(
     if fecha_inicial > HOY + timedelta(days=LIMITE_FUTURO_DIAS):
         return (
             False,
-            f"❌ FECHA FUERA DE RANGO\nLa fecha de inicio no puede ser a más de 3 años en el futuro.",
+            f"❌ Fecha fuera de rango (máximo 3 años)",
             [],
             None,
         )
@@ -70,12 +69,7 @@ def crear_serie_recurrente(
 
         return (
             False,
-            (
-                f"❌ SERIE DEMASIADO LARGA\n\n"
-                f"Duración total: {duracion_total_serie} días\n"
-                f"Límite máximo: 365 días (1 año)\n\n"
-                f"Máximo eventos posibles: {eventos_posibles}"
-            ),
+            f"❌ Serie demasiado larga (máximo {eventos_posibles} eventos)",
             [],
             None,
         )
@@ -96,25 +90,19 @@ def crear_serie_recurrente(
 
         return (
             False,
-            (
-                f"❌ SERIE FUERA DEL RANGO PERMITIDO\n\n"
-                f"La serie completa excede el límite de 3 años.\n"
-                f"Último evento terminaría: {fecha_fin_ultimo.strftime('%d/%m/%Y')}\n"
-                f"Límite máximo: {(HOY + timedelta(days=LIMITE_FUTURO_DIAS)).strftime('%d/%m/%Y')}\n\n"
-                f"Máximo eventos posibles: {eventos_posibles}"
-            ),
+            f"❌ Serie fuera de rango (máximo {eventos_posibles} eventos)",
             [],
             None,
         )
 
     # 7. Obtener datos del tipo de evento
     if tipo_evento not in tipos_evento_data:
-        return False, "❌ TIPO DE EVENTO NO ENCONTRADO", [], None
+        return False, "❌ Tipo de evento no encontrado", [], None
 
     evento_data = tipos_evento_data[tipo_evento]
     recursos_requeridos = evento_data.get("recursos_requeridos", [])
 
-    # 8. VERIFICACIÓN DE CAPACIDAD Y COMBUSTIBLE
+    # 8. VERIFICACIÓN DE CAPACIDAD MÁXIMA
     for req in recursos_requeridos:
         if "COMBUSTIBLE" in req["categoria"].upper():
             capacidad_total = 0
@@ -136,7 +124,7 @@ def crear_serie_recurrente(
                 eventos_posibles = int(eventos_posibles)
                 return (
                     False,
-                    f"❌ CAPACIDAD INSUFICIENTE\n\nPara {num_eventos} eventos se necesitan {total_necesario}L.\nCapacidad máxima: {capacidad_total}L\n\nMáximo eventos posibles: {eventos_posibles}.",
+                    f"❌ Capacidad insuficiente (máximo {eventos_posibles} eventos)",
                     [],
                     None,
                 )
@@ -164,7 +152,7 @@ def crear_serie_recurrente(
             faltante = cantidad_necesaria - stock_disponible
             return (
                 False,
-                f"❌ COMBUSTIBLE INSUFICIENTE\n\nSe necesitan {cantidad_necesaria}L de {categoria} {tipo}.\nStock actual: {stock_disponible}L\nFaltan: {faltante}L.",
+                f"❌ Combustible insuficiente (faltan {faltante}L de {categoria} {tipo})",
                 [],
                 None,
             )
@@ -268,7 +256,7 @@ def crear_serie_recurrente(
         if nuevo_evento is None:
             return (
                 False,
-                f"❌ Error inesperado en evento {i+1}: No se pudo crear el evento",
+                f"❌ Error en evento {i+1}: No se pudo crear",
                 eventos_creados,
                 fecha_temp,
             )
@@ -278,13 +266,10 @@ def crear_serie_recurrente(
         eventos_planificados.append(nuevo_evento)
 
         # Extraer recursos opcionales de la lista devuelta
-        # Extraer recursos opcionales de la lista devuelta
         if recursos_opcionales and isinstance(recursos_opcionales, list):
             for recurso in recursos_opcionales:
-                # Verificar que sea un diccionario con "nombre_mostrar"
                 if isinstance(recurso, dict) and "nombre_mostrar" in recurso:
                     recursos_opcionales_serie.add(recurso["nombre_mostrar"])
-                # Por si acaso viene como string (aunque no debería)
                 elif isinstance(recurso, str):
                     recursos_opcionales_serie.add(recurso)
 
@@ -295,13 +280,9 @@ def crear_serie_recurrente(
 
     # Añadir información sobre recursos opcionales si los hay
     if recursos_opcionales_serie:
-        mensaje_final += f"\n\nℹ️ RECURSOS OPCIONALES EN LA SERIE:\n"
-        for recurso in sorted(recursos_opcionales_serie):
-            mensaje_final += f"• {recurso}\n"
-        mensaje_final += "\n⚠️ Estos recursos no eran necesarios pero se asignaron en todos los eventos."
-
+        mensaje_final += f"\n\nℹ️ Recursos opcionales incluidos"
+    
     return True, mensaje_final, eventos_creados, None
-
 
 def buscar_serie_completa_disponible(
     tipo_evento,
@@ -324,7 +305,7 @@ def buscar_serie_completa_disponible(
         return (
             False,
             None,
-            "❌ CONFIGURACIÓN INVÁLIDA\n\nEl intervalo es menor que la duración.\nLos eventos se solaparían.",
+            "❌ El intervalo debe ser mayor que la duración",
         )
 
     # Calcular duración total de la serie
@@ -343,12 +324,7 @@ def buscar_serie_completa_disponible(
         return (
             False,
             None,
-            (
-                f"❌ SERIE DEMASIADO LARGA\n\n"
-                f"Duración total: {duracion_total_serie} días\n"
-                f"Límite máximo: 365 días (1 año)\n\n"
-                f"Máximo eventos posibles: {eventos_posibles}"
-            ),
+            f"❌ Serie demasiado larga (máximo {eventos_posibles} eventos)",
         )
 
     # Verificar que toda la serie quepa dentro de 3 años desde hoy
@@ -370,17 +346,11 @@ def buscar_serie_completa_disponible(
         return (
             False,
             None,
-            (
-                f"❌ SERIE FUERA DEL RANGO PERMITIDO\n\n"
-                f"La serie completa excede el límite de 3 años.\n"
-                f"Último evento terminaría: {fecha_fin_ultimo.strftime('%d/%m/%Y')}\n"
-                f"Límite máximo: {FECHA_MAXIMA.strftime('%d/%m/%Y')}\n\n"
-                f"Máximo eventos posibles: {eventos_posibles}"
-            ),
+            f"❌ La serie excede 3 años (máximo {eventos_posibles} eventos)",
         )
 
     if tipo_evento not in tipos_evento_data:
-        return False, None, "❌ TIPO DE EVENTO NO VÁLIDO"
+        return False, None, "❌ Tipo de evento no válido"
 
     evento_data = tipos_evento_data.get(tipo_evento)
     recursos_req = evento_data.get("recursos_requeridos", [])
@@ -402,7 +372,7 @@ def buscar_serie_completa_disponible(
                 return (
                     False,
                     None,
-                    f"❌ CAPACIDAD INSUFICIENTE\n\nCada evento necesita {req['cantidad']}L de {req['categoria']} {req['tipo']}.\nCapacidad total: {capacidad_total}L.",
+                    f"❌ Capacidad insuficiente (se necesitan {req['cantidad']}L, capacidad: {capacidad_total}L)",
                 )
 
             # Verificar si toda la serie es posible
@@ -413,7 +383,7 @@ def buscar_serie_completa_disponible(
                 return (
                     False,
                     None,
-                    f"❌ CAPACIDAD INSUFICIENTE\n\nPara {num_eventos} eventos se necesitan {total_necesario}L.\nCapacidad máxima: {capacidad_total}L\n\nMáximo eventos posibles: {eventos_posibles}.",
+                    f"❌ Capacidad insuficiente (máximo {eventos_posibles} eventos)",
                 )
 
     # Verificar combustible disponible actual
@@ -443,9 +413,9 @@ def buscar_serie_completa_disponible(
             return (
                 False,
                 None,
-                f"❌ COMBUSTIBLE INSUFICIENTE\n\nPara {num_eventos} eventos se necesitan {cantidad_necesaria}L.\nStock actual: {stock_disponible}L\nFaltan: {faltante}L.",
+                f"❌ Combustible insuficiente (faltan {faltante}L de {categoria} {tipo})",
             )
-
+    
     # --- 2. BÚSQUEDA DE FECHAS DISPONIBLES ---
     LIMITE_BUSQUEDA = LIMITE_FUTURO_DIAS  # Buscar en los próximos 3 años
 
@@ -513,15 +483,14 @@ def buscar_serie_completa_disponible(
             return (
                 True,
                 fecha_candidata,
-                f"✅ SERIE DISPONIBLE\n\nFecha de inicio: {fecha_candidata.strftime('%d/%m/%Y')}",
+                f"✅ Serie disponible desde {fecha_candidata.strftime('%d/%m/%Y')}",
             )
 
     return (
         False,
         None,
-        f"❌ NO HAY FECHAS DISPONIBLES\n\nSe buscaron los próximos {LIMITE_BUSQUEDA} días sin encontrar fechas libres.",
+        f"❌ No hay fechas disponibles en {LIMITE_BUSQUEDA} días",
     )
-
 
 def es_error_solapamiento(mensaje_error):
     """Determina si un error es de solapamiento (recursos ocupados en fechas)"""

@@ -156,7 +156,6 @@ def validar_requisitos_coexistentes(evento_data, recursos_seleccionados):
 
     return True, ""
 
-
 # Valida que se cumplan los recursos requeridos
 def validar_recursos_requeridos(
     evento_data,
@@ -164,8 +163,7 @@ def validar_recursos_requeridos(
     recursos,
     eventos_planificados,
     fecha_inicio,
-    fecha_fin,
-):
+    fecha_fin,):
     recursos_requeridos = evento_data.get("recursos_requeridos", [])
 
     # Agrupar recursos seleccionados por categoría y tipo
@@ -194,13 +192,13 @@ def validar_recursos_requeridos(
 
         # Para combustible, verificar cantidad disponible
         if "COMBUSTIBLE" in categoria_req.upper():
-            total_disponible = sum(r["cantidad_disponible"] for r in recursos_del_tipo)
-            if total_disponible < cantidad_req:
-                faltante = cantidad_req - total_disponible
-                return (
-                    False,
-                    f"❌ COMBUSTIBLE INSUFICIENTE: {categoria_req} {tipo_req}\nSe necesitan: {cantidad_req}L\nDisponible: {total_disponible}L\nFaltan: {faltante}L\n\n💡 Usa 'Rellenar Todo' para reponer combustible.",
-                )
+         total_disponible = sum(r["cantidad_disponible"] for r in recursos_del_tipo)
+         if total_disponible < cantidad_req:
+          faltante = cantidad_req - total_disponible
+          return (
+            False,
+            f"❌ Combustible insuficiente: {categoria_req} {tipo_req} (faltan {faltante}L)",
+        )
         else:
             # Para equipos: verificar ocupación en esas fechas
             capacidad_total = sum(r["cantidad_total"] for r in recursos_del_tipo)
@@ -236,7 +234,6 @@ def validar_recursos_requeridos(
                 )
 
     return True, ""
-
 
 # Consume los recursos necesarios para el evento
 def consumir_recursos(evento_data, recursos_seleccionados, recursos):
@@ -384,7 +381,6 @@ def validar_recursos_opcionales(evento_data, recursos_seleccionados):
 
 # ========== FUNCIÓN PRINCIPAL ==========
 
-
 def procesar_creacion_evento(
     tipo_evento,
     day,
@@ -450,24 +446,15 @@ def procesar_creacion_evento(
     )
 
     # Si estamos en modo validación, devolver advertencia
-    # Si estamos en modo validación, devolver advertencia
     if modo_validacion and recursos_opcionales:
-        nombres_opcionales = [r["nombre_mostrar"] for r in recursos_opcionales]
-        # Crear lista con viñetas para mejor visualización
-        lista_recursos = "\n".join([f"• {nombre}" for nombre in nombres_opcionales])
-        mensaje_advertencia = (
-            f"ℹ️ RECURSOS OPCIONALES DETECTADOS:\n"
-            f"Los siguientes recursos no son necesarios pero se incluirán:\n"
-            f"{lista_recursos}\n\n"
-            f"✅ No hay problema, puedes continuar."
-        )
-        return True, mensaje_advertencia, None, recursos_opcionales
+     nombres_opcionales = [r["nombre_mostrar"] for r in recursos_opcionales]
+     mensaje_advertencia = f"ℹ️ {len(nombres_opcionales)} recursos opcionales"
+     return True, mensaje_advertencia, None, recursos_opcionales
+ 
     # Si estamos en modo validación sin recursos opcionales
     if modo_validacion:
         return True, "✅ Validación exitosa", None, recursos_opcionales
 
-    # Si estamos creando el evento, añadir advertencia al mensaje final
-    # Si estamos creando el evento, añadir advertencia al mensaje final
     # Si estamos creando el evento, añadir advertencia al mensaje final
     mensaje_opcional = ""
     if recursos_opcionales:

@@ -67,7 +67,6 @@ def encontrar_eventos_solapados(fecha_inicio, fecha_fin, eventos_planificados):
 
     return eventos_solapados
 
-
 # Extrae las fechas de inicio y fin de un evento
 def obtener_fechas_evento(evento):
 
@@ -78,8 +77,6 @@ def obtener_fechas_evento(evento):
     except:
         return None, None
 
-
-# Calcula cuántos recursos están ocupados por eventos solapados
 # Calcula cuántos recursos están ocupados por eventos solapados
 def calcular_recursos_ocupados(eventos_solapados):
     recursos_ocupados = {}
@@ -107,7 +104,6 @@ def calcular_recursos_ocupados(eventos_solapados):
 
     return recursos_ocupados
 
-
 # Obtiene la clave (categoria|tipo) a partir del nombre del recurso
 def obtener_clave_recurso_por_nombre(evento, nombre_recurso):
 
@@ -116,16 +112,17 @@ def obtener_clave_recurso_por_nombre(evento, nombre_recurso):
             return f"{r_detalle['categoria']}|{r_detalle['tipo']}"
     return None
 
-
 def verificar_disponibilidad_sin_solapamientos(recursos_necesarios, recursos):
     for _, req in recursos_necesarios.items():
         if req["es_combustible"]:
             stock_disponible = obtener_stock_combustible(req, recursos)
 
             if stock_disponible < req["cantidad"]:
+                # MENSAJE CORTO
+                faltante = req["cantidad"] - stock_disponible
                 return (
                     False,
-                    f"Combustible insuficiente: {req['categoria']} {req['tipo']}",
+                    f"❌ Combustible insuficiente: {req['categoria']} {req['tipo']} (faltan {faltante}L)",
                 )
 
     return True, "Sin problemas de combustible"
@@ -134,7 +131,6 @@ def verificar_disponibilidad_sin_solapamientos(recursos_necesarios, recursos):
 def verificar_disponibilidad_con_solapamientos(
     recursos_necesarios, recursos_ocupados, recursos
 ):
-
     for clave, req in recursos_necesarios.items():
         cantidad_necesaria = req["cantidad"]
 
@@ -143,9 +139,11 @@ def verificar_disponibilidad_con_solapamientos(
             stock_disponible = obtener_stock_combustible(req, recursos)
 
             if stock_disponible < cantidad_necesaria:
+                # MENSAJE CORTO
+                faltante = cantidad_necesaria - stock_disponible
                 return (
                     False,
-                    f"Combustible insuficiente con solapamientos: {req['categoria']} {req['tipo']}",
+                    f"❌ Combustible insuficiente: {req['categoria']} {req['tipo']} (faltan {faltante}L)",
                 )
 
         # Para equipos
@@ -157,11 +155,10 @@ def verificar_disponibilidad_con_solapamientos(
             if disponible < cantidad_necesaria:
                 return (
                     False,
-                    f"Equipos no disponibles con solapamientos: {req['categoria']} {req['tipo']}",
+                    f"❌ {req['categoria']} {req['tipo']} no disponible (faltan {cantidad_necesaria - disponible} unidades)",
                 )
 
     return True, "Disponible"
-
 
 def obtener_stock_combustible(req, recursos):
     stock_total = 0
