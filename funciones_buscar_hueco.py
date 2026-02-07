@@ -80,19 +80,30 @@ def obtener_fechas_evento(evento):
 
 
 # Calcula cuántos recursos están ocupados por eventos solapados
+# Calcula cuántos recursos están ocupados por eventos solapados
 def calcular_recursos_ocupados(eventos_solapados):
-
     recursos_ocupados = {}
 
     for evento in eventos_solapados:
-        # Sumar recursos usados por este evento
-        for recurso_usado, cantidad in evento.get("recursos_usados", {}).items():
-            clave = obtener_clave_recurso_por_nombre(evento, recurso_usado)
-
-            if clave:
+        # PRIORIDAD 1: Usar la estructura nueva (recursos_detalle) si existe
+        if "recursos_detalle" in evento and evento["recursos_detalle"]:
+            for rd in evento["recursos_detalle"]:
+                clave = f"{rd['categoria']}|{rd['tipo']}"
+                cantidad = rd.get("cantidad", 1)
+                
                 if clave not in recursos_ocupados:
                     recursos_ocupados[clave] = 0
                 recursos_ocupados[clave] += cantidad
+        
+        # PRIORIDAD 2: Compatibilidad con estructura antigua (recursos_usados)
+        elif "recursos_usados" in evento:
+            for recurso_usado, cantidad in evento.get("recursos_usados", {}).items():
+                clave = obtener_clave_recurso_por_nombre(evento, recurso_usado)
+
+                if clave:
+                    if clave not in recursos_ocupados:
+                        recursos_ocupados[clave] = 0
+                    recursos_ocupados[clave] += cantidad
 
     return recursos_ocupados
 
