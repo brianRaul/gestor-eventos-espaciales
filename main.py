@@ -21,7 +21,7 @@ class GestorEventos(ctk.CTk):
 
         # 1.Configurar ventana
         self.title("Gestor de Eventos Espaciales")
-        self.geometry("670x975")
+        self.geometry("2000x975")
 
         self.evento_seleccionado = None
 

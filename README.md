@@ -40,60 +40,140 @@ La aplicación garantiza que los recursos no se asignen a más de un evento simu
 
 ---
 
-## 🚀 **Instalación y Ejecución**
+## 🏗️ **Estructura del Código**
 
-### **Requisitos Previos**
-- **Python 3.8 o superior** ([Descargar Python](https://www.python.org/downloads/))
-- **Sistema operativo**: Windows, macOS o Linux
+### **Arquitectura Modular**
+El sistema está organizado en módulos especializados para mantener una separación clara de responsabilidades:
 
-### **Paso 1: Clonar o descargar el proyecto**
-```bash
-# Opción 1: Clonar con Git
-git clone <tu-repositorio>
-cd gestor-eventos-espaciales
-
-# Opción 2: Descargar ZIP
-# 1. Descarga el proyecto como ZIP desde GitHub
-# 2. Descomprímelo en una carpeta de tu elección
-# 3. Abre una terminal en esa carpeta
+```
+main.py                          # Interfaz gráfica principal (CustomTkinter)
+│
+├── funciones_datos.py           # Carga y guardado de archivos JSON
+├── funciones_crear_evento.py    # Lógica principal de creación de eventos
+├── funciones_buscar_hueco.py    # Búsqueda de fechas disponibles
+├── funciones_series_recurrentes.py # Gestión de series de eventos
+│
+├── logica_combustible.py        # Gestión de combustible
+├── logica_eliminacion.py        # Eliminación de eventos con devolución
+├── logica_serie.py              # Validación de series recurrentes
+├── logica_visualizaciones.py    # Visualización de eventos y recursos
+├── logica_recursos.py           # Gestión y validación de recursos
+├── logica_fechas.py             # Validación y cálculo de fechas
+└── logica_validaciones.py       # Validaciones generales
 ```
 
-### **Paso 2: Instalar dependencias**
-```bash
-pip install customtkinter
+### **Flujo de Datos**
 ```
-
-### **Paso 3: Ejecutar la aplicación**
-```bash
-python main.py
+Interfaz Gráfica → Lógica de Negocio → Validaciones → Persistencia
+      (main.py)    (módulos logica_*)   (validaciones)   (JSON files)
 ```
-**¡Importante!** Solo necesitas ejecutar `main.py`. La aplicación cargará automáticamente todos los datos necesarios.
-
-### **Estructura mínima de archivos:**
-```
-gestor-eventos-espaciales/
-├── main.py                    ← ¡EJECUTA ESTE ARCHIVO!
-├── funciones_crear_evento.py
-├── funciones_series_recurrentes.py
-├── funciones_buscar_hueco.py
-├── funciones_datos.py
-├── eventos_predeterminados.json
-├── recursos.json
-├── eventos_planificados.json  ← Se crea automáticamente
-└── README.md
-```
-
-### **Paso 4: Usar la aplicación**
-1. La interfaz se abrirá automáticamente
-2. Sigue las instrucciones en pantalla
-3. ¡Comienza a planificar eventos espaciales!
 
 ---
 
-## 📋 **Tipos de Eventos Disponibles**
+## ⚙️ **Sistema de Restricciones Detallado**
 
-La aplicación incluye **15 tipos de eventos aeroespaciales** preconfigurados:
+### **Niveles de Validación**
+El sistema implementa 7 capas de validación secuencial:
 
+1. **Validación de Tipo de Evento** - Verifica que el evento exista en la configuración
+2. **Validación de Fechas** - Comprueba fechas válidas, no pasadas y dentro del límite de 3 años
+3. **Validación de Recursos Seleccionados** - Convierte nombres a objetos y verifica existencia
+4. **Reglas de Exclusión** - Bloquea combinaciones prohibidas de recursos
+5. **Requisitos Coexistentes** - Exige recursos complementarios cuando se usan ciertos recursos principales
+6. **Recursos Requeridos** - Verifica que todos los recursos obligatorios estén seleccionados y disponibles
+7. **Validación de Disponibilidad** - Comprueba solapamientos y stock disponible
+
+### **Tipos de Restricciones**
+
+#### **1. Restricciones de Recursos (Exclusiones)**
+```json
+{
+  "categoria": "COHETE",
+  "tipos_prohibidos": ["Ligero"]
+}
+```
+- **Sentido**: Cuando se selecciona un tipo de evento, ciertas categorías de recursos tienen tipos específicos prohibidos.
+- **Ejemplo**: Un "Despegue de cohete" no puede usar cohetes ligeros, solo pesados.
+
+#### **2. Dependencias de Recursos (Co-requisitos)**
+```json
+{
+  "categoria": "COHETE",
+  "tipo": "Pesado",
+  "requiere": [
+    {"categoria": "EQUIPO DE CONTROL", "tipo": "Digital"},
+    {"categoria": "SISTEMA DE SEGURIDAD", "tipo": "Activa"}
+  ]
+}
+```
+- **Sentido**: Cuando se selecciona un recurso específico, automáticamente requiere otros recursos.
+- **Ejemplo**: Un cohete pesado siempre necesita un equipo de control digital y un sistema de seguridad activa.
+
+#### **3. Restricciones de Cantidad**
+- **Combustible**: Verifica litros disponibles vs. requeridos
+- **Equipos**: Verifica unidades disponibles considerando eventos solapados
+- **Límites de capacidad**: Cada recurso tiene una cantidad máxima definida
+
+#### **4. Restricciones Temporales**
+- **Límite de 3 años**: No se puede planificar más allá de 1095 días desde hoy
+- **No eventos pasados**: No se permiten fechas anteriores a hoy
+- **Series limitadas**: Las series recurrentes no pueden exceder 1 año de duración total
+- **Intervalo mínimo**: En series, el intervalo debe ser mayor o igual a la duración del evento
+
+### **Validación de Solapamientos**
+El sistema verifica múltiples dimensiones de solapamiento:
+
+1. **Solapamiento Temporal**: Dos eventos no pueden ocurrir en las mismas fechas
+2. **Solapamiento de Recursos**: Un recurso no puede estar asignado a dos eventos simultáneamente
+3. **Solapamiento de Capacidad**: Para recursos con múltiples unidades, verifica unidades libres
+
+### **Gestión de Combustible**
+- **Consumo**: Al crear eventos, se descuenta combustible de los tanques
+- **Devolución**: Al eliminar eventos, el combustible regresa a los tanques (hasta capacidad máxima)
+- **Desperdicio**: Si el tanque está lleno al devolver, el exceso se pierde
+
+---
+
+## 🔩 **Recursos del Sistema**
+
+### **Categorías de Recursos**
+El sistema gestiona **15 categorías de recursos** con múltiples unidades:
+
+- **COHETE** (Pesado/Ligero) - Vehículos espaciales
+- **PLATAFORMA DE LANZAMIENTO** (Estática/Móvil) - Bases de despegue
+- **EQUIPO DE CONTROL** (Digital/Analógico) - Sistemas de control
+- **SALA DE CONTROL PRINCIPAL** (Primaria/Secundaria) - Centros de operaciones
+- **SISTEMA DE COMBUSTIBLE** (Líquido/Sólido) - Con cantidad en litros (POOL)
+- **TORRE DE SERVICIO** (Retráctil/Fija) - Estructuras de soporte
+- **SISTEMA DE SEGURIDAD** (Activa/Pasiva) - Sistemas de protección
+- **ESTACIÓN DE SEGUIMIENTO** (Satelital/Terrestre) - Sistemas de monitoreo
+- **SISTEMA DE NAVEGACIÓN** (GPS/Inercial) - Sistemas de guía
+- **SISTEMA ELÉCTRICO** (Principal/Emergencia) - Fuentes de energía
+- **SISTEMA DE CONTROL TÉRMICO** (Refrigerante/Aislante) - Control de temperatura
+- **EQUIPO DE RECUPERACIÓN** (Aéreo/Terrestre) - Sistemas de recuperación
+- **LABORATORIO DE PRUEBAS** (Químico/Físico) - Instalaciones de análisis
+- **PLATAFORMA DE ATERRIZAJE** (Continental/Marítima) - Zonas de aterrizaje
+- **EQUIPO DE COMUNICACIÓN** (Radio/Satelital) - Sistemas de comunicación
+
+### **Tipos de Recursos**
+Cada recurso tiene propiedades específicas:
+
+- **Recursos únicos**: Equipos que no se consumen (torres, plataformas)
+- **Recursos pool**: Múltiples unidades disponibles (cohetes, equipos de control)
+- **Combustibles**: Recursos consumibles con cantidad (litros disponibles vs. total)
+
+---
+
+## 🚀 **Tipos de Eventos Disponibles**
+
+La aplicación incluye **15 tipos de eventos aeroespaciales** preconfigurados, cada uno con:
+
+1. **Recursos requeridos mínimos** - Obligatorios para el evento
+2. **Reglas de exclusión** - Recursos que no pueden usarse
+3. **Requisitos coexistentes** - Dependencias entre recursos
+4. **Configuración de duración** - Mínimo y máximo de días
+
+**Eventos disponibles:**
 1. **Despegue de cohete** - Lanzamiento de cohete pesado
 2. **Prueba estática de motor** - Prueba de motor con cohete ligero
 3. **Simulación de aterrizaje** - Simulación en plataforma continental
@@ -109,243 +189,254 @@ La aplicación incluye **15 tipos de eventos aeroespaciales** preconfigurados:
 13. **Mantenimiento de torre fija** - Mantenimiento especializado
 14. **Prueba de comunicaciones por radio** - Comunicaciones UHF
 15. **Prueba mixta combustible sólido-líquido** - Prueba con ambos combustibles
----
-
-## 🔩 **Recursos del Sistema**
-
-El sistema gestiona **15 categorías de recursos** con múltiples unidades:
-
-- **COHETE** (Pesado/Ligero)
-- **PLATAFORMA DE LANZAMIENTO** (Estática/Móvil)
-- **EQUIPO DE CONTROL** (Digital/Analógico)
-- **SALA DE CONTROL PRINCIPAL** (Primaria/Secundaria)
-- **SISTEMA DE COMBUSTIBLE** (Líquido/Sólido) ← Con cantidad en litros
-- **TORRE DE SERVICIO** (Retráctil/Fija)
-- **SISTEMA DE SEGURIDAD** (Activa/Pasiva)
-- **ESTACIÓN DE SEGUIMIENTO** (Satelital/Terrestre)
-- **SISTEMA DE NAVEGACIÓN** (GPS/Inercial)
-- **SISTEMA ELÉCTRICO** (Principal/Emergencia)
-- **SISTEMA DE CONTROL TÉRMICO** (Refrigerante/Aislante)
-- **EQUIPO DE RECUPERACIÓN** (Aéreo/Terrestre)
-- **LABORATORIO DE PRUEBAS** (Químico/Físico)
-- **PLATAFORMA DE ATERRIZAJE** (Continental/Marítima)
-- **EQUIPO DE COMUNICACIÓN** (Radio/Satelital)
-
----
-
-## 🎮 **Guía Rápida de Uso**
-
-### **Planificar un Evento Individual**
-1. **Selecciona** un tipo de evento del menú desplegable
-2. **Introduce** la fecha (día, mes, año) y duración en días
-3. **Marca** los recursos necesarios (usa "✓ Marcar Recomendados" para selección automática)
-4. **Haz clic** en "🚀 Crear Nuevo Evento"
-
-### **Crear una Serie Recurrente**
-1. Rellena fecha y duración
-2. Especifica intervalo (en días) y número de repeticiones
-3. Usa "🔍 Sugerir Serie" para encontrar fechas disponibles
-4. Confirma con "🔄 Crear Serie"
-
-### **Gestionar Eventos Existentes**
-- **📋 Ver Eventos Planificados**: Muestra todos los eventos agendados
-- **🗑️ Eliminar Eventos**: Elimina eventos seleccionados, liberando recursos
-- **📦 Ver Recursos**: Detalla los recursos utilizados en cada evento
-
-### **Gestionar Combustible**
-- **📊 Ver Combustible**: Muestra niveles actuales de todos los tanques
-- **⛽ Rellenar Todo**: Repone todos los tanques de combustible al máximo
-
-### **Búsqueda Inteligente**
-- **🔍 Sugerir Próxima Fecha Libre**: Encuentra automáticamente la próxima ventana disponible
-
----
-
-## ⚙️ **Especificaciones Técnicas**
-
-### **Límites del Sistema**
-- **Planificación máxima**: 3 años (1095 días) hacia el futuro
-- **Duración máxima de serie**: 1 año (365 días)
-- **No se permiten** eventos en fechas pasadas
-- **Validación completa** de fechas (días/meses válidos, años bisiestos)
-
-### **Validaciones Implementadas**
-```python
-# Ejemplo de validaciones automáticas
-1. Fechas válidas (formato DD/MM/AAAA)
-2. No solapamiento de recursos
-3. Combustible suficiente disponible
-4. Cumplimiento de reglas de exclusión
-5. Cumplimiento de co-requisitos
-6. Límites de duración por tipo de evento
-```
-
-### **Arquitectura del Sistema**
-```
-Capa de Presentación (GUI) → main.py
-         ↓
-Capa de Lógica → funciones_*.py
-         ↓
-Capa de Datos → *.json
-```
-
----
-
-## 🛠️ **Solución de Problemas**
-
-### **Problemas Comunes y Soluciones**
-
-| Problema | Solución |
-|----------|----------|
-| **"Módulo customtkinter no encontrado"** | Ejecuta: `pip install customtkinter` |
-| **"Archivo JSON no encontrado"** | Asegúrate de que todos los archivos .json están en la misma carpeta que main.py |
-| **"Fecha inválida"** | Usa formato DD/MM/AAAA (ej: 15/04/2024) |
-| **"Combustible insuficiente"** | Usa el botón **"⛽ Rellenar Todo"** para reponer tanques |
-| **"Ocupado en esas fechas"** | Usa **"🔍 Sugerir Próxima Fecha Libre"** |
-| **"La serie excede 1 año"** | Reduce el número de repeticiones o el intervalo |
-
-### **Códigos de Error**
-- **❌ Rojo**: Error crítico (no se puede crear el evento)
-- **🟠 Naranja**: Advertencia (problema recuperable)
-- **✅ Verde**: Operación exitosa
-- **🔍 Azul**: Búsqueda en progreso
-
----
-
-## 📁 **Archivos de Configuración**
-
-### **`eventos_predeterminados.json`**
-Define cada tipo de evento con:
-- **recursos_requeridos**: Cantidades mínimas obligatorias
-- **reglas_exclusion**: Recursos que no pueden usarse juntos
-- **requisitos_coexistentes**: Recursos que deben usarse simultáneamente
-- **configuracion_evento**: Duración mínima y máxima
-
-### **`recursos.json`**
-Contiene el inventario completo con:
-- Cantidad total de cada recurso
-- Para combustible: cantidad disponible actual
-- Categorías y tipos organizados
-
-### **`eventos_planificados.json`**
-Almacena automáticamente todos los eventos creados con:
-- Fechas de inicio y fin
-- Recursos asignados con cantidades
-- Estado de planificación
-
----
-
-## 🔍 **Ejemplos de Restricciones**
-
-### **Regla de Exclusión**
-```json
-{
-  "categoria": "COHETE",
-  "tipos_prohibidos": ["Ligero"]
-}
-```
-→ Para un "Despegue de cohete", no se permite usar cohetes ligeros.
-
-### **Requisito Coexistente**
-```json
-{
-  "categoria": "COHETE",
-  "tipo": "Pesado",
-  "requiere": [
-    {"categoria": "EQUIPO DE CONTROL", "tipo": "Digital"},
-    {"categoria": "SISTEMA DE SEGURIDAD", "tipo": "Activa"}
-  ]
-}
-```
-→ Un cohete pesado siempre requiere control digital y seguridad activa.
 
 ---
 
 ## 🧠 **Lógica Avanzada Implementada**
 
 ### **Validación de Fechas**
-- No se permiten eventos en el pasado
-- Límite de planificación: 3 años (1095 días) hacia el futuro
-- Límite de series: 1 año (365 días) de duración total
-- Validación de días/meses válidos automática
+```python
+# Validaciones implementadas:
+1. Formato DD/MM/YYYY correcto
+2. No fechas pasadas (>= hoy)
+3. Límite de 3 años (1095 días desde hoy)
+4. Días válidos según mes (incluye años bisiestos)
+5. Duración dentro de límites del tipo de evento
+6. Series no exceden 1 año de duración total
+```
 
 ### **Validación de Recursos**
-- Combustible: Verifica cantidad disponible vs. requerida
-- Equipos: Verifica disponibilidad en el rango de fechas
-- Reglas de exclusión: Bloquea combinaciones prohibidas
-- Co-requisitos: Exige recursos complementarios
+```python
+# Para cada recurso seleccionado:
+1. Verificar existencia en inventario
+2. Comprobar reglas de exclusión (tipos prohibidos)
+3. Validar requisitos coexistentes (dependencias)
+4. Para combustible: cantidad disponible suficiente
+5. Para equipos: unidades libres en fechas solicitadas
+6. No solapamiento con otros eventos
+```
 
 ### **Búsqueda de Huecos**
-- Analiza eventos solapados
-- Considera la disponibilidad de cada recurso
-- Sugiere la próxima fecha disponible
+El algoritmo de búsqueda considera:
+1. **Eventos existentes** y sus recursos asignados
+2. **Disponibilidad por categoría y tipo** de recurso
+3. **Stock de combustible** actual
+4. **Límites temporales** (3 años máximo)
+5. **Restricciones específicas** del tipo de evento
+
+### **Gestión de Series Recurrentes**
+- **Validación completa** antes de crear cualquier evento
+- **Verificación de combustible** para toda la serie
+- **Búsqueda de ventana completa** para series
+- **Manejo de errores** por evento (si falla uno, se sugiere alternativa)
+
+### **Eliminación con Devolución**
+- **Equipos**: Liberados inmediatamente al inventario
+- **Combustible**: Devuelto a tanques (hasta capacidad máxima)
+- **Desperdicio**: Combustible excedente se pierde si tanque lleno
+- **Integridad**: Los eventos eliminados se borran completamente
 
 ---
 
-## 🎨 **Detalles de la Interfaz**
+## 📁 **Archivos de Configuración**
 
-La aplicación utiliza **CustomTkinter** con:
-- **Tema oscuro** por defecto (configurable)
-- **Widgets personalizados**: combobox, checkboxes con scroll, botones con iconos
-- **Feedback visual**: colores según estado (verde=éxito, rojo=error, naranja=advertencia)
-- **Actualización en tiempo real**: contador de eventos, estado de recursos
+### **`eventos_predeterminados.json`**
+Define cada tipo de evento con estructura completa:
+```json
+{
+  "Nombre del Evento": {
+    "recursos_requeridos": [
+      {"categoria": "CATEGORIA", "tipo": "TIPO", "cantidad": X, "descripcion": "..."}
+    ],
+    "reglas_exclusion": [
+      {"categoria": "CATEGORIA", "tipos_prohibidos": ["TIPO1", "TIPO2"]}
+    ],
+    "requisitos_coexistentes": [
+      {"categoria": "CATEGORIA", "tipo": "TIPO", "requiere": [...]}
+    ],
+    "configuracion_evento": {
+      "duracion_minima": X,
+      "duracion_maxima": Y
+    }
+  }
+}
+```
+
+### **`recursos.json`**
+Inventario con estructura jerárquica:
+```json
+{
+  "recursos": {
+    "CATEGORIA": [
+      {
+        "modelo": "NOMBRE",
+        "tipo": "TIPO",
+        "cantidad_total": X,
+        "cantidad_disponible": Y  // Solo para combustible
+      }
+    ]
+  }
+}
+```
+
+### **`eventos_planificados.json`**
+Almacena eventos creados con estructura unificada:
+```json
+[
+  {
+    "tipo": "Nombre del Evento",
+    "fecha_inicio": "DD/MM/AAAA",
+    "fecha_fin": "DD/MM/AAAA",
+    "duracion_dias": X,
+    "recursos": ["lista de nombres"],
+    "recursos_detalle": [...],  // Estructura completa
+    "recursos_usados": {...},   // Compatibilidad
+    "recursos_consumidos": [...],
+    "estado": "planificado"
+  }
+]
+```
 
 ---
 
-## 🏆 **Funcionalidades Avanzadas**
+## 🎯 **Flujo de Trabajo Típico**
 
-### ✅ **Recursos con Cantidad (Pools)**
-- Los combustibles tienen cantidad disponible y cantidad total
-- Los equipos tienen múltiples unidades disponibles
-- El sistema verifica unidades libres, no solo presencia/ausencia
+### **Crear Evento Individual**
+1. **Seleccionar** tipo de evento → Carga recursos recomendados
+2. **Introducir** fecha y duración → Validación automática
+3. **Seleccionar** recursos → Validación de reglas
+4. **Crear evento** → Consumo de recursos + guardado
 
-### ✅ **Planificación de Eventos Recurrentes**
-- Series con intervalo personalizable
-- Validación de toda la serie antes de crear
-- Búsqueda de fechas disponibles para series completas
+### **Crear Serie Recurrente**
+1. **Configurar** evento base (tipo, recursos, duración)
+2. **Definir** recurrencia (intervalo, repeticiones)
+3. **Validar** serie completa (combustible, disponibilidad)
+4. **Crear serie** → Generación de múltiples eventos
 
-### ✅ **Gestión Completa de Combustible**
-- Consumo automático al crear eventos
-- Devolución al eliminar eventos
-- Reposición manual con "Rellenar Todo"
-- Alertas visuales cuando el nivel es crítico
-
-### ✅ **Eliminación con Devolución**
-- Al eliminar eventos, los recursos se devuelven al inventario
-- Combustible regresa a los tanques (hasta capacidad máxima)
-- Equipos quedan disponibles para otros eventos
+### **Gestionar Conflictos**
+1. **Error de solapamiento** → Usar "Sugerir fecha"
+2. **Combustible insuficiente** → Usar "Rellenar todo"
+3. **Recursos ocupados** → Buscar hueco automáticamente
 
 ---
 
-## 📝 **Notas de Desarrollo**
+## 🔍 **Ejemplos de Validaciones en Acción**
 
-### **Patrones de Diseño Implementados**
-- **Modelo-Vista-Controlador (MVC)** implícito
-- **Funciones puras** para validación y cálculo
-- **Persistencia independiente** de la interfaz
+### **Ejemplo 1: Despegue de Cohete**
+- **Requiere**: Cohete pesado, plataforma estática, control digital, 45,000L combustible líquido
+- **Prohíbe**: Cohetes ligeros, plataformas móviles, combustible sólido
+- **Dependencias**: Cohete pesado → requiere control digital + seguridad activa
 
-### **Extensiones Futuras Posibles**
+### **Ejemplo 2: Prueba Mixta Combustible**
+- **Requiere**: Combustible sólido + líquido, seguridad activa doble
+- **Prohíbe**: Cualquier cohete, cualquier plataforma
+- **Sentido**: Prueba de laboratorio que no involucra vehículos
+
+### **Ejemplo 3: Serie de Pruebas**
+- **Validación**: Verifica combustible para todos los eventos
+- **Búsqueda**: Encuentra ventana de 30 días para 5 eventos
+- **Creación**: Genera 5 eventos espaciados uniformemente
+
+---
+
+## ⚠️ **Límites y Restricciones del Sistema**
+
+### **Límites Absolutos**
+- **Planificación máxima**: 3 años (1095 días) desde hoy
+- **Duración máxima de serie**: 1 año (365 días)
+- **Eventos simultáneos**: Limitados por recursos disponibles
+- **Combustible máximo**: Definido por capacidad de tanques
+
+### **Restricciones de Diseño**
+1. **No eventos pasados** → Evita inconsistencia temporal
+2. **Validación completa antes de crear** → Previene estados inconsistentes
+3. **Devolución parcial de combustible** → Simula pérdidas reales
+4. **Recursos opcionales permitidos** → Flexibilidad en configuración
+
+### **Consideraciones de Rendimiento**
+- **Búsqueda lineal** en ventana de 3 años
+- **Validación por recurso** en cada creación
+- **Ordenamiento automático** de eventos por fecha
+- **Actualización en tiempo real** de interfaces
+
+---
+
+## 🛠️ **Extensibilidad del Sistema**
+
+### **Agregar Nuevos Tipos de Eventos**
+1. Editar `eventos_predeterminados.json`
+2. Definir recursos requeridos, exclusiones y dependencias
+3. La aplicación cargará automáticamente al reiniciar
+
+### **Agregar Nuevos Recursos**
+1. Editar `recursos.json`
+2. Añadir a categoría existente o crear nueva
+3. Definir cantidad total (y disponible para combustible)
+
+### **Modificar Restricciones**
+1. Actualizar reglas en archivo JSON
+2. El sistema aplicará nuevas validaciones inmediatamente
+
+---
+
+## 📝 **Notas de Implementación**
+
+### **Decisiones de Diseño Clave**
+1. **Estructura unificada de eventos**: Todos los eventos tienen mismos campos
+2. **Validación por capas**: Errores se detectan temprano y claramente
+3. **Mensajes de error específicos**: Indican exactamente qué corregir
+4. **Persistencia inmediata**: Cambios se guardan automáticamente
+
+### **Manejo de Errores**
+- **Errores de validación**: Mensajes claros con emojis y colores
+- **Errores de sistema**: Logs en consola + mensajes amigables
+- **Errores de datos**: Carga segura con valores por defecto
+
+### **Compatibilidad Hacia Atrás**
+- **Eventos antiguos**: Compatibles con nueva estructura
+- **Recursos obsoletos**: Marcados pero no eliminados
+- **Configuraciones viejas**: Convertidas automáticamente
+
+---
+
+## 🎨 **Interfaz de Usuario**
+
+### **Componentes Principales**
+1. **Selector de eventos** → Lista desplegable con 15 tipos
+2. **Panel de recursos** → Agrupado por categoría con colores
+3. **Campos de fecha** → Validación en tiempo real
+4. **Sección de recurrencia** → Para series de eventos
+5. **Botones de acción** → Colores según función (verde=crear, rojo=eliminar)
+6. **Área de información** → Mensajes de estado y errores
+
+### **Feedback Visual**
+- **✅ Verde**: Operación exitosa
+- **❌ Rojo**: Error crítico (no se puede proceder)
+- **🟠 Naranja**: Advertencia (acción posible)
+- **🔍 Azul**: Búsqueda en progreso
+- **⛽ Naranja combustible**: Niveles de combustible
+
+### **Interacciones Clave**
+- **Click en checkbox** → Selección/deselección de recurso
+- **"Marcar Recomendados"** → Selección automática de recursos obligatorios
+- **"Sugerir Fecha"** → Búsqueda inteligente de hueco
+- **"Ver Recursos"** → Detalle completo por evento
+
+---
+
+## 🔮 **Futuras Mejoras Potenciales**
+
+### **Mejoras de Funcionalidad**
 1. **Exportación a calendario** (iCal, Google Calendar)
 2. **Notificaciones por email** para eventos próximos
 3. **Múltiples usuarios** con permisos diferentes
 4. **Estadísticas y reportes** de uso de recursos
-5. **API REST** para integración con otros sistemas
 
----
-
-## ❓ **Preguntas Frecuentes**
-
-### **¿Puedo modificar los tipos de eventos?**
-Sí, editando `eventos_predeterminados.json`. La aplicación cargará los cambios al reiniciar.
-
-### **¿Cómo restauro el combustible?**
-Usa el botón **"⛽ Rellenar Todo"** en la interfaz principal.
-
-### **¿Puedo planificar más de 3 años?**
-No, por diseño. El sistema limita la planificación a 3 años para mantener la precisión.
-
-### **¿Qué pasa si cierro la aplicación?**
-Todos los datos se guardan automáticamente. Al reabrirla, verás tus eventos planificados.
+### **Mejoras Técnicas**
+1. **API REST** para integración con otros sistemas
+2. **Base de datos** en lugar de archivos JSON
+3. **Interfaz web** además de desktop
+4. **Sistema de plugins** para tipos de eventos personalizados
 
 ---
 
