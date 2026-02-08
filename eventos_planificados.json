@@ -1,73 +1,19 @@
 [
     {
-        "tipo": "Despegue de cohete",
+        "tipo": "Mantenimiento de torre fija",
         "fecha_inicio": "08/02/2026",
-        "fecha_fin": "09/02/2026",
-        "duracion_dias": 2,
+        "fecha_fin": "12/02/2026",
+        "duracion_dias": 5,
         "recursos": [
-            "Apolo-1 (Pesado)",
-            "LC-39A (Estatica)",
-            "Consola-MCD-01 (Digital)",
-            "Firing Room-1 (Primaria)",
-            "Deposito-Liquido (Liquido)",
-            "Torre-Movil-A (Retractil)",
-            "Sistema-Activo-B (Activa)",
-            "Sat-Tracker-1 (Satelital)",
-            "GPS-System-A (GPS)",
-            "Generador-Principal (Principal)",
-            "Cooling-System-A (Refrigerante)"
+            "Torre-Fija-B (Fija)",
+            "Sistema-Activo-B (Activa)"
         ],
         "recursos_detalle": [
             {
-                "nombre_mostrar": "Apolo-1 (Pesado)",
-                "categoria": "COHETE",
-                "modelo": "Apolo-1",
-                "tipo": "Pesado",
-                "es_combustible": false,
-                "es_consumible": false,
-                "cantidad": 1
-            },
-            {
-                "nombre_mostrar": "LC-39A (Estatica)",
-                "categoria": "PLATAFORMA DE LANZAMIENTO",
-                "modelo": "LC-39A",
-                "tipo": "Estatica",
-                "es_combustible": false,
-                "es_consumible": false,
-                "cantidad": 1
-            },
-            {
-                "nombre_mostrar": "Consola-MCD-01 (Digital)",
-                "categoria": "EQUIPO DE CONTROL",
-                "modelo": "Consola-MCD-01",
-                "tipo": "Digital",
-                "es_combustible": false,
-                "es_consumible": false,
-                "cantidad": 1
-            },
-            {
-                "nombre_mostrar": "Firing Room-1 (Primaria)",
-                "categoria": "SALA DE CONTROL PRINCIPAL",
-                "modelo": "Firing Room-1",
-                "tipo": "Primaria",
-                "es_combustible": false,
-                "es_consumible": false,
-                "cantidad": 1
-            },
-            {
-                "nombre_mostrar": "Deposito-Liquido (Liquido)",
-                "categoria": "SISTEMA DE COMBUSTIBLE",
-                "modelo": "Deposito-Liquido",
-                "tipo": "Liquido",
-                "es_combustible": true,
-                "es_consumible": true,
-                "cantidad": 45000
-            },
-            {
-                "nombre_mostrar": "Torre-Movil-A (Retractil)",
+                "nombre_mostrar": "Torre-Fija-B (Fija)",
                 "categoria": "TORRE DE SERVICIO",
-                "modelo": "Torre-Movil-A",
-                "tipo": "Retractil",
+                "modelo": "Torre-Fija-B",
+                "tipo": "Fija",
                 "es_combustible": false,
                 "es_consumible": false,
                 "cantidad": 1
@@ -80,110 +26,20 @@
                 "es_combustible": false,
                 "es_consumible": false,
                 "cantidad": 1
-            },
-            {
-                "nombre_mostrar": "Sat-Tracker-1 (Satelital)",
-                "categoria": "ESTACIÓN DE SEGUIMIENTO",
-                "modelo": "Sat-Tracker-1",
-                "tipo": "Satelital",
-                "es_combustible": false,
-                "es_consumible": false,
-                "cantidad": 1
-            },
-            {
-                "nombre_mostrar": "GPS-System-A (GPS)",
-                "categoria": "SISTEMA DE NAVEGACIÓN",
-                "modelo": "GPS-System-A",
-                "tipo": "GPS",
-                "es_combustible": false,
-                "es_consumible": false,
-                "cantidad": 1
-            },
-            {
-                "nombre_mostrar": "Generador-Principal (Principal)",
-                "categoria": "SISTEMA ELÉCTRICO",
-                "modelo": "Generador-Principal",
-                "tipo": "Principal",
-                "es_combustible": false,
-                "es_consumible": false,
-                "cantidad": 1
-            },
-            {
-                "nombre_mostrar": "Cooling-System-A (Refrigerante)",
-                "categoria": "SISTEMA DE CONTROL TÉRMICO",
-                "modelo": "Cooling-System-A",
-                "tipo": "Refrigerante",
-                "es_combustible": false,
-                "es_consumible": false,
-                "cantidad": 1
             }
         ],
         "recursos_usados": {
-            "Apolo-1 (Pesado)": 1,
-            "LC-39A (Estatica)": 1,
-            "Consola-MCD-01 (Digital)": 1,
-            "Firing Room-1 (Primaria)": 1,
-            "Deposito-Liquido (Liquido)": 45000,
-            "Torre-Movil-A (Retractil)": 1,
-            "Sistema-Activo-B (Activa)": 1,
-            "Sat-Tracker-1 (Satelital)": 1,
-            "GPS-System-A (GPS)": 1,
-            "Generador-Principal (Principal)": 1,
-            "Cooling-System-A (Refrigerante)": 1
+            "Torre-Fija-B (Fija)": 1,
+            "Sistema-Activo-B (Activa)": 1
         },
         "recursos_consumidos": [
             {
-                "recurso": "Apolo-1 (Pesado)",
-                "cantidad": 1,
-                "es_consumible": false
-            },
-            {
-                "recurso": "LC-39A (Estatica)",
-                "cantidad": 1,
-                "es_consumible": false
-            },
-            {
-                "recurso": "Consola-MCD-01 (Digital)",
-                "cantidad": 1,
-                "es_consumible": false
-            },
-            {
-                "recurso": "Firing Room-1 (Primaria)",
-                "cantidad": 1,
-                "es_consumible": false
-            },
-            {
-                "recurso": "Deposito-Liquido (Liquido)",
-                "cantidad": 45000,
-                "es_consumible": true
-            },
-            {
-                "recurso": "Torre-Movil-A (Retractil)",
+                "recurso": "Torre-Fija-B (Fija)",
                 "cantidad": 1,
                 "es_consumible": false
             },
             {
                 "recurso": "Sistema-Activo-B (Activa)",
-                "cantidad": 1,
-                "es_consumible": false
-            },
-            {
-                "recurso": "Sat-Tracker-1 (Satelital)",
-                "cantidad": 1,
-                "es_consumible": false
-            },
-            {
-                "recurso": "GPS-System-A (GPS)",
-                "cantidad": 1,
-                "es_consumible": false
-            },
-            {
-                "recurso": "Generador-Principal (Principal)",
-                "cantidad": 1,
-                "es_consumible": false
-            },
-            {
-                "recurso": "Cooling-System-A (Refrigerante)",
                 "cantidad": 1,
                 "es_consumible": false
             }

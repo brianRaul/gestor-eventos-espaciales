@@ -1,160 +1,35 @@
 from datetime import datetime, timedelta
-
+from . import logica_recursos as lr
+from . import logica_fechas as lf
+from . import logica_validaciones as lval
 # ========== FUNCIONES DE VALIDACIÓN ==========
-
 
 # Valida que el tipo de evento sea válido
 def validar_tipo_evento(tipo_evento, tipos_evento_data):
-    if not tipo_evento or tipo_evento == "Elige un tipo de evento":
-        return False, "❌ Selecciona un tipo de evento"
-
-    if tipo_evento not in tipos_evento_data:
-        return False, "❌ Tipo de evento no encontrado"
-
-    return True, ""
-
+    return lval.validar_tipo_evento(tipo_evento, tipos_evento_data)
 
 # Valida la fecha y duración del evento
 def validar_fecha_duracion(
     day, month, year, duracion_str, tipo_evento, tipos_evento_data
 ):
-    try:
-        # PRIMERO: Verificar si algún número es demasiado grande
-        if len(day) > 2 or len(month) > 2 or len(year) > 4 or len(duracion_str) > 4:
-            return False, "❌ Fecha o duración inválida", None, None, None
-
-        # Convertir duración
-        duracion = int(duracion_str)
-
-        # Validaciones normales que ya tenías
-        if duracion <= 0:
-            return False, "❌ La duración debe ser mayor a 0", None, None, None
-
-        fecha_inicio = datetime(int(year), int(month), int(day))
-        if fecha_inicio.date() < datetime.now().date():
-            return False, "❌ No puedes planificar en el pasado", None, None, None
-
-        LIMITE_FUTURO_DIAS = 1095
-        fecha_maxima = datetime.now().date() + timedelta(days=LIMITE_FUTURO_DIAS)
-
-        if fecha_inicio.date() > fecha_maxima:
-            return (
-                False,
-                f"❌ No puedes planificar eventos a más de 3 años en el futuro",
-                None,
-                None,
-                None,
-            )
-
-        fecha_fin = fecha_inicio + timedelta(days=duracion - 1)
-
-        # Validar que el evento completo no exceda los 3 años
-        if fecha_fin.date() > fecha_maxima:
-            return (
-                False,
-                f"❌ El evento no puede terminar después de 3 años a partir de hoy",
-                None,
-                None,
-                None,
-            )
-
-        # Validar duración min/max del evento
-        evento_data = tipos_evento_data[tipo_evento]
-        config_evento = evento_data.get("configuracion_evento", {})
-        d_min = config_evento.get("duracion_minima", 1)
-        d_max = config_evento.get("duracion_maxima", 30)
-
-        if not (d_min <= duracion <= d_max):
-            return (
-                False,
-                f"❌ Duración permitida: {d_min}-{d_max} días",
-                None,
-                None,
-                None,
-            )
-
-        return True, "", fecha_inicio, fecha_fin, duracion
-
-    except ValueError:
-        return False, "❌ Fecha o duración inválida", None, None, None
-    except OverflowError:
-        return False, "❌ Fecha o duración inválida", None, None, None
-
+    # Usar la función del módulo
+    valido, mensaje, fecha_inicio, fecha_fin, duracion = lf.validar_fecha_basica(
+        day, month, year, duracion_str, tipo_evento, tipos_evento_data
+    )
+    
+    return valido, mensaje, fecha_inicio, fecha_fin, duracion
 
 # Convierte nombres de recursos a objetos completos y valida
 def validar_recursos_seleccionados(recursos_seleccionados_nombres, recursos):
-    recursos_seleccionados = []
-    for nombre_mostrar in recursos_seleccionados_nombres:
-        for recurso in recursos:
-            if recurso["nombre_mostrar"] == nombre_mostrar:
-                recursos_seleccionados.append(recurso)
-                break
-
-    if not recursos_seleccionados:
-        return False, "❌ Selecciona al menos un recurso", None
-
-    return True, "", recursos_seleccionados
-
+    return lval.validar_recursos_seleccionados(recursos_seleccionados_nombres, recursos)
 
 # Valida reglas de exclusión de recursos
 def validar_reglas_exclusion(evento_data, recursos_seleccionados):
-    reglas_exclusion = evento_data.get("reglas_exclusion", [])
-
-    for regla in reglas_exclusion:
-        categoria_prohibida = regla.get("categoria", "")
-        tipos_prohibidos = regla.get("tipos_prohibidos", [])
-
-        for recurso in recursos_seleccionados:
-            if (
-                recurso["categoria"] == categoria_prohibida
-                and recurso["tipo"] in tipos_prohibidos
-            ):
-                return (
-                    False,
-                    f"⛔ RECURSO PROHIBIDO: '{recurso['nombre_mostrar']}' no está permitido para este evento.",
-                )
-
-    return True, ""
-
+    return lval.validar_reglas_exclusion(evento_data, recursos_seleccionados)
 
 # Valida requisitos de recursos coexistentes
 def validar_requisitos_coexistentes(evento_data, recursos_seleccionados):
-    requisitos_coexistentes = evento_data.get("requisitos_coexistentes", [])
-
-    for requisito in requisitos_coexistentes:
-        categoria_principal = requisito.get("categoria", "")
-        tipo_principal = requisito.get("tipo", "")
-        requiere_lista = requisito.get("requiere", [])
-
-        # Verificar si el recurso principal está seleccionado
-        principal_seleccionado = False
-        for recurso in recursos_seleccionados:
-            if (
-                recurso["categoria"] == categoria_principal
-                and recurso["tipo"] == tipo_principal
-            ):
-                principal_seleccionado = True
-                break
-
-        if principal_seleccionado:
-            # Verificar que todos los recursos requeridos estén seleccionados
-            for requerido in requiere_lista:
-                cat_req = requerido.get("categoria", "")
-                tipo_req = requerido.get("tipo", "")
-                encontrado = False
-
-                for recurso in recursos_seleccionados:
-                    if recurso["categoria"] == cat_req and recurso["tipo"] == tipo_req:
-                        encontrado = True
-                        break
-
-                if not encontrado:
-                    return (
-                        False,
-                        f"❌ '{categoria_principal} {tipo_principal}' requiere también '{cat_req} {tipo_req}'",
-                    )
-
-    return True, ""
+    return lval.validar_requisitos_coexistentes(evento_data, recursos_seleccionados)
 
 # Valida que se cumplan los recursos requeridos
 def validar_recursos_requeridos(
@@ -349,35 +224,9 @@ def crear_evento_dict(
 
     return nuevo_evento
 
-
 # Valida si hay recursos seleccionados que no son necesarios ni prohibidos
 def validar_recursos_opcionales(evento_data, recursos_seleccionados):
-    recursos_requeridos = evento_data.get("recursos_requeridos", [])
-    reglas_exclusion = evento_data.get("reglas_exclusion", [])
-
-    # Crear conjunto de claves de recursos requeridos
-    requeridos_keys = set()
-    for req in recursos_requeridos:
-        clave = f"{req['categoria']}|{req['tipo']}"
-        requeridos_keys.add(clave)
-
-    # Crear conjunto de claves de recursos prohibidos
-    prohibidos_keys = set()
-    for regla in reglas_exclusion:
-        categoria = regla.get("categoria", "")
-        for tipo in regla.get("tipos_prohibidos", []):
-            clave = f"{categoria}|{tipo}"
-            prohibidos_keys.add(clave)
-
-    # Identificar recursos opcionales (seleccionados pero no requeridos ni prohibidos)
-    recursos_opcionales = []
-    for recurso in recursos_seleccionados:
-        clave = f"{recurso['categoria']}|{recurso['tipo']}"
-        if clave not in requeridos_keys and clave not in prohibidos_keys:
-            recursos_opcionales.append(recurso)
-
-    return recursos_opcionales
-
+    return lval.validar_recursos_opcionales(evento_data, recursos_seleccionados)
 
 # ========== FUNCIÓN PRINCIPAL ==========
 

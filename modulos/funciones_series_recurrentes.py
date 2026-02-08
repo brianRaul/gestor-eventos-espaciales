@@ -1,6 +1,8 @@
 from datetime import datetime, date, timedelta
-from funciones_crear_evento import *
-from funciones_buscar_hueco import *
+from .funciones_crear_evento import *
+from .funciones_buscar_hueco import *
+from . import logica_fechas as lf  
+from . import logica_validaciones as lval
 
 def crear_serie_recurrente(
     tipo_evento,
@@ -55,45 +57,18 @@ def crear_serie_recurrente(
             None,
         )
 
-    # 5. Calcular fechas de la serie completa
-    fecha_inicio_ultimo = fecha_inicial + timedelta(
-        days=(num_eventos - 1) * intervalo_dias
+    # 5. Calcular duración total de la serie usando función del módulo
+    duracion_total_serie = lf.calcular_duracion_total_serie(
+        duracion_dias, intervalo_dias, num_eventos
     )
-    fecha_fin_ultimo = fecha_inicio_ultimo + timedelta(days=duracion_dias - 1)
-    duracion_total_serie = (fecha_fin_ultimo - fecha_inicial).days + 1
 
-    # Verificar que la serie completa no exceda 1 año
-    if duracion_total_serie > LIMITE_SERIE_DIAS:
-        eventos_posibles = (LIMITE_SERIE_DIAS - duracion_dias) // intervalo_dias + 1
-        eventos_posibles = max(1, eventos_posibles)
-
-        return (
-            False,
-            f"❌ Serie demasiado larga (máximo {eventos_posibles} eventos)",
-            [],
-            None,
-        )
-
-    # 6. Verificar que toda la serie esté dentro de 3 años
-    if fecha_fin_ultimo > HOY + timedelta(days=LIMITE_FUTURO_DIAS):
-        # Calcular cuántos eventos caben en los 3 años
-        dias_disponibles = (
-            HOY + timedelta(days=LIMITE_FUTURO_DIAS) - fecha_inicial
-        ).days
-        eventos_posibles = 1
-        if intervalo_dias > 0:
-            eventos_posibles = min(
-                num_eventos, (dias_disponibles // intervalo_dias) + 1
-            )
-
-        eventos_posibles = max(1, eventos_posibles)
-
-        return (
-            False,
-            f"❌ Serie fuera de rango (máximo {eventos_posibles} eventos)",
-            [],
-            None,
-        )
+    # 6. Verificar límites de la serie usando función del módulo
+    valido, mensaje = lf.validar_limites_serie(
+        duracion_dias, intervalo_dias, num_eventos, LIMITE_SERIE_DIAS, LIMITE_FUTURO_DIAS
+    )
+    
+    if not valido:
+        return False, mensaje, [], None
 
     # 7. Obtener datos del tipo de evento
     if tipo_evento not in tipos_evento_data:
@@ -178,7 +153,7 @@ def crear_serie_recurrente(
 
         if not exito:
             # Determinar si es error de solapamiento
-            if es_error_solapamiento(mensaje):
+            if lval.es_error_solapamiento(mensaje):
                 return False, mensaje, [], fecha_temp
             else:
                 return False, mensaje, [], None
@@ -308,13 +283,10 @@ def buscar_serie_completa_disponible(
             "❌ El intervalo debe ser mayor que la duración",
         )
 
-    # Calcular duración total de la serie
-    fecha_inicio_simulada = date.today()
-    fecha_inicio_ultimo = fecha_inicio_simulada + timedelta(
-        days=(num_eventos - 1) * intervalo_dias
+    # Calcular duración total de la serie usando función del módulo
+    duracion_total_serie = lf.calcular_duracion_total_serie(
+        duracion_dias, intervalo_dias, num_eventos
     )
-    fecha_fin_ultimo = fecha_inicio_ultimo + timedelta(days=duracion_dias - 1)
-    duracion_total_serie = (fecha_fin_ultimo - fecha_inicio_simulada).days + 1
 
     # Verificar que la serie no exceda 365 días
     if duracion_total_serie > LIMITE_DIAS_SERIE:
@@ -327,27 +299,13 @@ def buscar_serie_completa_disponible(
             f"❌ Serie demasiado larga (máximo {eventos_posibles} eventos)",
         )
 
-    # Verificar que toda la serie quepa dentro de 3 años desde hoy
-    HOY = date.today()
-    FECHA_MAXIMA = HOY + timedelta(days=LIMITE_FUTURO_DIAS)
-
-    if fecha_fin_ultimo > FECHA_MAXIMA:
-        # Calcular cuántos eventos caben en los 3 años
-        dias_disponibles = (FECHA_MAXIMA - HOY).days
-        eventos_posibles = 1
-        if intervalo_dias > 0:
-            eventos_posibles = min(
-                num_eventos, (dias_disponibles // intervalo_dias) + 1
-            )
-
-        # Asegurar que al menos quepa un evento
-        eventos_posibles = max(1, eventos_posibles)
-
-        return (
-            False,
-            None,
-            f"❌ La serie excede 3 años (máximo {eventos_posibles} eventos)",
-        )
+    # Verificar que toda la serie quepa dentro de 3 años desde hoy usando función del módulo
+    valido, mensaje = lf.validar_limites_serie(
+        duracion_dias, intervalo_dias, num_eventos, LIMITE_DIAS_SERIE, LIMITE_FUTURO_DIAS
+    )
+    
+    if not valido:
+        return False, None, mensaje
 
     if tipo_evento not in tipos_evento_data:
         return False, None, "❌ Tipo de evento no válido"
@@ -430,12 +388,18 @@ def buscar_serie_completa_disponible(
         fecha_candidata = fecha_inicio_busqueda + timedelta(days=dias_offset)
 
         # Verificar que toda la serie quepa dentro de 3 años para esta fecha candidata
-        fecha_inicio_ultimo_candidato = fecha_candidata + timedelta(
-            days=(num_eventos - 1) * intervalo_dias
+        # Obtener fechas de la serie usando función del módulo
+        fechas_inicio, fechas_fin, valido_fechas, msg_fechas = lf.obtener_fechas_serie(
+            fecha_candidata.strftime("%d/%m/%Y"),
+            duracion_dias,
+            intervalo_dias,
+            num_eventos
         )
-        fecha_fin_ultimo_candidato = fecha_inicio_ultimo_candidato + timedelta(
-            days=duracion_dias - 1
-        )
+        
+        if not valido_fechas or not fechas_fin:
+            continue
+            
+        fecha_fin_ultimo_candidato = fechas_fin[-1]
 
         if fecha_fin_ultimo_candidato > fecha_maxima:
             # Esta fecha no sirve, pasar a la siguiente
@@ -464,7 +428,7 @@ def buscar_serie_completa_disponible(
             if not exito:
                 puede_toda_la_serie = False
                 # Si el error NO es de solapamiento, terminar la búsqueda
-                if not es_error_solapamiento(msg):
+                if not lval.es_error_solapamiento(msg):
                     return False, None, msg
                 break
 
@@ -492,7 +456,6 @@ def buscar_serie_completa_disponible(
         f"❌ No hay fechas disponibles en {LIMITE_BUSQUEDA} días",
     )
 
-def es_error_solapamiento(mensaje_error):
     """Determina si un error es de solapamiento (recursos ocupados en fechas)"""
     mensaje_lower = mensaje_error.lower()
 

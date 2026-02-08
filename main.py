@@ -1,11 +1,17 @@
 import customtkinter as ctk
 import json
 from datetime import datetime, date, timedelta
-from funciones_datos import *
-from funciones_crear_evento import *
-from funciones_buscar_hueco import *
-import funciones_series_recurrentes as fsr
 import tkinter.messagebox as messagebox
+from modulos.funciones_datos import *
+from modulos.funciones_crear_evento import *
+from modulos.funciones_buscar_hueco import *
+import modulos.funciones_series_recurrentes as fsr
+import modulos.logica_combustible as lc
+import modulos.logica_eliminacion as le
+import modulos.logica_serie as ls
+import modulos.logica_visualizaciones as lv
+import modulos.logica_recursos as lr
+import modulos.logica_fechas as lf
 
 
 class GestorEventos(ctk.CTk):
@@ -122,13 +128,8 @@ class GestorEventos(ctk.CTk):
             mensaje.pack(pady=20)
             return
 
-        # Agrupar por categoría
-        recursos_por_categoria = {}
-        for recurso in self.recursos:
-            categoria = recurso["categoria"]
-            if categoria not in recursos_por_categoria:
-                recursos_por_categoria[categoria] = []
-            recursos_por_categoria[categoria].append(recurso)
+        # Usar función del módulo para agrupar por categoría
+        recursos_por_categoria = lr.obtener_recursos_por_categoria(self.recursos)
 
         # Mostrar por categoría
         for categoria, recursos in recursos_por_categoria.items():
@@ -146,23 +147,9 @@ class GestorEventos(ctk.CTk):
                 var = ctk.BooleanVar(value=False)
                 self.checkbox_vars[recurso["nombre_mostrar"]] = var
 
-                # Mostrar información según tipo de recurso
-                if recurso["es_combustible"]:
-                    # Para combustible: mostrar disponible/total
-                    texto = f"{recurso['nombre_mostrar']} - {recurso['cantidad_disponible']}/{recurso['cantidad_total']}L"
-                    # Color según disponibilidad
-                    if recurso["cantidad_disponible"] <= 0:
-                        color = "#FF5252"  # Rojo si no hay
-                    elif (
-                        recurso["cantidad_disponible"] < recurso["cantidad_total"] * 0.2
-                    ):
-                        color = "#FF9800"  # Naranja si queda poco (<20%)
-                    else:
-                        color = "#4CAF50"  # Verde si hay suficiente
-                else:
-                    # Para equipos: solo mostrar cantidad total
-                    texto = f"{recurso['nombre_mostrar']} - {recurso['cantidad_total']} unidades"
-                    color = "#F0F3F4"
+                # Usar funciones del módulo para obtener texto y color
+                texto, _ = lr.obtener_texto_recurso(recurso)
+                color = lr.obtener_color_recurso(recurso)
 
                 # Crear checkbox
                 checkbox = ctk.CTkCheckBox(
@@ -189,64 +176,15 @@ class GestorEventos(ctk.CTk):
         for var in self.checkbox_vars.values():
             var.set(False)
 
-        # Obtener los recursos requeridos para este evento
-        evento_data = self.tipos_evento_data[tipo_evento]
-        recursos_requeridos = evento_data.get("recursos_requeridos", [])
+        # Usar función del módulo para obtener recursos recomendados
+        recursos_recomendados = lr.obtener_recursos_recomendados(
+            tipo_evento, self.tipos_evento_data, self.recursos
+        )
 
-        if not recursos_requeridos:
-            self.lbl_info.configure(
-                text="⚠️ No hay recursos requeridos definidos para este evento",
-                text_color="orange",
-            )
-            return
-
-        # Para cada recurso requerido
-        for req in recursos_requeridos:
-            categoria_req = req["categoria"]
-            tipo_req = req["tipo"]
-            cantidad_req = req.get("cantidad", 1)
-
-            # Buscar todos los recursos que coincidan con la categoría y tipo
-            recursos_coincidentes = []
-            for recurso_nombre, checkbox_var in self.checkbox_vars.items():
-                for r in self.recursos:
-                    if r["nombre_mostrar"] == recurso_nombre:
-                        if r["categoria"] == categoria_req and r["tipo"] == tipo_req:
-                            recursos_coincidentes.append((r, checkbox_var))
-                            break
-
-            if not recursos_coincidentes:
-                continue
-
-            # Para combustible
-            if "COMBUSTIBLE" in categoria_req.upper():
-                # Buscar un recurso con suficiente combustible
-                recurso_suficiente = None
-                for r, checkbox_var in recursos_coincidentes:
-                    if r["cantidad_disponible"] >= cantidad_req:
-                        recurso_suficiente = (r, checkbox_var)
-                        break
-
-                if recurso_suficiente:
-                    # Marcar el recurso con suficiente combustible
-                    recurso_suficiente[1].set(True)
-                else:
-                    # Si ninguno tiene suficiente, marcar el primero
-                    recursos_coincidentes[0][1].set(True)
-            else:
-                # Para equipos
-                # Buscar un recurso con cantidad_total suficiente
-                recurso_suficiente = None
-                for r, checkbox_var in recursos_coincidentes:
-                    if r["cantidad_total"] >= cantidad_req:
-                        recurso_suficiente = (r, checkbox_var)
-                        break
-
-                if recurso_suficiente:
-                    recurso_suficiente[1].set(True)
-                else:
-                    # Si ninguno tiene suficiente, marcar el primero
-                    recursos_coincidentes[0][1].set(True)
+        # Marcar los recursos recomendados
+        for nombre_recurso in recursos_recomendados:
+            if nombre_recurso in self.checkbox_vars:
+                self.checkbox_vars[nombre_recurso].set(True)
 
         # Contar cuántos recursos se marcaron
         recursos_marcados = sum(1 for var in self.checkbox_vars.values() if var.get())
@@ -259,6 +197,16 @@ class GestorEventos(ctk.CTk):
             self.lbl_info.configure(
                 text="⚠️ No se pudo marcar ningún recurso recomendado",
                 text_color="orange",
+            )
+
+    # .4 ========== Limpiar selección =================
+    def limpiar_seleccion_recursos(self):
+        # Desmarcar todos los checkboxes de recursos
+        if hasattr(self, "checkbox_vars"):
+            for var in self.checkbox_vars.values():
+                var.set(False)
+            self.lbl_info.configure(
+                text="Todos los recursos desmarcados", text_color="orange"
             )
 
     # .3 ========== Crear evento ======================
@@ -329,329 +277,46 @@ class GestorEventos(ctk.CTk):
             # Error: mostrar mensaje TAL CUAL viene (ya es corto)
             self.lbl_info.configure(text=mensaje, text_color="red")
 
-    # .4 ========== Limpiar selección =================
-    def limpiar_seleccion_recursos(self):
-        # Desmarcar todos los checkboxes de recursos
-        if hasattr(self, "checkbox_vars"):
-            for var in self.checkbox_vars.values():
-                var.set(False)
-            self.lbl_info.configure(
-                text="Todos los recursos desmarcados", text_color="orange"
-            )
-
     # .5 ========== Mostrar eventos planificados ======
     def mostrar_eventos_planificados(self):
-        # Crear una nueva ventana emergente
-        ventana_eventos = ctk.CTkToplevel(self)
-        ventana_eventos.title("📋 Eventos Planificados")
-        ventana_eventos.geometry("440x400")
-
-        # Título
-        titulo = ctk.CTkLabel(
-            ventana_eventos, text="EVENTOS PLANIFICADOS", font=("Arial", 16, "bold")
+        lv.mostrar_eventos_planificados(
+            self, self.eventos_planificados, lv.mostrar_recursos_evento
         )
-        titulo.pack(pady=10)
-
-        # Frame para contener los eventos con scroll
-        frame_contenedor = ctk.CTkScrollableFrame(
-            ventana_eventos, width=550, height=400
-        )
-        frame_contenedor.pack(pady=10, padx=10, fill="both", expand=True)
-
-        # Verificar si hay eventos
-        if not self.eventos_planificados:
-            sin_eventos = ctk.CTkLabel(
-                frame_contenedor,
-                text=" No hay eventos planificados todavía.",
-                font=("Arial", 12),
-                text_color="gray",
-            )
-            sin_eventos.pack(pady=20)
-        else:
-            # Mostrar cada evento
-            for i, evento in enumerate(self.eventos_planificados, 1):
-                # Crear un frame para cada evento (como una tarjeta)
-                frame_evento = ctk.CTkFrame(frame_contenedor)
-                frame_evento.pack(fill="x", pady=5, padx=5)
-
-                # Contenido del evento
-                contenido_evento = ctk.CTkFrame(frame_evento)
-                contenido_evento.pack(fill="x", padx=10, pady=5)
-
-                # Número del evento
-                lbl_numero = ctk.CTkLabel(
-                    contenido_evento, text=f"Evento #{i}", font=("Arial", 12, "bold")
-                )
-                lbl_numero.grid(row=0, column=0, sticky="w", pady=(0, 5))
-
-                # Tipo de evento
-                lbl_tipo = ctk.CTkLabel(
-                    contenido_evento, text=f"Tipo: {evento['tipo']}", font=("Arial", 12)
-                )
-                lbl_tipo.grid(row=1, column=0, sticky="w")
-
-                # Fecha de inicio y fin
-                lbl_fecha = ctk.CTkLabel(
-                    contenido_evento,
-                    text=f"📅 Inicio: {evento.get('fecha_inicio', evento.get('fecha', 'N/A'))} | Fin: {evento.get('fecha_fin', 'N/A')}",
-                    font=("Arial", 12),
-                )
-                lbl_fecha.grid(row=2, column=0, sticky="w")
-
-                # Duración
-                lbl_duracion = ctk.CTkLabel(
-                    contenido_evento,
-                    text=f"⏱️ Duración: {evento.get('duracion_dias', 1)} días",
-                    font=("Arial", 11),
-                )
-                lbl_duracion.grid(row=3, column=0, sticky="w")
-
-                # Botón para ver recursos
-                btn_recursos = ctk.CTkButton(
-                    contenido_evento,
-                    text="📦 Ver Recursos",
-                    width=100,
-                    height=30,
-                    fg_color="#2196F3",
-                    hover_color="#1976D2",
-                    command=lambda ev=evento: self.mostrar_recursos_evento(ev),
-                )
-                btn_recursos.grid(
-                    row=0, column=1, rowspan=4, padx=(20, 0), pady=5, sticky="e"
-                )
-
-        # Botón para cerrar la ventana
-        btn_cerrar = ctk.CTkButton(
-            ventana_eventos, text="Cerrar", width=100, command=ventana_eventos.destroy
-        )
-        btn_cerrar.pack(pady=10)
-
-    # .5.1 ========== Mostrar recursos de un evento ===
-    def mostrar_recursos_evento(self, evento):
-
-        # Crear ventana emergente
-        ventana_recursos = ctk.CTkToplevel(self)
-        ventana_recursos.title(f"📦 Recursos del Evento: {evento['tipo']}")
-        ventana_recursos.geometry("500x500")
-
-        # Título
-        titulo = ctk.CTkLabel(
-            ventana_recursos,
-            text=f"RECURSOS UTILIZADOS: {evento['tipo']}",
-            font=("Arial", 16, "bold"),
-        )
-        titulo.pack(pady=10)
-
-        # Información del evento
-        info_frame = ctk.CTkFrame(ventana_recursos)
-        info_frame.pack(pady=5, padx=20, fill="x")
-
-        ctk.CTkLabel(
-            info_frame,
-            text=f"📅 Fecha: {evento.get('fecha_inicio', 'N/A')} | Duración: {evento.get('duracion_dias', 1)} días",
-            font=("Arial", 12),
-        ).pack(pady=5)
-
-        # Frame con scroll para recursos
-        frame_scroll = ctk.CTkScrollableFrame(ventana_recursos, width=450, height=250)
-        frame_scroll.pack(pady=10, padx=10, fill="both", expand=True)
-
-        # Verificar EXPLÍCITAMENTE qué campos existen
-        if "recursos_detalle" in evento:
-            # Usar recursos_detalle aunque esté vacío
-            recursos = evento["recursos_detalle"]
-        elif "recursos" in evento:
-            # Para compatibilidad con eventos antiguos
-            recursos = evento["recursos"]
-        elif "recursos_utilizados" in evento:
-            # Para compatibilidad con eventos muy antiguos
-            recursos = evento["recursos_utilizados"]
-        else:
-            # No hay recursos en ningún formato
-            recursos = []
-
-        if not recursos:
-            ctk.CTkLabel(
-                frame_scroll,
-                text="ℹ️ Este evento no tiene información de recursos\n(o fue creado antes de implementar esta función)",
-                text_color="orange",
-                font=("Arial", 12),
-            ).pack(pady=50)
-
-            # Mostrar el evento completo para depuración
-            ctk.CTkLabel(
-                frame_scroll,
-                text=f"Campos disponibles en el evento: {list(evento.keys())}",
-                text_color="gray",
-                font=("Arial", 10),
-            ).pack(pady=10)
-        else:
-            # Contadores
-            recursos_combustible = 0
-            recursos_equipos = 0
-
-            # Mostrar cada recurso
-            for recurso in recursos:
-                # Crear frame para cada recurso
-                frame_recurso = ctk.CTkFrame(frame_scroll)
-                frame_recurso.pack(fill="x", pady=3, padx=5)
-
-                # Determinar si es combustible
-                es_combustible = recurso.get("es_combustible", False)
-                if not es_combustible:
-                    # Intentar detectar por nombre o categoría
-                    nombre = recurso.get("nombre_mostrar", "").lower()
-                    categoria = recurso.get("categoria", "").lower()
-                    if (
-                        "combustible" in nombre
-                        or "combustible" in categoria
-                        or "fuel" in nombre
-                    ):
-                        es_combustible = True
-
-                # Color según tipo
-                if es_combustible:
-                    color = "#FF9800"  # Naranja para combustible
-                    icono = "⛽"
-                    recursos_combustible += 1
-                    cantidad = recurso.get("cantidad", 1)
-                    cantidad_texto = f"{cantidad}L"
-                else:
-                    color = "#2196F3"  # Azul para equipos
-                    icono = "🛠️"
-                    recursos_equipos += 1
-                    cantidad = recurso.get("cantidad", 1)
-                    cantidad_texto = f"{cantidad} unidades"
-
-                # Obtener nombre para mostrar
-                nombre_mostrar = recurso.get(
-                    "nombre_mostrar", recurso.get("nombre", "Recurso sin nombre")
-                )
-
-                # Mostrar información del recurso
-                texto_recurso = f"{icono} {nombre_mostrar} - {cantidad_texto}"
-                lbl_recurso = ctk.CTkLabel(
-                    frame_recurso,
-                    text=texto_recurso,
-                    font=("Arial", 11),
-                    text_color=color,
-                )
-                lbl_recurso.pack(anchor="w", padx=10, pady=5)
-
-            # Mostrar resumen
-            resumen_frame = ctk.CTkFrame(ventana_recursos)
-            resumen_frame.pack(pady=5, padx=20, fill="x")
-
-            resumen_text = f"📊 Total: {len(recursos)} recursos"
-            if recursos_combustible > 0:
-                resumen_text += f" | ⛽ Combustible: {recursos_combustible}"
-            if recursos_equipos > 0:
-                resumen_text += f" | 🛠️ Equipos: {recursos_equipos}"
-
-            ctk.CTkLabel(resumen_frame, text=resumen_text, font=("Arial", 11)).pack(
-                pady=5
-            )
-
-        # Botón para cerrar
-        btn_cerrar = ctk.CTkButton(
-            ventana_recursos, text="Cerrar", width=100, command=ventana_recursos.destroy
-        )
-        btn_cerrar.pack(pady=10)
 
     # .6 ========== Sugerir Fecha =====================
     def sugerir_fecha_disponible(self):
         tipo_evento = self.combo_evento.get()
-        if tipo_evento not in self.tipos_evento_data:
-            self.lbl_info.configure(
-                text="❌ Selecciona un evento primero", text_color="red"
+        day = self.entry_day.get()
+        month = self.entry_month.get()
+        year = self.entry_year.get()
+        duracion_str = self.entry_duracion.get()
+
+        # Usar la función del módulo para la lógica
+        fecha_encontrada, mensaje, es_error_combustible = (
+            lf.sugerir_fecha_disponible_logica(
+                tipo_evento=tipo_evento,
+                tipos_evento_data=self.tipos_evento_data,
+                day=day,
+                month=month,
+                year=year,
+                duracion_str=duracion_str,
+                eventos_planificados=self.eventos_planificados,
+                recursos=self.recursos,
+                preparar_recursos_requeridos_func=preparar_recursos_requeridos,  # de funciones_buscar_hueco
+                verificar_disponibilidad_fecha_func=verificar_disponibilidad_fecha,  # de funciones_buscar_hueco
             )
-            return
+        )
 
-        try:
-            duracion = int(self.entry_duracion.get())
-        except:
-            duracion = 1
-
-        # Obtener recursos requeridos para este evento
-        evento_data = self.tipos_evento_data[tipo_evento]
-        recursos_requeridos = evento_data.get("recursos_requeridos", [])
-
-        # Usar función preparada para convertir recursos requeridos
-        recursos_necesarios = preparar_recursos_requeridos(recursos_requeridos)
-
-        # Empezar la búsqueda desde la fecha que el usuario puso, o desde mañana
-        try:
-            day = int(self.entry_day.get())
-            month = int(self.entry_month.get())
-            year = int(self.entry_year.get())
-            fecha_busqueda = date(year, month, day)
-
-            # Si la fecha es en el pasado, empezar desde mañana
-            if fecha_busqueda < date.today():
-                fecha_busqueda = date.today() + timedelta(days=1)
-        except:
-            # Si no hay fecha válida, empezar desde mañana
-            fecha_busqueda = date.today() + timedelta(days=1)
-
-        # Límite de búsqueda: 3 años (1095 días)
-        LIMITE_BUSQUEDA = 1095
-        fecha_maxima = date.today() + timedelta(days=1095)
-
-        # Variable para detectar si el error es de combustible
-        error_combustible_detectado = False
-        mensaje_combustible = ""
-
-        for _ in range(LIMITE_BUSQUEDA):
-            # Verificar que no excedamos el límite de 3 años
-            if fecha_busqueda > fecha_maxima:
-                break
-
-            fecha_fin = fecha_busqueda + timedelta(days=duracion - 1)
-
-            # Usar la función de disponibilidad externa
-            disponible, mensaje_disponibilidad = verificar_disponibilidad_fecha(
-                fecha_busqueda,
-                fecha_fin,
-                recursos_necesarios,
-                self.eventos_planificados,
-                self.recursos,
-            )
-
-            if disponible:
-                self.actualizar_campos_fecha(fecha_busqueda)
-                self.lbl_info.configure(
-                    text=f"✅ Fecha disponible: {fecha_busqueda.strftime('%d/%m/%Y')} (dentro de los próximos 3 años)",
-                    text_color="green",
-                )
-                return
-            else:
-                # VERIFICACIÓN CLAVE: Si el mensaje indica problema de combustible, guardar el error
-                mensaje_lower = mensaje_disponibilidad.lower()
-                if any(
-                    palabra in mensaje_lower
-                    for palabra in ["combustible", "fuel", "litro", "litros"]
-                ):
-                    error_combustible_detectado = True
-                    mensaje_combustible = mensaje_disponibilidad
-                    # No rompemos el bucle, continuamos buscando
-                    # Solo salimos si encontramos otra fecha disponible
-                    # Si no encontramos ninguna, mostraremos el primer error de combustible encontrado
-
-            # Pasar al siguiente día
-            fecha_busqueda += timedelta(days=1)
-
-        # Después de buscar en todas las fechas
-        if error_combustible_detectado:
-            # Mostrar el primer error de combustible encontrado
-            self.lbl_info.configure(
-                text=f"❌ {mensaje_combustible}\n\n💡 Usa 'Rellenar Todo' para reponer combustible.",
-                text_color="red",
-            )
+        # Manejar el resultado en la interfaz
+        if fecha_encontrada:
+            self.actualizar_campos_fecha(fecha_encontrada)
+            self.lbl_info.configure(text=mensaje, text_color="green")
         else:
-            self.lbl_info.configure(
-                text="❌ No se encontró fecha disponible en los próximos 3 años",
-                text_color="red",
-            )
+            if es_error_combustible:
+                mensaje = (
+                    f"❌ {mensaje}\n\n💡 Usa 'Rellenar Todo' para reponer combustible."
+                )
+            self.lbl_info.configure(text=mensaje, text_color="red")
 
     # .7 ========== Actualizar campos fecha ===========
     def actualizar_campos_fecha(self, fecha):
@@ -702,14 +367,8 @@ class GestorEventos(ctk.CTk):
         )
         frame_scroll.pack(pady=10, padx=10)
 
-        # Buscar combustibles
-        combustibles = []
-        for recurso in self.recursos:
-            if (
-                recurso.get("es_combustible", False)
-                or "COMBUSTIBLE" in recurso.get("categoria", "").upper()
-            ):
-                combustibles.append(recurso)
+        # Usar la función del módulo para obtener combustibles
+        combustibles = lc.obtener_combustibles(self.recursos)
 
         if not combustibles:
             ctk.CTkLabel(
@@ -717,84 +376,55 @@ class GestorEventos(ctk.CTk):
             ).pack(pady=20)
         else:
             for recurso in combustibles:
-                disponible = recurso["cantidad_disponible"]
-                total = recurso["cantidad_total"]
-                porcentaje = (disponible / total * 100) if total > 0 else 0
-
-                # Color según porcentaje
-                if porcentaje >= 80:
-                    color = "#4CAF50"
-                elif porcentaje >= 30:
-                    color = "#FF9800"
-                else:
-                    color = "#F44336"
+                # Usar funciones del módulo para cálculos
+                porcentaje = lc.calcular_porcentaje_combustible(recurso)
+                color = lc.obtener_color_porcentaje(porcentaje)
 
                 # Frame para cada combustible
                 frame_tanque = ctk.CTkFrame(frame_scroll)
                 frame_tanque.pack(fill="x", pady=5, padx=5)
 
                 # Mostrar información
-                texto = f"• {recurso['nombre_mostrar']}: {disponible:,}/{total:,}L ({porcentaje:.1f}%)"
+                texto = f"• {recurso['nombre_mostrar']}: {recurso['cantidad_disponible']:,}/{recurso['cantidad_total']:,}L ({porcentaje:.1f}%)"
                 ctk.CTkLabel(
                     frame_tanque, text=texto, font=("Arial", 11), text_color=color
                 ).pack(anchor="w", padx=10, pady=5)
+
             tipo_evento_actual = self.combo_evento.get()
 
             if tipo_evento_actual and tipo_evento_actual != "Elige un tipo de evento":
-                if tipo_evento_actual in self.tipos_evento_data:
-                    evento_data = self.tipos_evento_data[tipo_evento_actual]
-                    recursos_requeridos = evento_data.get("recursos_requeridos", [])
+                # Usar función del módulo para obtener advertencias
+                advertencias = lc.obtener_advertencias_combustible_evento(
+                    tipo_evento_actual, combustibles, self.tipos_evento_data
+                )
 
-                    # Buscar requerimientos de combustible para este evento
-                    for req in recursos_requeridos:
-                        if "COMBUSTIBLE" in req["categoria"].upper():
-                            # Buscar el combustible correspondiente
-                            for recurso_comb in combustibles:
-                                if (
-                                    recurso_comb["categoria"] == req["categoria"]
-                                    and recurso_comb["tipo"] == req["tipo"]
-                                ):
+                for advertencia in advertencias:
+                    # Crear frame para advertencia
+                    frame_advertencia = ctk.CTkFrame(self.ventana_combustible)
+                    frame_advertencia.pack(pady=5, padx=20, fill="x")
 
-                                    # Verificar si hay suficiente
-                                    if (
-                                        recurso_comb["cantidad_disponible"]
-                                        < req["cantidad"]
-                                    ):
-                                        faltante = (
-                                            req["cantidad"]
-                                            - recurso_comb["cantidad_disponible"]
-                                        )
+                    # Mostrar advertencia
+                    ctk.CTkLabel(
+                        frame_advertencia,
+                        text=f"⚠️ ATENCIÓN: Evento '{tipo_evento_actual}'",
+                        text_color="#FF9800",
+                        font=("Arial", 12, "bold"),
+                    ).pack(pady=2)
 
-                                        # Crear frame para advertencia
-                                        frame_advertencia = ctk.CTkFrame(
-                                            self.ventana_combustible
-                                        )
-                                        frame_advertencia.pack(
-                                            pady=5, padx=20, fill="x"
-                                        )
+                    ctk.CTkLabel(
+                        frame_advertencia,
+                        text=f"Faltan {advertencia['faltante']:,}L de {advertencia['categoria']} {advertencia['tipo']}",
+                        text_color="#FF5252",
+                        font=("Arial", 11),
+                    ).pack(pady=2)
 
-                                        # Mostrar advertencia
-                                        ctk.CTkLabel(
-                                            frame_advertencia,
-                                            text=f"⚠️ ATENCIÓN: Evento '{tipo_evento_actual}'",
-                                            text_color="#FF9800",
-                                            font=("Arial", 12, "bold"),
-                                        ).pack(pady=2)
+                    ctk.CTkLabel(
+                        frame_advertencia,
+                        text=f"Se necesitan {advertencia['necesario']:,}L por evento",
+                        text_color="gray",
+                        font=("Arial", 10),
+                    ).pack(pady=2)
 
-                                        ctk.CTkLabel(
-                                            frame_advertencia,
-                                            text=f"Faltan {faltante:,}L de {req['categoria']} {req['tipo']}",
-                                            text_color="#FF5252",
-                                            font=("Arial", 11),
-                                        ).pack(pady=2)
-
-                                        ctk.CTkLabel(
-                                            frame_advertencia,
-                                            text=f"Se necesitan {req['cantidad']:,}L por evento",
-                                            text_color="gray",
-                                            font=("Arial", 10),
-                                        ).pack(pady=2)
-                                    break
         # Botón para cerrar
         ctk.CTkButton(self.ventana_combustible, text="Cerrar", command=on_close).pack(
             pady=10
@@ -802,20 +432,10 @@ class GestorEventos(ctk.CTk):
 
     # .9 ========== Rellenar sistema de combustible ===
     def rellenar_combustible(self):
-        litros_agregados = 0
-
-        for recurso in self.recursos:
-            if (
-                recurso.get("es_combustible", False)
-                or "COMBUSTIBLE" in recurso.get("categoria", "").upper()
-            ):
-                disponible = recurso["cantidad_disponible"]
-                total = recurso["cantidad_total"]
-
-                if disponible < total:
-                    litros_faltantes = total - disponible
-                    recurso["cantidad_disponible"] = total
-                    litros_agregados += litros_faltantes
+        # Usar función del módulo para la lógica de rellenado
+        litros_agregados, recursos_modificados = lc.rellenar_combustible_logica(
+            self.recursos
+        )
 
         if litros_agregados > 0:
             # Guardar cambios
@@ -838,8 +458,18 @@ class GestorEventos(ctk.CTk):
                 text="ℹ️ Todo el combustible ya está lleno", text_color="orange"
             )
 
+    # .9.1========= Verifica si hay combustible suficiente para toda la serie =======
+    def verificar_combustible_para_serie(self, tipo_evento, repeticiones, recursos):
+        # Usar función del módulo
+        return lc.verificar_combustible_para_serie_logica(
+            tipo_evento, repeticiones, recursos, self.tipos_evento_data
+        )
+
     # .10 ========= Eliminar Eventos ==================
     def eliminar_eventos_planificados(self):
+
+        self.eventos_planificados = cargar_eventos_planificados()
+
         if len(self.eventos_planificados) == 0:
             self.lbl_info.configure(
                 text="❌ No hay eventos para eliminar", text_color="red"
@@ -983,283 +613,88 @@ class GestorEventos(ctk.CTk):
         if not respuesta:
             return
 
-        # 4. Procesar cada evento a eliminar (orden inverso)
-        recursos_devueltos = []
-        combustible_devuelto = (
-            []
-        )  # Ahora cada elemento tiene: nombre, litros, desperdiciados, nuevo_total
-        eventos_a_eliminar_indices.sort(reverse=True)
+        # 4. Procesar cada evento a eliminar usando la función del módulo
+        recursos_devueltos, combustible_devuelto, nuevos_eventos = (
+            le.procesar_eliminacion_eventos(
+                eventos_a_eliminar_indices,
+                self.eventos_planificados.copy(),  # Usamos copia para no modificar la original directamente
+                self.recursos,
+            )
+        )
 
-        for indice in eventos_a_eliminar_indices:
-            if indice >= len(self.eventos_planificados):
-                continue
+        # 5. Actualizar la lista de eventos
+        self.eventos_planificados = nuevos_eventos
 
-            evento = self.eventos_planificados[indice]
-
-            # TODOS LOS EVENTOS (INDIVIDUALES Y DE SERIE) TIENEN MISMA ESTRUCTURA
-            if "recursos_detalle" in evento and evento["recursos_detalle"]:
-                for recurso_detalle in evento["recursos_detalle"]:
-                    # Buscar el recurso en la lista de recursos
-                    for recurso in self.recursos:
-                        if (
-                            recurso["nombre_mostrar"]
-                            == recurso_detalle["nombre_mostrar"]
-                        ):
-                            cantidad = recurso_detalle.get("cantidad", 1)
-                            es_combustible = recurso_detalle.get(
-                                "es_combustible", False
-                            )
-
-                            if es_combustible and cantidad > 0:
-                                # COMBUSTIBLE: devolver al tanque calculando desperdicio
-                                disponible_actual = recurso["cantidad_disponible"]
-                                capacidad_maxima = recurso["cantidad_total"]
-
-                                # Calcular cuánto se puede devolver y cuánto se desperdicia
-                                espacio_disponible = (
-                                    capacidad_maxima - disponible_actual
-                                )
-                                litros_devueltos = min(cantidad, espacio_disponible)
-                                litros_desperdiciados = cantidad - litros_devueltos
-
-                                if litros_devueltos > 0:
-                                    recurso["cantidad_disponible"] = (
-                                        disponible_actual + litros_devueltos
-                                    )
-                                    combustible_devuelto.append(
-                                        {
-                                            "nombre": recurso["nombre_mostrar"],
-                                            "litros": litros_devueltos,
-                                            "desperdiciados": litros_desperdiciados,
-                                            "nuevo_total": recurso[
-                                                "cantidad_disponible"
-                                            ],
-                                        }
-                                    )
-                                elif litros_desperdiciados > 0:
-                                    # Si no se puede devolver nada (tanque lleno) pero había combustible
-                                    combustible_devuelto.append(
-                                        {
-                                            "nombre": recurso["nombre_mostrar"],
-                                            "litros": 0,
-                                            "desperdiciados": litros_desperdiciados,
-                                            "nuevo_total": disponible_actual,
-                                        }
-                                    )
-                            else:
-                                # EQUIPOS: registrar que se liberó
-                                encontrado = False
-                                for r in recursos_devueltos:
-                                    if r["nombre"] == recurso["nombre_mostrar"]:
-                                        encontrado = True
-                                        break
-
-                                if not encontrado:
-                                    recursos_devueltos.append(
-                                        {
-                                            "nombre": recurso["nombre_mostrar"],
-                                            "categoria": recurso["categoria"],
-                                        }
-                                    )
-                            break
-
-            # Eliminar el evento
-            del self.eventos_planificados[indice]
-
-        # 5. Guardar cambios
-        self.guardar_recursos()
-        self.guardar_eventos_en_json()
-
-        # 6. Actualizar interfaz
+        # 5.1. Actualizar contador y recursos disponibles
         self.actualizar_contador()
         self.crear_checkboxes_recursos()
+
+        # 6. Guardar cambios
+        self.guardar_recursos()
+        self.guardar_eventos_en_json()
 
         # 7. Cerrar ventana
         ventana_eliminar.destroy()
 
-        # 8. Mostrar mensaje de éxito
-        mensaje = f"✅ Se eliminaron {len(eventos_a_eliminar_indices)} evento(s)."
-
-        # Resumen de equipos liberados
-        if recursos_devueltos:
-            equipos_unicos = len(set(item["nombre"] for item in recursos_devueltos))
-            mensaje += f"\n🔄 {equipos_unicos} equipo(s) liberado(s)."
-
-        # Resumen de combustible devuelto
-        if combustible_devuelto:
-            total_litros = sum(item["litros"] for item in combustible_devuelto)
-            total_desperdiciado = sum(
-                item.get("desperdiciados", 0) for item in combustible_devuelto
-            )
-
-            if len(combustible_devuelto) == 1:
-                item = combustible_devuelto[0]
-                mensaje += f"\n⛽ +{item['litros']}L devueltos a {item['nombre']}"
-                if item.get("desperdiciados", 0) > 0:
-                    mensaje += f" (💥 {item['desperdiciados']}L desperdiciados)"
-            else:
-                mensaje += f"\n⛽ +{total_litros}L de combustible devueltos"
-                if total_desperdiciado > 0:
-                    mensaje += f" (💥 {total_desperdiciado}L desperdiciados)"
-
+        # 8. Generar y mostrar mensaje de éxito
+        mensaje = le.generar_mensaje_resumen(
+            eventos_a_eliminar_indices, recursos_devueltos, combustible_devuelto
+        )
         self.lbl_info.configure(text=mensaje, text_color="green")
 
-    # .13 ========= Verifica si hay combustible suficiente para toda la serie =======
-    def verificar_combustible_para_serie(self, tipo_evento, repeticiones, recursos):
-        if tipo_evento not in self.tipos_evento_data:
-            return False, "Tipo de evento no válido"
-
-        evento_data = self.tipos_evento_data[tipo_evento]
-        recursos_requeridos = evento_data.get("recursos_requeridos", [])
-
-        # Calcular combustible total necesario
-        combustible_necesario = {}
-
-        for req in recursos_requeridos:
-            if "COMBUSTIBLE" in req["categoria"].upper():
-                clave = f"{req['categoria']}|{req['tipo']}"
-                if clave not in combustible_necesario:
-                    combustible_necesario[clave] = 0
-                combustible_necesario[clave] += req["cantidad"] * repeticiones
-
-        # Verificar stock disponible
-        for clave, cantidad_necesaria in combustible_necesario.items():
-            categoria, tipo = clave.split("|")
-            stock_disponible = 0
-
-            # Sumar todo el combustible del mismo tipo
-            for recurso in recursos:
-                if (
-                    recurso.get("es_combustible", False)
-                    and recurso["categoria"] == categoria
-                    and recurso["tipo"] == tipo
-                ):
-                    stock_disponible += recurso["cantidad_disponible"]
-
-            if stock_disponible < cantidad_necesaria:
-                faltante = cantidad_necesaria - stock_disponible
-                return False, f"⛽ Faltan {faltante}L de {categoria} {tipo}"
-
-        return True, ""
-
     # .14 ========= Crear serie de eventos ==========
+
     def crear_serie_recurrente(self):
-
-        # 1. Validar tipo de evento
+        # 1. Obtener datos de la interfaz
         tipo_evento = self.combo_evento.get()
-        if not tipo_evento or tipo_evento == "Elige un tipo de evento":
-            self.lbl_info.configure(
-                text="❌ Selecciona un tipo de evento primero",
-                text_color="red",
-            )
-            return
-
-        # 2. Validar campos de fecha y duración
         day = self.entry_day.get()
         month = self.entry_month.get()
         year = self.entry_year.get()
         duracion = self.entry_duracion.get()
+        intervalo = self.entry_intervalo.get()
+        repeticiones = self.entry_repeticiones.get()
 
-        if not all([day, month, year, duracion]):
-            self.lbl_info.configure(
-                text="❌ Completa todos los campos de fecha y duración",
-                text_color="red",
-            )
-            return
+        # 2. Verificar si hay recursos seleccionados
+        tiene_recursos = hasattr(self, "checkbox_vars") and any(
+            v.get() for v in self.checkbox_vars.values()
+        )
 
-        # 3. Validar campos de recurrencia
-        intervalo = self.entry_intervalo.get() or "7"
-        repeticiones = self.entry_repeticiones.get() or "1"
+        # 3. Validar datos usando el módulo
+        valido, mensaje, datos_validados = ls.validar_datos_serie(
+            tipo_evento,
+            day,
+            month,
+            year,
+            duracion,
+            intervalo,
+            repeticiones,
+            tiene_recursos,
+        )
 
-        # VALIDACIÓN: verificar que sean números válidos
-        if not duracion.isdigit() or not repeticiones.isdigit():
-            self.lbl_info.configure(
-                text="❌ Usa solo números válidos en duración y repeticiones",
-                text_color="red",
-            )
-            return
-
-        # VALIDACIÓN: verificar que intervalo sea número (si no está vacío)
-        if intervalo and not intervalo.strip().isdigit():
-            self.lbl_info.configure(
-                text="❌ Usa solo números válidos en todos los campos",
-                text_color="red",
-            )
-            return
-
-        # Intentamos convertir a números
-        try:
-            intervalo_int = int(intervalo)
-            repeticiones_int = int(repeticiones)
-            duracion_int = int(duracion)
-
-            if intervalo_int <= 0 or repeticiones_int <= 0 or duracion_int <= 0:
-                self.lbl_info.configure(
-                    text="❌ Valores deben ser mayores a 0",
-                    text_color="red",
-                )
-                return
-        except ValueError:
-            self.lbl_info.configure(
-                text="❌ Usa números válidos en todos los campos",
-                text_color="red",
-            )
-            return
-
-        # 4. Obtener recursos seleccionados
-        if not hasattr(self, "checkbox_vars"):
-            self.lbl_info.configure(
-                text="❌ Error: no se cargaron los recursos",
-                text_color="red",
-            )
-            return
-
-        recursos_seleccionados = [k for k, v in self.checkbox_vars.items() if v.get()]
-
-        if not recursos_seleccionados:
-            self.lbl_info.configure(
-                text="❌ Selecciona al menos un recurso",
-                text_color="red",
-            )
-            return
-
-        # 5. Verificar límite de 1 año ANTES de confirmar
-        duracion_total_aproximada = (
-            repeticiones_int - 1
-        ) * intervalo_int + duracion_int
-
-        if duracion_total_aproximada > 365:
-            eventos_posibles = (365 - duracion_int) // intervalo_int + 1
-            eventos_posibles = max(1, eventos_posibles)
-
-            mensaje = f"❌ Serie demasiado larga (máximo {eventos_posibles} eventos)"
-
+        if not valido:
             self.lbl_info.configure(text=mensaje, text_color="red")
             return
 
-        # 6. Confirmar con usuario
+        # 4. Obtener recursos seleccionados
+        recursos_seleccionados = [k for k, v in self.checkbox_vars.items() if v.get()]
+
+        # 5. Confirmar con usuario
+        texto_confirmacion = ls.generar_texto_confirmacion_serie(datos_validados)
         respuesta = messagebox.askyesno(
-            "Confirmar serie recurrente",
-            f"¿Crear serie de {repeticiones_int} eventos?\n\n"
-            f"• Tipo: {tipo_evento}\n"
-            f"• Duración por evento: {duracion_int} días\n"
-            f"• Intervalo: {intervalo_int} días\n"
-            f"• Duración total: {duracion_total_aproximada} días\n"
-            f"• Recursos: {len(recursos_seleccionados)}",
+            "Confirmar serie recurrente", texto_confirmacion
         )
 
         if not respuesta:
             return
 
-        fecha_str = f"{day}/{month}/{year}"
-
+        # 6. Llamar a la función de creación de serie
         exito, mensaje, eventos_creados, fecha_problema = fsr.crear_serie_recurrente(
             tipo_evento=tipo_evento,
             recursos_seleccionados_nombres=recursos_seleccionados,
-            fecha_inicio_str=fecha_str,
-            duracion_dias=duracion_int,
-            intervalo_dias=intervalo_int,
-            num_eventos=repeticiones_int,
+            fecha_inicio_str=datos_validados["fecha_str"],
+            duracion_dias=datos_validados["duracion"],
+            intervalo_dias=datos_validados["intervalo"],
+            num_eventos=datos_validados["repeticiones"],
             recursos=self.recursos,
             eventos_planificados=self.eventos_planificados,
             tipos_evento_data=self.tipos_evento_data,
@@ -1314,79 +749,24 @@ class GestorEventos(ctk.CTk):
         repeticiones = self.entry_repeticiones.get()
         intervalo = self.entry_intervalo.get()
 
-        # Obtenemos qué recursos marcó el usuario en los checkboxes
-        recursos_check = [k for k, v in self.checkbox_vars.items() if v.get()]
+        # --- 2. VERIFICAR SI HAY RECURSOS SELECCIONADOS ---
+        tiene_recursos = hasattr(self, "checkbox_vars") and any(
+            v.get() for v in self.checkbox_vars.values()
+        )
 
-        # --- 2. VALIDACIONES PREVIAS ---
-        if tipo == "Elige un tipo de evento" or not duracion or not repeticiones:
-            self.lbl_info.configure(
-                text="❌ Rellena Tipo, Duración y Repeticiones primero.",
-                text_color="red",
-            )
-            return
+        # --- 3. VALIDAR DATOS USANDO EL MÓDULO ---
+        valido, mensaje, datos_validados = ls.validar_datos_sugerencia_serie(
+            tipo, duracion, repeticiones, intervalo, tiene_recursos
+        )
 
-        if not recursos_check:
-            self.lbl_info.configure(
-                text="❌ Selecciona al menos un recurso.", text_color="red"
-            )
-            return
-
-        # VALIDACIÓN: verificar que sean números válidos
-        if not duracion.isdigit() or not repeticiones.isdigit():
-            self.lbl_info.configure(
-                text="❌ Usa solo números válidos en Duración y Repeticiones.",
-                text_color="red",
-            )
-            return
-
-        # VALIDACIÓN: verificar que intervalo sea número (si no está vacío)
-        if intervalo and not intervalo.strip().isdigit():
-            self.lbl_info.configure(
-                text="❌ Usa solo números válidos en todos los campos.",
-                text_color="red",
-            )
-            return
-
-        # Intentamos convertir a números
-        try:
-            dur_int = int(duracion)
-            rep_int = int(repeticiones)
-            # Si el intervalo está vacío, ponemos 7 días por defecto
-            int_int = int(intervalo) if (intervalo and intervalo.strip()) else 7
-
-            # VALIDACIÓN: verificar que no sean números demasiado largos
-            if len(str(dur_int)) > 4 or len(str(rep_int)) > 4 or len(str(int_int)) > 4:
-                self.lbl_info.configure(
-                    text="❌ Número demasiado largo (máximo 4 dígitos)",
-                    text_color="red",
-                )
-                return
-
-        except ValueError:
-            self.lbl_info.configure(
-                text="❌ Duración, Repeticiones e Intervalo deben ser números.",
-                text_color="red",
-            )
-            return
-
-        # --- 3. VERIFICAR LÍMITE DE 1 AÑO ANTES DE BUSCAR ---
-        duracion_total_aproximada = (rep_int - 1) * int_int + dur_int
-
-        if duracion_total_aproximada > 365:
-            eventos_posibles = (365 - dur_int) // int_int + 1
-            eventos_posibles = max(1, eventos_posibles)
-
-            mensaje = (
-                f"❌ SERIE DEMASIADO LARGA\n\n"
-                f"Duración total: {duracion_total_aproximada} días\n"
-                f"Límite máximo: 365 días (1 año)\n\n"
-                f"Máximo eventos posibles: {eventos_posibles}"
-            )
-
+        if not valido:
             self.lbl_info.configure(text=mensaje, text_color="red")
             return
 
-        # --- 4. LLAMADA AL MOTOR DE BÚSQUEDA ---
+        # --- 4. OBTENER RECURSOS SELECCIONADOS ---
+        recursos_check = [k for k, v in self.checkbox_vars.items() if v.get()]
+
+        # --- 5. LLAMADA AL MOTOR DE BÚSQUEDA ---
         self.lbl_info.configure(
             text="🔍 Buscando fechas disponibles...", text_color="orange"
         )
@@ -1394,18 +774,18 @@ class GestorEventos(ctk.CTk):
 
         # Esta función ya incluye todas las validaciones
         exito, fecha, mensaje = fsr.buscar_serie_completa_disponible(
-            tipo_evento=tipo,
+            tipo_evento=datos_validados["tipo_evento"],
             recursos_seleccionados_nombres=recursos_check,
-            duracion_dias=dur_int,
-            intervalo_dias=int_int,
-            num_eventos=rep_int,
+            duracion_dias=datos_validados["duracion"],
+            intervalo_dias=datos_validados["intervalo"],
+            num_eventos=datos_validados["repeticiones"],
             recursos=self.recursos,
             eventos_planificados=self.eventos_planificados,
             tipos_evento_data=self.tipos_evento_data,
             app=self,
         )
 
-        # --- 5. GESTIÓN DEL RESULTADO ---
+        # --- 6. GESTIÓN DEL RESULTADO ---
         if exito:
             # Si encontramos fecha, llenamos los campos automáticamente
             self.actualizar_campos_fecha(fecha)
