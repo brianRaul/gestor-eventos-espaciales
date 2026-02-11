@@ -52,14 +52,14 @@
       {
         "modelo": "Deposito-Liquido",
         "tipo": "Liquido",
-        "cantidad_total": 5000000,
-        "cantidad_disponible": 4955000
+        "cantidad_total": 450000,
+        "cantidad_disponible": 450000
       },
       {
         "modelo": "Tanque-Solido",
         "tipo": "Solido",
-        "cantidad_total": 2000000,
-        "cantidad_disponible": 2000000
+        "cantidad_total": 450000,
+        "cantidad_disponible": 450000
       }
     ],
     "TORRE DE SERVICIO": [

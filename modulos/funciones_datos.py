@@ -1,4 +1,6 @@
 import json
+from datetime import datetime, date, timedelta
+
 # ========== FUNCIONES DE CARGA ==========
 # Carga los tipos de eventos desde el JSON 
 def cargar_eventos_desde_json():
@@ -64,8 +66,19 @@ def cargar_recursos_desde_json():
 def cargar_eventos_planificados():
     try:
         with open("eventos_planificados.json", "r", encoding="utf-8") as f:
-            contenido = json.load(f)
-            return contenido if isinstance(contenido, list) else []
+            eventos = json.load(f)
+        # Convertir fechas a objetos date y agregar resumen de recursos
+        for ev in eventos:
+            ev["fecha_inicio_date"] = datetime.strptime(ev["fecha_inicio"], "%d/%m/%Y").date()
+            ev["fecha_fin_date"] = datetime.strptime(ev["fecha_fin"], "%d/%m/%Y").date()
+            # Agregar resumen de recursos si no existe (para eventos antiguos)
+            if "resumen_recursos" not in ev and "recursos_detalle" in ev:
+                resumen = {}
+                for rd in ev["recursos_detalle"]:
+                    clave = f"{rd['categoria']}|{rd['tipo']}"
+                    resumen[clave] = resumen.get(clave, 0) + rd["cantidad"]
+                ev["resumen_recursos"] = resumen
+        return eventos if isinstance(eventos, list) else []
     except (FileNotFoundError, json.JSONDecodeError):
         return []
     

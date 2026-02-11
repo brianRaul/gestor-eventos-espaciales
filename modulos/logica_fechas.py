@@ -13,6 +13,8 @@ def sugerir_fecha_disponible_logica(
     recursos,
     preparar_recursos_requeridos_func,
     verificar_disponibilidad_fecha_func,
+    eventos_por_fecha=None,      
+    recursos_por_clave=None,
 ):
 
     # Lógica para sugerir una fecha disponible para un evento
@@ -42,16 +44,16 @@ def sugerir_fecha_disponible_logica(
         # Si no hay fecha válida, empezar desde mañana
         fecha_busqueda = date.today() + timedelta(days=1)
 
-    # Límite de búsqueda: 3 años (1095 días)
-    LIMITE_BUSQUEDA = 1095
-    fecha_maxima = date.today() + timedelta(days=1095)
+    # Límite de búsqueda: 1 año
+    LIMITE_BUSQUEDA = 365
+    fecha_maxima = date.today() + timedelta(days=365)
 
     # Variable para detectar si el error es de combustible
     error_combustible_detectado = False
     mensaje_combustible = ""
 
     for _ in range(LIMITE_BUSQUEDA):
-        # Verificar que no excedamos el límite de 3 años
+        # Verificar que no excedamos el límite de 1 año
         if fecha_busqueda > fecha_maxima:
             break
 
@@ -64,12 +66,14 @@ def sugerir_fecha_disponible_logica(
             recursos_necesarios,
             eventos_planificados,
             recursos,
+            eventos_por_fecha,     
+            recursos_por_clave,
         )
 
         if disponible:
             return (
                 fecha_busqueda,
-                f"✅ Fecha disponible: {fecha_busqueda.strftime('%d/%m/%Y')} (dentro de los próximos 3 años)",
+                f"✅ Fecha disponible: {fecha_busqueda.strftime('%d/%m/%Y')}",
                 False,
             )
         else:
@@ -90,7 +94,7 @@ def sugerir_fecha_disponible_logica(
     if error_combustible_detectado:
         return None, mensaje_combustible, True
     else:
-        return None, "❌ No se encontró fecha disponible en los próximos 3 años", False
+        return None, "❌ No se encontró fecha disponible en 1 año", False
 
 
 def validar_fecha_basica(
@@ -114,13 +118,13 @@ def validar_fecha_basica(
         if fecha_inicio.date() < datetime.now().date():
             return False, "❌ No puedes planificar en el pasado", None, None, None
 
-        LIMITE_FUTURO_DIAS = 1095
+        LIMITE_FUTURO_DIAS = 365
         fecha_maxima = datetime.now().date() + timedelta(days=LIMITE_FUTURO_DIAS)
 
         if fecha_inicio.date() > fecha_maxima:
             return (
                 False,
-                f"❌ No puedes planificar eventos a más de 3 años en el futuro",
+                f"❌ No puedes planificar eventos a más de 1 año en el futuro",
                 None,
                 None,
                 None,
@@ -128,11 +132,11 @@ def validar_fecha_basica(
 
         fecha_fin = fecha_inicio + timedelta(days=duracion - 1)
 
-        # Validar que el evento completo no exceda los 3 años
+        # Validar que el evento completo no exceda el año
         if fecha_fin.date() > fecha_maxima:
             return (
                 False,
-                f"❌ El evento no puede terminar después de 3 años a partir de hoy",
+                f"❌ El evento no puede terminar después de 1 año a partir de hoy",
                 None,
                 None,
                 None,
@@ -204,7 +208,7 @@ def validar_limites_serie(
     intervalo_dias,
     num_eventos,
     max_duracion_serie=365,
-    max_planificacion=1095,
+    max_planificacion=365,
 ):
     """
     Valida que una serie de eventos cumpla con los límites establecidos
@@ -235,6 +239,6 @@ def validar_limites_serie(
             )
 
         eventos_posibles = max(1, eventos_posibles)
-        return False, f"❌ La serie excede 3 años (máximo {eventos_posibles} eventos)"
+        return False, f"❌ La serie excede 1 año (máximo {eventos_posibles} eventos)"
 
     return True, ""
