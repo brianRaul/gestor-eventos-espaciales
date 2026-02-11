@@ -1,3 +1,4 @@
+# funciones_series_recurrentes.py - VERSIÓN CORREGIDA
 from datetime import datetime, date, timedelta
 from .funciones_crear_evento import *
 from .funciones_buscar_hueco import *
@@ -34,25 +35,25 @@ def crear_serie_recurrente(
     if num_eventos > 1 and intervalo_dias < duracion_dias:
         return (
             False,
-            "❌ Intervalo menor que duración",
+            "❌ El intervalo debe ser mayor o igual a la duración",
             [],
             None,
         )
 
     # 4. LÍMITES DE TIEMPO
     HOY = datetime.now().date()
-    LIMITE_FUTURO_DIAS = 1095  # 3 años
-    LIMITE_SERIE_DIAS = 365  # 1 año para la serie
+    LIMITE_FUTURO_DIAS = 365  # 1 año (cambiado de 1095)
+    LIMITE_SERIE_DIAS = 365   # 1 año para la serie
 
     # Verificar que el primer evento no esté en el pasado
     if fecha_inicial < HOY:
         return False, "❌ No puedes planificar en el pasado", [], None
 
-    # Verificar que el primer evento esté dentro de 3 años
+    # Verificar que el primer evento esté dentro de 1 año
     if fecha_inicial > HOY + timedelta(days=LIMITE_FUTURO_DIAS):
         return (
             False,
-            f"❌ Fecha fuera de rango (máximo 3 años)",
+            f"❌ Fecha fuera de rango (máximo 1 año)",
             [],
             None,
         )
@@ -198,7 +199,7 @@ def crear_serie_recurrente(
         eventos_validados.append(evento_simulado)
         fecha_temp += timedelta(days=intervalo_dias)
 
-    # 11. CREAR LOS EVENTOS REALES (CON ESTRUCTURA UNIFICADA) - CORREGIDO
+    # 11. CREAR LOS EVENTOS REALES (CON ESTRUCTURA UNIFICADA)
     fecha_temp = fecha_inicial
     eventos_creados = []
     recursos_opcionales_serie = set()  # ← conjunto para recursos opcionales únicos
@@ -259,6 +260,7 @@ def crear_serie_recurrente(
     
     return True, mensaje_final, eventos_creados, None
 
+
 def buscar_serie_completa_disponible(
     tipo_evento,
     recursos_seleccionados_nombres,
@@ -271,7 +273,7 @@ def buscar_serie_completa_disponible(
     app=None,
 ):
     LIMITE_DIAS_SERIE = 365  # Límite de duración de serie
-    LIMITE_FUTURO_DIAS = 1095  # Límite de 3 años para planificación
+    LIMITE_FUTURO_DIAS = 365  # Límite de 1 año para planificación (cambiado de 1095)
 
     # --- 1. VERIFICACIONES PREVIAS ---
 
@@ -280,7 +282,7 @@ def buscar_serie_completa_disponible(
         return (
             False,
             None,
-            "❌ El intervalo debe ser mayor que la duración",
+            "❌ El intervalo debe ser mayor o igual que la duración",
         )
 
     # Calcular duración total de la serie usando función del módulo
@@ -299,7 +301,7 @@ def buscar_serie_completa_disponible(
             f"❌ Serie demasiado larga (máximo {eventos_posibles} eventos)",
         )
 
-    # Verificar que toda la serie quepa dentro de 3 años desde hoy usando función del módulo
+    # Verificar que toda la serie quepa dentro de 1 año desde hoy
     valido, mensaje = lf.validar_limites_serie(
         duracion_dias, intervalo_dias, num_eventos, LIMITE_DIAS_SERIE, LIMITE_FUTURO_DIAS
     )
@@ -375,20 +377,19 @@ def buscar_serie_completa_disponible(
             )
     
     # --- 2. BÚSQUEDA DE FECHAS DISPONIBLES ---
-    LIMITE_BUSQUEDA = LIMITE_FUTURO_DIAS  # Buscar en los próximos 3 años
+    LIMITE_BUSQUEDA = 365  # Buscar en los próximos 365 días (1 año)
 
     fecha_inicio_busqueda = date.today()
     fecha_maxima = fecha_inicio_busqueda + timedelta(days=LIMITE_FUTURO_DIAS)
 
     for dias_offset in range(LIMITE_BUSQUEDA):
-
+        # Actualizar interfaz si se proporciona app
         if app and dias_offset % 5 == 0:
             app.update()
 
         fecha_candidata = fecha_inicio_busqueda + timedelta(days=dias_offset)
 
-        # Verificar que toda la serie quepa dentro de 3 años para esta fecha candidata
-        # Obtener fechas de la serie usando función del módulo
+        # Verificar que toda la serie quepa dentro de 1 año para esta fecha candidata
         fechas_inicio, fechas_fin, valido_fechas, msg_fechas = lf.obtener_fechas_serie(
             fecha_candidata.strftime("%d/%m/%Y"),
             duracion_dias,
@@ -396,13 +397,12 @@ def buscar_serie_completa_disponible(
             num_eventos
         )
         
-        if not valido_fechas or not fechas_fin:
+        if not valido_fechas:
             continue
             
-        fecha_fin_ultimo_candidato = fechas_fin[-1]
-
-        if fecha_fin_ultimo_candidato > fecha_maxima:
-            # Esta fecha no sirve, pasar a la siguiente
+        # Verificar que la última fecha de la serie no exceda el límite
+        fecha_fin_ultimo = fechas_fin[-1] if fechas_fin else fecha_candidata
+        if fecha_fin_ultimo > fecha_maxima:
             continue
 
         puede_toda_la_serie = True
@@ -411,7 +411,7 @@ def buscar_serie_completa_disponible(
         for i in range(num_eventos):
             f_actual = fecha_candidata + timedelta(days=i * intervalo_dias)
 
-            # Validamos cada evento de la serie
+            # Validar cada evento de la serie
             exito, msg, _, _ = procesar_creacion_evento(
                 tipo_evento,
                 str(f_actual.day),
@@ -432,7 +432,7 @@ def buscar_serie_completa_disponible(
                     return False, None, msg
                 break
 
-            # Añadir a la simulación
+            # Añadir evento simulado para la próxima iteración
             eventos_simulados.append(
                 {
                     "fecha_inicio": f_actual.strftime("%d/%m/%Y"),
@@ -453,65 +453,5 @@ def buscar_serie_completa_disponible(
     return (
         False,
         None,
-        f"❌ No hay fechas disponibles en {LIMITE_BUSQUEDA} días",
+        f"❌ No hay fechas disponibles en los próximos {LIMITE_BUSQUEDA} días",
     )
-
-    """Determina si un error es de solapamiento (recursos ocupados en fechas)"""
-    mensaje_lower = mensaje_error.lower()
-
-    # Errores que SON de solapamiento
-    palabras_solapamiento = [
-        "ocupad",
-        "ocupado",
-        "ocupada",
-        "ocupados",
-        "ocupadas",
-        "solap",
-        "solapa",
-        "solapamiento",
-        "solapan",
-        "calendario",
-        "disponible",
-        "disponibilidad",
-        "hueco",
-        "libre",
-        "conflicto",
-        "choque",
-        "superpone",
-    ]
-
-    # Errores que NO SON de solapamiento
-    palabras_no_solapamiento = [
-        "duración",
-        "duracion",
-        "duraci",
-        "días",
-        "dias",
-        "menor",
-        "mayor",
-        "mínima",
-        "minima",
-        "máxima",
-        "maxima",
-        "fecha inválida",
-        "fecha invalida",
-        "selecciona",
-        "selección",
-        "recurso prohibido",
-        "requiere",
-        "combustible",
-        "litro",
-        "litros",
-        "3 años",
-        "3 año",
-        "1095",
-        "pasado",
-    ]
-
-    # Si contiene palabras de NO solapamiento, no es solapamiento
-    for palabra in palabras_no_solapamiento:
-        if palabra in mensaje_lower:
-            return False
-
-    # Si contiene palabras de solapamiento, es solapamiento
-    return any(palabra in mensaje_lower for palabra in palabras_solapamiento)

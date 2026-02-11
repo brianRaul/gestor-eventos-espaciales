@@ -8,9 +8,215 @@ La aplicación garantiza que los recursos no se asignen a más de un evento simu
 
 ---
 
-## ✨ Características Principales
+## 🏗️ Arquitectura Basada en Clases - La Ventaja de `GestorEventos`
 
-### ✅ **Planificación Inteligente**
+### **Diseño Orientado a Objetos con Clase Principal**
+
+La aplicación está estructurada alrededor de la clase principal `GestorEventos`, que hereda de `customtkinter.CTk`. Este diseño ofrece importantes ventajas:
+
+#### **1. Encapsulación y Organización**
+- **Estado Centralizado**: Todos los datos de la aplicación (eventos planificados, recursos, configuraciones) están encapsulados dentro de una sola instancia de `GestorEventos`
+- **Evita Variables Globales**: Elimina el uso de variables globales, reduciendo errores y facilitando el mantenimiento
+- **Ciclo de Vida Controlado**: La inicialización, ejecución y cierre están completamente gestionados por la clase
+
+#### **2. Coherencia y Mantenibilidad**
+- **Métodos Especializados**: Cada funcionalidad tiene su método dedicado (`crear_evento`, `eliminar_eventos`, `ver_combustible`, etc.)
+- **Separación de Responsabilidades**: La interfaz gráfica está claramente separada de la lógica de negocio mediante módulos especializados
+- **Facilidad de Extensión**: Nuevas funcionalidades se pueden agregar como nuevos métodos o módulos sin afectar el código existente
+
+#### **3. Integración con el Sistema de Ventanas**
+- **Ventana Principal Única**: `GestorEventos` actúa como la ventana principal de la aplicación
+- **Gestión de Ventanas Secundarias**: Controla todas las ventanas emergentes (Toplevel) que se crean
+- **Comunicación Centralizada**: Todas las partes de la aplicación acceden a los mismos datos a través de la instancia principal
+
+#### **4. Sincronización Automática**
+- **Patrón Observador Integrado**: La clase principal coordina la actualización de todas las ventanas abiertas
+- **Datos Siempre Actualizados**: Cuando se realizan cambios (crear/eliminar eventos, modificar combustible), todas las ventanas abiertas se actualizan automáticamente
+- **Registro de Ventanas**: Mantiene un registro de todas las ventanas abiertas para notificarles de cambios
+
+---
+
+## 🚀 Cómo Ejecutar el Programa
+
+### **Requisitos Previos**
+
+1. **Python 3.8 o superior** instalado en el sistema
+2. **Acceso a línea de comandos** (Terminal en macOS/Linux, CMD o PowerShell en Windows)
+
+### **Instalación de Dependencias**
+
+```bash
+# Instalar CustomTkinter (interfaz gráfica moderna)
+pip install customtkinter
+
+# Verificar instalación
+python -c "import customtkinter; print('✅ CustomTkinter instalado correctamente')"
+```
+
+### **Estructura del Proyecto**
+
+```
+gestor_eventos_espaciales/
+├── main.py                          # Punto de entrada - Clase GestorEventos
+├── eventos_predeterminados.json     # Configuración de tipos de evento
+├── recursos.json                    # Inventario de recursos disponibles
+├── eventos_planificados.json        # Eventos creados (se genera automáticamente)
+└── modulos/                         # Módulos de lógica de negocio
+    ├── funciones_datos.py           # Carga/guardado de datos
+    ├── funciones_crear_evento.py    # Lógica de creación de eventos
+    ├── funciones_buscar_hueco.py    # Búsqueda de fechas disponibles
+    ├── funciones_series_recurrentes.py # Gestión de series
+    ├── logica_combustible.py        # Gestión de combustible
+    ├── logica_eliminacion.py        # Eliminación con devolución
+    ├── logica_serie.py              # Validación de series
+    ├── logica_visualizaciones.py    # Visualizaciones de eventos
+    ├── logica_recursos.py           # Gestión de recursos
+    ├── logica_fechas.py             # Validación de fechas
+    ├── logica_validaciones.py       # Validaciones generales
+    └── logica_sincronizacion.py     # Sincronización de ventanas
+```
+
+### **Pasos para Ejecutar**
+
+1. **Abrir terminal** en la carpeta del proyecto
+2. **Ejecutar el archivo principal**:
+
+```bash
+python main.py
+```
+
+### **Comportamiento al Iniciar**
+
+1. **Carga Automática de Datos**: 
+   - Carga los tipos de evento desde `eventos_predeterminados.json`
+   - Carga los recursos disponibles desde `recursos.json`
+   - Carga eventos existentes desde `eventos_planificados.json` (si existe)
+
+2. **Inicialización de la Interfaz**:
+   - Crea la ventana principal con tamaño fijo (675x975 píxeles)
+   - Configura todos los elementos de la interfaz
+   - Inicializa el sistema de sincronización de ventanas
+
+3. **Aplicación Lista**:
+   - La ventana principal se muestra centrada en pantalla
+   - El contador de eventos se actualiza automáticamente
+   - Los recursos se cargan en el panel de selección
+
+---
+
+## 🔗 Conexión entre Funciones y Módulos
+
+### **Flujo de Datos y Control**
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    CLASE GestorEventos (main.py)                 │
+├─────────────────────────────────────────────────────────────────┤
+│  Interfaz Gráfica          │     Gestión de Estado              │
+│  • crear_interfaz()        │     • eventos_planificados         │
+│  • lbl_info, btn_crear     │     • recursos                     │
+│  • combo_evento, etc.      │     • tipos_evento_data            │
+└─────────────┬──────────────────────────────┬────────────────────┘
+              │                              │
+              ▼                              ▼
+    ┌──────────────────┐          ┌────────────────────────┐
+    │  Módulos de UI   │          │  Módulos de Lógica     │
+    │  • logica_       │          │  • funciones_crear_    │
+    │    visualizaciones│          │    evento.py          │
+    │  • logica_       │          │  • funciones_series_   │
+    │    recursos       │          │    recurrentes.py     │
+    └──────────────────┘          └────────────────────────┘
+              │                              │
+              └──────────────┬───────────────┘
+                             │
+                             ▼
+               ┌────────────────────────────┐
+               │   Sistema de Sincronización │
+               │   • logica_sincronizacion.py│
+               │   • Actualiza ventanas      │
+               │     automáticamente         │
+               └────────────────────────────┘
+```
+
+### **Conexiones Clave entre Componentes**
+
+#### **1. Creación de Eventos**
+```
+Interfaz → main.py.crear_evento() → funciones_crear_evento.procesar_creacion_evento()
+         ↓
+logica_validaciones → logica_recursos → funciones_buscar_hueco
+         ↓
+Resultado → Actualiza estado → Guarda JSON → Notifica cambios
+```
+
+#### **2. Gestión de Recursos**
+```
+Checkboxes → main.py.crear_checkboxes_recursos() → logica_recursos.obtener_recursos_por_categoria()
+          ↓
+Selección → logica_recursos.obtener_recursos_recomendados() → tipos_evento_data
+          ↓
+Validación → logica_validaciones.validar_reglas_exclusion()
+```
+
+#### **3. Sincronización de Ventanas**
+```
+Evento de Cambio → main.py → logica_sincronizacion.notificar_cambio_*()
+                 ↓
+Registro de Ventanas → Actualización Automática → Recreación de Contenido
+```
+
+#### **4. Sistema de Combustible**
+```
+Estado de Combustible → logica_combustible.obtener_combustibles()
+                     ↓
+main.py.ver_combustible() → Ventana con datos actualizados
+                     ↓
+Consumo/Reposición → Actualización automática de todas las ventanas
+```
+
+### **Comunicación entre Módulos**
+
+1. **main.py → Módulos de Lógica**: Llama funciones específicas pasando datos necesarios
+2. **Módulos de Lógica → main.py**: Retornan resultados (éxito/error, datos procesados)
+3. **Módulos entre sí**: Se importan y utilizan funciones especializadas
+4. **Sistema de Sincronización**: Escucha cambios y notifica a todas las ventanas registradas
+
+### **Flujo de una Operación Típica (Crear Evento)**
+
+```
+1. Usuario completa formulario en interfaz
+2. main.py.crear_evento() captura los datos
+3. Llama a funciones_crear_evento.procesar_creacion_evento()
+4. Este módulo coordina validaciones con:
+   - logica_validaciones (validaciones básicas)
+   - logica_recursos (validación de recursos)
+   - logica_fechas (validación de fechas)
+   - funciones_buscar_hueco (disponibilidad)
+5. Si todo es válido:
+   - Consume recursos (combustible)
+   - Crea estructura del evento
+   - Retorna éxito a main.py
+6. main.py:
+   - Agrega evento a lista interna
+   - Guarda en JSON
+   - Notifica cambios al sistema de sincronización
+   - Actualiza interfaz principal
+   - Actualiza todas las ventanas abiertas
+```
+
+### **Beneficios de esta Arquitectura**
+
+1. **Alta Cohesión**: Cada módulo tiene una responsabilidad clara
+2. **Bajo Acoplamiento**: Los módulos se comunican a través de interfaces definidas
+3. **Testabilidad**: Fácil probar cada módulo por separado
+4. **Mantenibilidad**: Cambios en un módulo no afectan a los demás
+5. **Escalabilidad**: Nuevas funcionalidades se agregan como nuevos módulos
+
+---
+
+## Características Principales
+
+### **Planificación Inteligente**
 - Creación de eventos individuales con validación en tiempo real
 - Soporte para **series recurrentes** con intervalo personalizable
 - Validación automática de fechas y duraciones (límite de 3 años)
@@ -40,7 +246,7 @@ La aplicación garantiza que los recursos no se asignen a más de un evento simu
 
 ---
 
-## 🏗️ **Estructura del Código**
+## **Estructura del Código**
 
 ### **Arquitectura Modular**
 El sistema está organizado en módulos especializados para mantener una separación clara de responsabilidades:
@@ -67,70 +273,6 @@ main.py                          # Interfaz gráfica principal (CustomTkinter)
 Interfaz Gráfica → Lógica de Negocio → Validaciones → Persistencia
       (main.py)    (módulos logica_*)   (validaciones)   (JSON files)
 ```
-
----
-
-## ⚙️ **Sistema de Restricciones Detallado**
-
-### **Niveles de Validación**
-El sistema implementa 7 capas de validación secuencial:
-
-1. **Validación de Tipo de Evento** - Verifica que el evento exista en la configuración
-2. **Validación de Fechas** - Comprueba fechas válidas, no pasadas y dentro del límite de 3 años
-3. **Validación de Recursos Seleccionados** - Convierte nombres a objetos y verifica existencia
-4. **Reglas de Exclusión** - Bloquea combinaciones prohibidas de recursos
-5. **Requisitos Coexistentes** - Exige recursos complementarios cuando se usan ciertos recursos principales
-6. **Recursos Requeridos** - Verifica que todos los recursos obligatorios estén seleccionados y disponibles
-7. **Validación de Disponibilidad** - Comprueba solapamientos y stock disponible
-
-### **Tipos de Restricciones**
-
-#### **1. Restricciones de Recursos (Exclusiones)**
-```json
-{
-  "categoria": "COHETE",
-  "tipos_prohibidos": ["Ligero"]
-}
-```
-- **Sentido**: Cuando se selecciona un tipo de evento, ciertas categorías de recursos tienen tipos específicos prohibidos.
-- **Ejemplo**: Un "Despegue de cohete" no puede usar cohetes ligeros, solo pesados.
-
-#### **2. Dependencias de Recursos (Co-requisitos)**
-```json
-{
-  "categoria": "COHETE",
-  "tipo": "Pesado",
-  "requiere": [
-    {"categoria": "EQUIPO DE CONTROL", "tipo": "Digital"},
-    {"categoria": "SISTEMA DE SEGURIDAD", "tipo": "Activa"}
-  ]
-}
-```
-- **Sentido**: Cuando se selecciona un recurso específico, automáticamente requiere otros recursos.
-- **Ejemplo**: Un cohete pesado siempre necesita un equipo de control digital y un sistema de seguridad activa.
-
-#### **3. Restricciones de Cantidad**
-- **Combustible**: Verifica litros disponibles vs. requeridos
-- **Equipos**: Verifica unidades disponibles considerando eventos solapados
-- **Límites de capacidad**: Cada recurso tiene una cantidad máxima definida
-
-#### **4. Restricciones Temporales**
-- **Límite de 3 años**: No se puede planificar más allá de 1095 días desde hoy
-- **No eventos pasados**: No se permiten fechas anteriores a hoy
-- **Series limitadas**: Las series recurrentes no pueden exceder 1 año de duración total
-- **Intervalo mínimo**: En series, el intervalo debe ser mayor o igual a la duración del evento
-
-### **Validación de Solapamientos**
-El sistema verifica múltiples dimensiones de solapamiento:
-
-1. **Solapamiento Temporal**: Dos eventos no pueden ocurrir en las mismas fechas
-2. **Solapamiento de Recursos**: Un recurso no puede estar asignado a dos eventos simultáneamente
-3. **Solapamiento de Capacidad**: Para recursos con múltiples unidades, verifica unidades libres
-
-### **Gestión de Combustible**
-- **Consumo**: Al crear eventos, se descuenta combustible de los tanques
-- **Devolución**: Al eliminar eventos, el combustible regresa a los tanques (hasta capacidad máxima)
-- **Desperdicio**: Si el tanque está lleno al devolver, el exceso se pierde
 
 ---
 
@@ -296,7 +438,6 @@ Almacena eventos creados con estructura unificada:
   }
 ]
 ```
-
 ---
 
 ## 🎯 **Flujo de Trabajo Típico**
@@ -443,22 +584,5 @@ Almacena eventos creados con estructura unificada:
 ## 👨‍💻 **Autor**
 
 **Brian Raúl López Pérez**
-
----
-
-## 📄 **Licencia**
-
-Este proyecto fue desarrollado como parte de un trabajo académico. Para uso educativo y demostración.
-
----
-
-## 🎯 **Resumen Final**
-
-Este **Gestor de Eventos Espaciales** es un sistema completo que demuestra:
-- ✅ Planificación inteligente con restricciones complejas
-- ✅ Interfaz gráfica profesional y usable
-- ✅ Gestión avanzada de recursos con cantidades
-- ✅ Persistencia robusta de datos
-- ✅ Validaciones exhaustivas y manejo de errores
 
 **¡Listo para ejecutar y usar!** 🚀

@@ -1,10 +1,13 @@
 # logica_visualizacion.py
 import customtkinter as ctk
 
-def mostrar_eventos_planificados(parent, eventos_planificados, mostrar_recursos_callback):
+
+def mostrar_eventos_planificados(
+    parent, eventos_planificados, mostrar_recursos_callback
+):
     """
     Muestra una ventana con la lista de eventos planificados
-    
+
     Args:
         parent: ventana padre (main window)
         eventos_planificados: lista de eventos a mostrar
@@ -15,6 +18,10 @@ def mostrar_eventos_planificados(parent, eventos_planificados, mostrar_recursos_
     ventana_eventos.title("📋 Eventos Planificados")
     ventana_eventos.geometry("440x400")
 
+    ventana_eventos.transient(parent)  # Hace que sea ventana hija
+    ventana_eventos.lift()  # Trae la ventana al frente
+    ventana_eventos.focus_force()  # Enfoca la ventana
+
     # Título
     titulo = ctk.CTkLabel(
         ventana_eventos, text="EVENTOS PLANIFICADOS", font=("Arial", 16, "bold")
@@ -22,9 +29,7 @@ def mostrar_eventos_planificados(parent, eventos_planificados, mostrar_recursos_
     titulo.pack(pady=10)
 
     # Frame para contener los eventos con scroll
-    frame_contenedor = ctk.CTkScrollableFrame(
-        ventana_eventos, width=550, height=400
-    )
+    frame_contenedor = ctk.CTkScrollableFrame(ventana_eventos, width=550, height=400)
     frame_contenedor.pack(pady=10, padx=10, fill="both", expand=True)
 
     # Verificar si hay eventos
@@ -60,9 +65,9 @@ def mostrar_eventos_planificados(parent, eventos_planificados, mostrar_recursos_
             lbl_tipo.grid(row=1, column=0, sticky="w")
 
             # Fecha de inicio y fin
-            fecha_inicio = evento.get('fecha_inicio', evento.get('fecha', 'N/A'))
-            fecha_fin = evento.get('fecha_fin', 'N/A')
-            
+            fecha_inicio = evento.get("fecha_inicio", evento.get("fecha", "N/A"))
+            fecha_fin = evento.get("fecha_fin", "N/A")
+
             lbl_fecha = ctk.CTkLabel(
                 contenido_evento,
                 text=f"📅 Inicio: {fecha_inicio} | Fin: {fecha_fin}",
@@ -86,7 +91,9 @@ def mostrar_eventos_planificados(parent, eventos_planificados, mostrar_recursos_
                 height=30,
                 fg_color="#2196F3",
                 hover_color="#1976D2",
-                command=lambda ev=evento: mostrar_recursos_callback(parent, ev),
+                command=lambda ev=evento: mostrar_recursos_callback(
+                    ventana_eventos, ev
+                ),
             )
             btn_recursos.grid(
                 row=0, column=1, rowspan=4, padx=(20, 0), pady=5, sticky="e"
@@ -98,10 +105,11 @@ def mostrar_eventos_planificados(parent, eventos_planificados, mostrar_recursos_
     )
     btn_cerrar.pack(pady=10)
 
+
 def mostrar_recursos_evento(parent, evento):
     """
     Muestra los recursos utilizados en un evento específico
-    
+
     Args:
         parent: ventana padre
         evento: diccionario con la información del evento
@@ -110,6 +118,10 @@ def mostrar_recursos_evento(parent, evento):
     ventana_recursos = ctk.CTkToplevel(parent)
     ventana_recursos.title(f"📦 Recursos del Evento: {evento['tipo']}")
     ventana_recursos.geometry("500x500")
+
+    ventana_recursos.transient(parent)  # Hace que sea hija de ventana_eventos
+    ventana_recursos.lift()  # Trae la ventana al frente
+    ventana_recursos.focus_force()  # Enfoca la ventana
 
     # Título
     titulo = ctk.CTkLabel(
@@ -225,9 +237,7 @@ def mostrar_recursos_evento(parent, evento):
         if recursos_equipos > 0:
             resumen_text += f" | 🛠️ Equipos: {recursos_equipos}"
 
-        ctk.CTkLabel(resumen_frame, text=resumen_text, font=("Arial", 11)).pack(
-            pady=5
-        )
+        ctk.CTkLabel(resumen_frame, text=resumen_text, font=("Arial", 11)).pack(pady=5)
 
     # Botón para cerrar
     btn_cerrar = ctk.CTkButton(

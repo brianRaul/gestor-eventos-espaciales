@@ -12,6 +12,7 @@ import modulos.logica_serie as ls
 import modulos.logica_visualizaciones as lv
 import modulos.logica_recursos as lr
 import modulos.logica_fechas as lf
+import modulos.logica_sincronizacion as lsinc
 
 
 class GestorEventos(ctk.CTk):
@@ -21,9 +22,15 @@ class GestorEventos(ctk.CTk):
 
         # 1.Configurar ventana
         self.title("Gestor de Eventos Espaciales")
-        self.geometry("2000x975")
+        self.geometry("675x990")
+        
+        self.resizable(False, False)
 
         self.evento_seleccionado = None
+        
+
+       # Inicializar gestor de sincronización
+        self.gestor_sinc = lsinc.crear_gestor_sincronizacion(self)
 
         # 2. CARGA DE EVENTOS
         self.tipos_evento_data = cargar_eventos_desde_json()
@@ -221,11 +228,11 @@ class GestorEventos(ctk.CTk):
         # Validación rápida de límite de años
         try:
             fecha_ingresada = datetime(int(year), int(month), int(day))
-            fecha_limite = datetime.now() + timedelta(days=1095)  # 3 años
+            fecha_limite = datetime.now() + timedelta(days=365)  # 1 año
 
             if fecha_ingresada > fecha_limite:
                 self.lbl_info.configure(
-                    text="❌ La fecha excede el límite de 3 años",
+                    text="❌ La fecha excede el límite de 1 año",
                     text_color="red",
                 )
                 return
@@ -258,6 +265,10 @@ class GestorEventos(ctk.CTk):
             # Guardar datos
             self.guardar_eventos_en_json()
             self.guardar_recursos()
+            
+            # Notificar cambios a ventanas abiertas
+            self.gestor_sinc.notificar_cambio_combustible()
+            self.gestor_sinc.notificar_cambio_eventos()
 
             # Actualizar interfaz
             self.actualizar_contador()
@@ -279,9 +290,11 @@ class GestorEventos(ctk.CTk):
 
     # .5 ========== Mostrar eventos planificados ======
     def mostrar_eventos_planificados(self):
-        lv.mostrar_eventos_planificados(
-            self, self.eventos_planificados, lv.mostrar_recursos_evento
-        )
+        ventana = self.gestor_sinc.crear_ventana_eventos(
+        self, 
+        self.eventos_planificados, 
+        lv.mostrar_recursos_evento
+    )
 
     # .6 ========== Sugerir Fecha =====================
     def sugerir_fecha_disponible(self):
@@ -345,11 +358,21 @@ class GestorEventos(ctk.CTk):
         self.ventana_combustible.title("📊 Estado de Combustible")
         self.ventana_combustible.geometry("400x350")
 
-        # Configurar para que al cerrar se limpie la referencia
+        self.ventana_combustible.transient(self)  # Hace que sea ventana hija
+        self.ventana_combustible.lift()  # Trae la ventana al frente
+        self.ventana_combustible.focus_force()  # Enfoca la ventana
+
+        # Registrar ventana en gestor
+        self.gestor_sinc.registrar_ventana('combustible', self.ventana_combustible)
+
+    # Configurar para que al cerrar se limpie la referencia
         def on_close():
-            if self.ventana_combustible is not None:
-                self.ventana_combustible.destroy()
-                self.ventana_combustible = None
+        # Eliminar del gestor
+         self.gestor_sinc.eliminar_ventana('combustible', self.ventana_combustible)
+        
+         if self.ventana_combustible is not None:
+            self.ventana_combustible.destroy()
+            self.ventana_combustible = None
 
         self.ventana_combustible.protocol("WM_DELETE_WINDOW", on_close)
 
@@ -441,14 +464,8 @@ class GestorEventos(ctk.CTk):
             # Guardar cambios
             self.guardar_recursos()
 
-            # ACTUALIZACIÓN: Si la ventana está abierta, cierra y vuelve a abrir
-            if (
-                self.ventana_combustible is not None
-                and self.ventana_combustible.winfo_exists()
-            ):
-                self.ventana_combustible.destroy()
-                self.ventana_combustible = None
-                self.ver_combustible()  # Abre nueva ventana con datos actualizados
+           # Notificar cambio a todas las ventanas de combustible
+            self.gestor_sinc.notificar_cambio_combustible()
 
             # Mensaje de éxito
             mensaje = f"✅ Combustible rellenado\n⛽ +{litros_agregados:,} litros"
@@ -458,14 +475,14 @@ class GestorEventos(ctk.CTk):
                 text="ℹ️ Todo el combustible ya está lleno", text_color="orange"
             )
 
-    # .9.1========= Verifica si hay combustible suficiente para toda la serie =======
+    # .10 ========= Verifica si hay combustible suficiente para toda la serie =======
     def verificar_combustible_para_serie(self, tipo_evento, repeticiones, recursos):
         # Usar función del módulo
         return lc.verificar_combustible_para_serie_logica(
             tipo_evento, repeticiones, recursos, self.tipos_evento_data
         )
 
-    # .10 ========= Eliminar Eventos ==================
+    # .11 ========= Eliminar Eventos ==================
     def eliminar_eventos_planificados(self):
 
         self.eventos_planificados = cargar_eventos_planificados()
@@ -480,9 +497,9 @@ class GestorEventos(ctk.CTk):
         ventana_eliminar.title("🗑️ Eliminar Eventos")
         ventana_eliminar.geometry("600x500")
 
-        # Hacer que la ventana sea modal
-        ventana_eliminar.grab_set()
-        ventana_eliminar.transient(self)
+        ventana_eliminar.transient(self)  # Hace que sea ventana hija
+        ventana_eliminar.lift()  # Trae la ventana al frente
+        ventana_eliminar.focus_force()  # Enfoca la ventana
 
         # Título
         ctk.CTkLabel(
@@ -578,14 +595,14 @@ class GestorEventos(ctk.CTk):
         )
         btn_cancelar.pack(side="left", padx=10)
 
-    # .11 ========= Seleccionar todos los eventos para eliminar=========
+    # .12 ========= Seleccionar todos los eventos para eliminar=========
     def toggle_seleccionar_todos_eventos(self, var_todos):
         estado = var_todos.get()
         if hasattr(self, "checkboxes_eliminar"):
             for checkbox_var in self.checkboxes_eliminar:
                 checkbox_var.set(estado)
 
-    # .12 ========= Confirmar eliminación =============
+    # .13 ========= Confirmar eliminación =============
     def confirmar_eliminacion(self, ventana_eliminar):
         # 1. Obtener índices de eventos seleccionados para eliminar
         eventos_a_eliminar_indices = []
@@ -632,6 +649,9 @@ class GestorEventos(ctk.CTk):
         # 6. Guardar cambios
         self.guardar_recursos()
         self.guardar_eventos_en_json()
+        
+        # Notificar TODOS los cambios a ventanas abiertas
+        self.gestor_sinc.notificar_todos_los_cambios()
 
         # 7. Cerrar ventana
         ventana_eliminar.destroy()
@@ -643,7 +663,6 @@ class GestorEventos(ctk.CTk):
         self.lbl_info.configure(text=mensaje, text_color="green")
 
     # .14 ========= Crear serie de eventos ==========
-
     def crear_serie_recurrente(self):
         # 1. Obtener datos de la interfaz
         tipo_evento = self.combo_evento.get()
@@ -706,6 +725,11 @@ class GestorEventos(ctk.CTk):
             # NO agregar eventos aquí - la función ya los agregó a eventos_planificados
             self.guardar_eventos_en_json()
             self.guardar_recursos()
+            
+            # Notificar cambios a ventanas abiertas
+            self.gestor_sinc.notificar_cambio_combustible()
+            self.gestor_sinc.notificar_cambio_eventos()
+            
             self.actualizar_contador()
             self.crear_checkboxes_recursos()
 
