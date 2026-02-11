@@ -38,7 +38,9 @@ def validar_recursos_requeridos(
     recursos,
     eventos_planificados,
     fecha_inicio,
-    fecha_fin,):
+    fecha_fin,
+    recursos_por_clave=None,
+):
     recursos_requeridos = evento_data.get("recursos_requeridos", [])
 
     # Agrupar recursos seleccionados por categoría y tipo
@@ -56,102 +58,94 @@ def validar_recursos_requeridos(
         cantidad_req = recurso_req.get("cantidad", 1)
 
         clave_req = f"{categoria_req}-{tipo_req}"
-
         if clave_req not in recursos_seleccionados_dict:
-            return (
-                False,
-                f"❌ El recurso requerido '{categoria_req} {tipo_req}' no está seleccionado",
-            )
+            return False, f"❌ El recurso requerido '{categoria_req} {tipo_req}' no está seleccionado"
 
         recursos_del_tipo = recursos_seleccionados_dict[clave_req]
 
-        # Para combustible, verificar cantidad disponible
         if "COMBUSTIBLE" in categoria_req.upper():
-         total_disponible = sum(r["cantidad_disponible"] for r in recursos_del_tipo)
-         if total_disponible < cantidad_req:
-          faltante = cantidad_req - total_disponible
-          return (
-            False,
-            f"❌ Combustible insuficiente: {categoria_req} {tipo_req} (faltan {faltante}L)",
-        )
+            # Usar índice si está disponible
+            if recursos_por_clave is not None:
+                clave_idx = f"{categoria_req}|{tipo_req}"
+                recurso_idx = recursos_por_clave.get(clave_idx)
+                total_disponible = recurso_idx["cantidad_disponible"] if recurso_idx else 0
+            else:
+                total_disponible = sum(r["cantidad_disponible"] for r in recursos_del_tipo)
+            if total_disponible < cantidad_req:
+                faltante = cantidad_req - total_disponible
+                return False, f"❌ Combustible insuficiente: {categoria_req} {tipo_req} (faltan {faltante}L)"
         else:
-            # Para equipos: verificar ocupación en esas fechas
-            capacidad_total = sum(r["cantidad_total"] for r in recursos_del_tipo)
+            # Para equipos: capacidad total
+            if recursos_por_clave is not None:
+                clave_idx = f"{categoria_req}|{tipo_req}"
+                recurso_idx = recursos_por_clave.get(clave_idx)
+                capacidad_total = recurso_idx["cantidad_total"] if recurso_idx else 0
+            else:
+                capacidad_total = sum(r["cantidad_total"] for r in recursos_del_tipo)
 
             # Buscar eventos que se solapen
             cantidad_ocupada = 0
             for evento in eventos_planificados:
                 try:
-                    ev_inicio = datetime.strptime(
-                        evento["fecha_inicio"], "%d/%m/%Y"
-                    ).date()
+                    ev_inicio = datetime.strptime(evento["fecha_inicio"], "%d/%m/%Y").date()
                     ev_fin = datetime.strptime(evento["fecha_fin"], "%d/%m/%Y").date()
                 except:
                     continue
-
-                # Verificar solapamiento
-                se_solapan = (fecha_inicio.date() <= ev_fin) and (
-                    fecha_fin.date() >= ev_inicio
-                )
-
+                se_solapan = (fecha_inicio.date() <= ev_fin) and (fecha_fin.date() >= ev_inicio)
                 if se_solapan:
-                    # Contar cuántos de este tipo usa el evento
                     for rd in evento.get("recursos_detalle", []):
                         if rd["categoria"] == categoria_req and rd["tipo"] == tipo_req:
                             cantidad_ocupada += rd.get("cantidad", 1)
-
             disponible = capacidad_total - cantidad_ocupada
-
             if disponible < cantidad_req:
-                return (
-                    False,
-                    f"❌ Ocupado en esas fechas: {categoria_req} {tipo_req}. (Total: {capacidad_total}, Ocupados: {cantidad_ocupada}, Necesarios: {cantidad_req})",
-                )
-
+                return False, f"❌ Ocupado en esas fechas: {categoria_req} {tipo_req}. (Total: {capacidad_total}, Ocupados: {cantidad_ocupada}, Necesarios: {cantidad_req})"
     return True, ""
 
 # Consume los recursos necesarios para el evento
-def consumir_recursos(evento_data, recursos_seleccionados, recursos):
+def consumir_recursos(evento_data, recursos_seleccionados, recursos, recursos_por_clave=None):
     recursos_requeridos = evento_data.get("recursos_requeridos", [])
     recursos_consumidos = []
 
     for recurso in recursos_seleccionados:
         if recurso["es_combustible"]:
-            # Buscar el recurso combustible en la lista principal
-            for r in recursos:
-                if r["nombre_mostrar"] == recurso["nombre_mostrar"]:
-                    # Encontrar cuánto combustible necesita
+            if recursos_por_clave is not None:
+                clave = f"{recurso['categoria']}|{recurso['tipo']}"
+                r = recursos_por_clave.get(clave)
+                if r:
                     cantidad_necesaria = 0
                     for recurso_req in recursos_requeridos:
-                        if (
-                            recurso_req["categoria"] == r["categoria"]
-                            and recurso_req["tipo"] == r["tipo"]
-                        ):
+                        if recurso_req["categoria"] == r["categoria"] and recurso_req["tipo"] == r["tipo"]:
                             cantidad_necesaria = recurso_req["cantidad"]
                             break
-
-                    # Consumir el recurso
                     r["cantidad_disponible"] -= cantidad_necesaria
-                    recursos_consumidos.append(
-                        {
+                    recursos_consumidos.append({
+                        "recurso": r["nombre_mostrar"],
+                        "cantidad": cantidad_necesaria,
+                        "es_consumible": True,
+                    })
+            else:
+                # Fallback: búsqueda lineal
+                for r in recursos:
+                    if r["nombre_mostrar"] == recurso["nombre_mostrar"]:
+                        cantidad_necesaria = 0
+                        for recurso_req in recursos_requeridos:
+                            if recurso_req["categoria"] == r["categoria"] and recurso_req["tipo"] == r["tipo"]:
+                                cantidad_necesaria = recurso_req["cantidad"]
+                                break
+                        r["cantidad_disponible"] -= cantidad_necesaria
+                        recursos_consumidos.append({
                             "recurso": r["nombre_mostrar"],
                             "cantidad": cantidad_necesaria,
                             "es_consumible": True,
-                        }
-                    )
-                    break
+                        })
+                        break
         else:
-            # Para recursos NO combustibles
-            recursos_consumidos.append(
-                {
-                    "recurso": recurso["nombre_mostrar"],
-                    "cantidad": 1,
-                    "es_consumible": False,
-                }
-            )
-
+            recursos_consumidos.append({
+                "recurso": recurso["nombre_mostrar"],
+                "cantidad": 1,
+                "es_consumible": False,
+            })
     return recursos_consumidos
-
 
 # Crea el diccionario del evento
 def crear_evento_dict(
@@ -209,16 +203,22 @@ def crear_evento_dict(
         else:
             uso_recursos_evento[recurso["nombre_mostrar"]] = 1
 
-    # 3. Crear evento con estructura UNIFICADA
+    # --- Generar resumen de recursos ---
+    resumen_recursos = {}
+    for rd in recursos_detalle:
+        clave = f"{rd['categoria']}|{rd['tipo']}"
+        resumen_recursos[clave] = resumen_recursos.get(clave, 0) + rd["cantidad"]
+
     nuevo_evento = {
         "tipo": tipo_evento,
         "fecha_inicio": fecha_inicio.strftime("%d/%m/%Y"),
         "fecha_fin": fecha_fin.strftime("%d/%m/%Y"),
         "duracion_dias": duracion,
         "recursos": recursos_seleccionados_nombres,
-        "recursos_detalle": recursos_detalle,  # ← ESTRUCTURA COMPLETA
+        "recursos_detalle": recursos_detalle,
         "recursos_usados": uso_recursos_evento,
         "recursos_consumidos": recursos_consumidos,
+        "resumen_recursos": resumen_recursos, 
         "estado": "planificado",
     }
 
@@ -241,6 +241,7 @@ def procesar_creacion_evento(
     eventos_planificados,
     tipos_evento_data,
     modo_validacion=False,
+    recursos_por_clave=None,
 ):
 
     # 1. Validar tipo de evento
@@ -285,6 +286,7 @@ def procesar_creacion_evento(
         eventos_planificados,
         fecha_inicio,
         fecha_fin,
+        recursos_por_clave=recursos_por_clave,
     )
     if not valido:
         return False, mensaje, None, []
@@ -317,7 +319,7 @@ def procesar_creacion_evento(
         
     # 8. Consumir recursos
     recursos_consumidos = consumir_recursos(
-        evento_data, recursos_seleccionados, recursos
+        evento_data, recursos_seleccionados, recursos,recursos_por_clave=recursos_por_clave 
     )
 
     # 9. Crear diccionario del evento CON ESTRUCTURA UNIFICADA

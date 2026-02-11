@@ -16,6 +16,7 @@ def crear_serie_recurrente(
     eventos_planificados,
     tipos_evento_data,
     app=None,
+    recursos_por_clave=None,
 ):
     # 1. Validar que no sean números demasiado largos
     if (
@@ -217,6 +218,7 @@ def crear_serie_recurrente(
             eventos_planificados=eventos_planificados,
             tipos_evento_data=tipos_evento_data,
             modo_validacion=False,
+            recursos_por_clave=recursos_por_clave,
         )
 
         # VERIFICACIÓN CLAVE: Si hay error, retornar inmediatamente
@@ -271,6 +273,8 @@ def buscar_serie_completa_disponible(
     eventos_planificados,
     tipos_evento_data,
     app=None,
+    eventos_por_fecha=None,
+    recursos_por_clave=None,     
 ):
     LIMITE_DIAS_SERIE = 365  # Límite de duración de serie
     LIMITE_FUTURO_DIAS = 365  # Límite de 1 año para planificación (cambiado de 1095)
@@ -423,6 +427,7 @@ def buscar_serie_completa_disponible(
                 eventos_planificados + eventos_simulados,
                 tipos_evento_data,
                 modo_validacion=True,
+                recursos_por_clave=recursos_por_clave,
             )
 
             if not exito:

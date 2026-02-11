@@ -23,13 +23,14 @@ class GestorEventos(ctk.CTk):
         # 1.Configurar ventana
         self.title("Gestor de Eventos Espaciales")
         self.geometry("675x990")
-        
+
         self.resizable(False, False)
 
         self.evento_seleccionado = None
-        
 
-       # Inicializar gestor de sincronización
+        self.MAX_EVENTOS = 100
+
+        # Inicializar gestor de sincronización
         self.gestor_sinc = lsinc.crear_gestor_sincronizacion(self)
 
         # 2. CARGA DE EVENTOS
@@ -47,6 +48,11 @@ class GestorEventos(ctk.CTk):
         if self.eventos_planificados is None:
             self.eventos_planificados = []
 
+        self.eventos_por_fecha = {}  # fecha_str -> lista de eventos
+        self.recursos_por_clave = {}  # "categoria|tipo" -> recurso
+        self._reindexar_eventos()
+        self._indexar_recursos()
+
         # Referencia para la ventana de combustible
         self.ventana_combustible = None
 
@@ -60,21 +66,29 @@ class GestorEventos(ctk.CTk):
 
     def guardar_eventos_en_json(self):
         try:
-            # Ordenar eventos por fecha de inicio (más antigua primero)
+            eventos_a_guardar = []
+            for ev in self.eventos_planificados:
+                ev_copy = ev.copy()
+                # Eliminar campos temporales que no deben ir al JSON
+                ev_copy.pop("fecha_inicio_date", None)
+                ev_copy.pop("fecha_fin_date", None)
+                # resumen_recursos puede quedarse, es útil para cálculos futuros
+                eventos_a_guardar.append(ev_copy)
+
             eventos_ordenados = sorted(
-                self.eventos_planificados,
+                eventos_a_guardar,
                 key=lambda x: datetime.strptime(x["fecha_inicio"], "%d/%m/%Y"),
             )
-
             with open("eventos_planificados.json", "w", encoding="utf-8") as f:
                 json.dump(eventos_ordenados, f, ensure_ascii=False, indent=4)
 
+            # Actualizar la lista en memoria con los objetos completos (incluyendo fechas date)
+            # Pero primero debemos asegurar que self.eventos_planificados tenga los campos _date
+            # Lo más fácil: recargar los eventos desde el archivo y reindexar
+            self.eventos_planificados = cargar_eventos_planificados()
+            self._reindexar_eventos()
             print(f"✅ Eventos guardados y ordenados: {len(eventos_ordenados)} eventos")
-
-            # Actualizar la lista en memoria
-            self.eventos_planificados = eventos_ordenados
             return True
-
         except Exception as e:
             print(f"❌ Error al guardar en JSON: {e}")
             return False
@@ -225,6 +239,14 @@ class GestorEventos(ctk.CTk):
         year = self.entry_year.get()
         duracion_str = self.entry_duracion.get()
 
+        # Antes de procesar la creación, verificar límite
+        if len(self.eventos_planificados) >= self.MAX_EVENTOS:
+            self.lbl_info.configure(
+                text=f"❌ Límite alcanzado: máximo {self.MAX_EVENTOS} eventos",
+                text_color="red",
+            )
+            return
+
         # Validación rápida de límite de años
         try:
             fecha_ingresada = datetime(int(year), int(month), int(day))
@@ -244,7 +266,7 @@ class GestorEventos(ctk.CTk):
             k for k, v in self.checkbox_vars.items() if v.get()
         ]
 
-        # 3. Llamar a la función de lógica externa (CORREGIDO: 4 valores)
+        # 3. Llamar a la función de lógica externa
         resultado, mensaje, nuevo_evento, _ = procesar_creacion_evento(
             tipo_evento=tipo_evento,
             day=day,
@@ -261,11 +283,12 @@ class GestorEventos(ctk.CTk):
         if resultado and nuevo_evento:
             # Éxito: agregar evento (ya viene con estructura completa)
             self.eventos_planificados.append(nuevo_evento)
+            self._reindexar_eventos()
 
             # Guardar datos
             self.guardar_eventos_en_json()
             self.guardar_recursos()
-            
+
             # Notificar cambios a ventanas abiertas
             self.gestor_sinc.notificar_cambio_combustible()
             self.gestor_sinc.notificar_cambio_eventos()
@@ -291,10 +314,8 @@ class GestorEventos(ctk.CTk):
     # .5 ========== Mostrar eventos planificados ======
     def mostrar_eventos_planificados(self):
         ventana = self.gestor_sinc.crear_ventana_eventos(
-        self, 
-        self.eventos_planificados, 
-        lv.mostrar_recursos_evento
-    )
+            self, self.eventos_planificados, lv.mostrar_recursos_evento
+        )
 
     # .6 ========== Sugerir Fecha =====================
     def sugerir_fecha_disponible(self):
@@ -363,16 +384,16 @@ class GestorEventos(ctk.CTk):
         self.ventana_combustible.focus_force()  # Enfoca la ventana
 
         # Registrar ventana en gestor
-        self.gestor_sinc.registrar_ventana('combustible', self.ventana_combustible)
+        self.gestor_sinc.registrar_ventana("combustible", self.ventana_combustible)
 
-    # Configurar para que al cerrar se limpie la referencia
+        # Configurar para que al cerrar se limpie la referencia
         def on_close():
-        # Eliminar del gestor
-         self.gestor_sinc.eliminar_ventana('combustible', self.ventana_combustible)
-        
-         if self.ventana_combustible is not None:
-            self.ventana_combustible.destroy()
-            self.ventana_combustible = None
+            # Eliminar del gestor
+            self.gestor_sinc.eliminar_ventana("combustible", self.ventana_combustible)
+
+            if self.ventana_combustible is not None:
+                self.ventana_combustible.destroy()
+                self.ventana_combustible = None
 
         self.ventana_combustible.protocol("WM_DELETE_WINDOW", on_close)
 
@@ -464,7 +485,7 @@ class GestorEventos(ctk.CTk):
             # Guardar cambios
             self.guardar_recursos()
 
-           # Notificar cambio a todas las ventanas de combustible
+            # Notificar cambio a todas las ventanas de combustible
             self.gestor_sinc.notificar_cambio_combustible()
 
             # Mensaje de éxito
@@ -496,10 +517,19 @@ class GestorEventos(ctk.CTk):
         ventana_eliminar = ctk.CTkToplevel(self)
         ventana_eliminar.title("🗑️ Eliminar Eventos")
         ventana_eliminar.geometry("600x500")
+        ventana_eliminar.transient(self)
+        ventana_eliminar.lift()
+        ventana_eliminar.focus_force()
 
-        ventana_eliminar.transient(self)  # Hace que sea ventana hija
-        ventana_eliminar.lift()  # Trae la ventana al frente
-        ventana_eliminar.focus_force()  # Enfoca la ventana
+        # ----- REGISTRAR VENTANA EN EL GESTOR DE SINCRONIZACIÓN -----
+        self.gestor_sinc.registrar_ventana("eliminar", ventana_eliminar)
+
+        def on_close_eliminar():
+            self.gestor_sinc.eliminar_ventana("eliminar", ventana_eliminar)
+            ventana_eliminar.destroy()
+
+        ventana_eliminar.protocol("WM_DELETE_WINDOW", on_close_eliminar)
+        # ------------------------------------------------------------
 
         # Título
         ctk.CTkLabel(
@@ -519,38 +549,35 @@ class GestorEventos(ctk.CTk):
         frame_scroll = ctk.CTkScrollableFrame(ventana_eliminar, width=550, height=300)
         frame_scroll.pack(pady=10, padx=10)
 
-        # ========== CHECKBOX "SELECCIONAR TODOS" ==========
-        frame_seleccion_todos = ctk.CTkFrame(frame_scroll)
-        frame_seleccion_todos.pack(fill="x", pady=(0, 10), padx=5)
+        # --- Guardar referencia para la actualización automática ---
+        ventana_eliminar.frame_scroll_eliminar = frame_scroll
 
-        self.var_seleccionar_todos = ctk.BooleanVar(value=False)
+        # ----- CHECKBOX "SELECCIONAR TODOS" (guardado en ventana) -----
+        ventana_eliminar.var_seleccionar_todos = ctk.BooleanVar(value=False)
 
         checkbox_seleccionar_todos = ctk.CTkCheckBox(
-            frame_seleccion_todos,
+            frame_scroll,
             text="📋 SELECCIONAR TODOS LOS EVENTOS",
-            variable=self.var_seleccionar_todos,
+            variable=ventana_eliminar.var_seleccionar_todos,
             onvalue=True,
             offvalue=False,
             font=("Arial", 12, "bold"),
-            command=lambda: self.toggle_seleccionar_todos_eventos(
-                self.var_seleccionar_todos
+            command=lambda: self.toggle_seleccionar_todos_eventos_eliminar(
+                ventana_eliminar, ventana_eliminar.var_seleccionar_todos
             ),
         )
-        checkbox_seleccionar_todos.pack(anchor="w", padx=5)
+        checkbox_seleccionar_todos.pack(anchor="w", padx=5, pady=(0, 10))
+        # -------------------------------------------------------------
 
-        # Lista para checkboxes de eventos
-        self.checkboxes_eliminar = []
+        # ----- Lista de checkboxes de eventos (guardada en ventana) -----
+        ventana_eliminar.checkboxes_eliminar = []
 
-        # Crear checkboxes para cada evento
         for i, evento in enumerate(self.eventos_planificados):
             var_checkbox = ctk.BooleanVar(value=False)
-            self.checkboxes_eliminar.append(var_checkbox)
+            ventana_eliminar.checkboxes_eliminar.append(var_checkbox)
 
-            # Formatear texto del evento
             fecha_inicio = evento.get("fecha_inicio", "N/A")
             duracion = evento.get("duracion_dias", 1)
-
-            # Mostrar información resumida
             recursos_count = len(
                 evento.get("recursos", evento.get("recursos_detalle", []))
             )
@@ -569,6 +596,7 @@ class GestorEventos(ctk.CTk):
                 width=500,
             )
             checkbox.pack(anchor="w", padx=10, pady=5)
+        # -----------------------------------------------------------------
 
         # Botones
         frame_botones = ctk.CTkFrame(ventana_eliminar)
@@ -591,22 +619,22 @@ class GestorEventos(ctk.CTk):
             text="CANCELAR",
             width=100,
             height=40,
-            command=ventana_eliminar.destroy,
+            command=on_close_eliminar,
         )
         btn_cancelar.pack(side="left", padx=10)
 
-    # .12 ========= Seleccionar todos los eventos para eliminar=========
-    def toggle_seleccionar_todos_eventos(self, var_todos):
+    # .12 ========= Seleccionar todos los eventos para eliminar =========
+    def toggle_seleccionar_todos_eventos_eliminar(self, ventana, var_todos):
         estado = var_todos.get()
-        if hasattr(self, "checkboxes_eliminar"):
-            for checkbox_var in self.checkboxes_eliminar:
+        if hasattr(ventana, "checkboxes_eliminar"):
+            for checkbox_var in ventana.checkboxes_eliminar:
                 checkbox_var.set(estado)
 
     # .13 ========= Confirmar eliminación =============
     def confirmar_eliminacion(self, ventana_eliminar):
         # 1. Obtener índices de eventos seleccionados para eliminar
         eventos_a_eliminar_indices = []
-        for i, checkbox_var in enumerate(self.checkboxes_eliminar):
+        for i, checkbox_var in enumerate(ventana_eliminar.checkboxes_eliminar):
             if checkbox_var.get():
                 eventos_a_eliminar_indices.append(i)
 
@@ -630,33 +658,34 @@ class GestorEventos(ctk.CTk):
         if not respuesta:
             return
 
-        # 4. Procesar cada evento a eliminar usando la función del módulo
+        # 4. Procesar cada evento a eliminar
         recursos_devueltos, combustible_devuelto, nuevos_eventos = (
             le.procesar_eliminacion_eventos(
                 eventos_a_eliminar_indices,
-                self.eventos_planificados.copy(),  # Usamos copia para no modificar la original directamente
+                self.eventos_planificados.copy(),
                 self.recursos,
             )
         )
 
         # 5. Actualizar la lista de eventos
         self.eventos_planificados = nuevos_eventos
+        self._reindexar_eventos()
 
-        # 5.1. Actualizar contador y recursos disponibles
+        # 6. Actualizar interfaz
         self.actualizar_contador()
         self.crear_checkboxes_recursos()
 
-        # 6. Guardar cambios
+        # 7. Guardar cambios
         self.guardar_recursos()
         self.guardar_eventos_en_json()
-        
-        # Notificar TODOS los cambios a ventanas abiertas
+
+        # 8. Notificar TODOS los cambios a ventanas abiertas
         self.gestor_sinc.notificar_todos_los_cambios()
 
-        # 7. Cerrar ventana
+        # 9. Cerrar ventana
         ventana_eliminar.destroy()
 
-        # 8. Generar y mostrar mensaje de éxito
+        # 10. Generar y mostrar mensaje de éxito
         mensaje = le.generar_mensaje_resumen(
             eventos_a_eliminar_indices, recursos_devueltos, combustible_devuelto
         )
@@ -694,6 +723,17 @@ class GestorEventos(ctk.CTk):
             self.lbl_info.configure(text=mensaje, text_color="red")
             return
 
+        # Verificar que la serie no exceda el límite total
+        if (
+            len(self.eventos_planificados) + datos_validados["repeticiones"]
+        ) > self.MAX_EVENTOS:
+            disponibles = self.MAX_EVENTOS - len(self.eventos_planificados)
+            self.lbl_info.configure(
+                text=f"❌ Límite excedido: solo puedes agregar {disponibles} evento(s)",
+                text_color="red",
+            )
+            return
+
         # 4. Obtener recursos seleccionados
         recursos_seleccionados = [k for k, v in self.checkbox_vars.items() if v.get()]
 
@@ -725,11 +765,12 @@ class GestorEventos(ctk.CTk):
             # NO agregar eventos aquí - la función ya los agregó a eventos_planificados
             self.guardar_eventos_en_json()
             self.guardar_recursos()
-            
+
             # Notificar cambios a ventanas abiertas
             self.gestor_sinc.notificar_cambio_combustible()
             self.gestor_sinc.notificar_cambio_eventos()
-            
+
+            self._reindexar_eventos()
             self.actualizar_contador()
             self.crear_checkboxes_recursos()
 
@@ -835,6 +876,39 @@ class GestorEventos(ctk.CTk):
             else:
                 self.lbl_info.configure(text=mensaje, text_color="red")
 
+    def _reindexar_eventos(self):
+        """Reconstruye el índice de eventos por fecha.
+        Convierte automáticamente las fechas si falta el campo date.
+        """
+        self.eventos_por_fecha.clear()
+
+        for ev in self.eventos_planificados:
+            # Asegurar que tenga los campos de fecha como objetos date
+            if "fecha_inicio_date" not in ev:
+                ev["fecha_inicio_date"] = datetime.strptime(
+                    ev["fecha_inicio"], "%d/%m/%Y"
+                ).date()
+                ev["fecha_fin_date"] = datetime.strptime(
+                    ev["fecha_fin"], "%d/%m/%Y"
+                ).date()
+
+            inicio = ev["fecha_inicio_date"]
+            fin = ev["fecha_fin_date"]
+            delta = (fin - inicio).days
+
+            for i in range(delta + 1):
+                fecha = (inicio + timedelta(days=i)).strftime("%d/%m/%Y")
+                if fecha not in self.eventos_por_fecha:
+                    self.eventos_por_fecha[fecha] = []
+                self.eventos_por_fecha[fecha].append(ev)
+
+    def _indexar_recursos(self):
+        """Construye el índice de recursos por clave."""
+        self.recursos_por_clave = {}
+        for r in self.recursos:
+            clave = f"{r['categoria']}|{r['tipo']}"
+            self.recursos_por_clave[clave] = r
+
     ################## INTERFAZ ###################
 
     def crear_interfaz(self):
@@ -927,9 +1001,6 @@ class GestorEventos(ctk.CTk):
         )
         self.entry_day.pack(pady=5, padx=5)
 
-        # Separador
-        # ctk.CTkLabel(frame_campos_fecha, text="/").pack(side="left", padx=2)
-
         # month
         self.entry_month = ctk.CTkEntry(
             frame_campos_fecha,
@@ -939,9 +1010,6 @@ class GestorEventos(ctk.CTk):
             border_width=2,
         )
         self.entry_month.pack(pady=5, padx=5)
-
-        # Separador
-        # ctk.CTkLabel(frame_campos_fecha, text="/").pack(side="left", padx=2)
 
         # Año
         self.entry_year = ctk.CTkEntry(
@@ -988,13 +1056,15 @@ class GestorEventos(ctk.CTk):
         )
         btn_limpiar.pack(side="left", padx=5)
 
-        # ========== 5. RECURRENCIA (NUEVA SECCIÓN) ==========
+        # ========== 5. RECURRENCIA ==========
         frame_recurrencia = ctk.CTkFrame(self)
         frame_recurrencia.pack(pady=10, padx=20, fill="x")
 
-        ctk.CTkLabel(frame_recurrencia, text="Recurrencia:", font=("Monaco", 14)).pack(
-            pady=5
-        )
+        ctk.CTkLabel(
+            frame_recurrencia,
+            text="Creación de eventos recurrentes:",
+            font=("Monaco", 18),
+        ).pack(pady=5)
 
         frame_campos_recurrencia = ctk.CTkFrame(frame_recurrencia)
         frame_campos_recurrencia.pack(pady=5)
@@ -1087,7 +1157,7 @@ class GestorEventos(ctk.CTk):
         # Botón 2: Rellenar todo
         btn_rellenar = ctk.CTkButton(
             frame_combustible,
-            text="⛽ Rellenar Todo",
+            text="⛽ Rellenar Tanques",
             width=180,
             fg_color="#FF9800",
             hover_color="#F57C00",

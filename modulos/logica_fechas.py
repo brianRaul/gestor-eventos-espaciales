@@ -13,6 +13,8 @@ def sugerir_fecha_disponible_logica(
     recursos,
     preparar_recursos_requeridos_func,
     verificar_disponibilidad_fecha_func,
+    eventos_por_fecha=None,      
+    recursos_por_clave=None,
 ):
 
     # Lógica para sugerir una fecha disponible para un evento
@@ -64,6 +66,8 @@ def sugerir_fecha_disponible_logica(
             recursos_necesarios,
             eventos_planificados,
             recursos,
+            eventos_por_fecha,     
+            recursos_por_clave,
         )
 
         if disponible:
@@ -114,7 +118,7 @@ def validar_fecha_basica(
         if fecha_inicio.date() < datetime.now().date():
             return False, "❌ No puedes planificar en el pasado", None, None, None
 
-        LIMITE_FUTURO_DIAS = 1095
+        LIMITE_FUTURO_DIAS = 365
         fecha_maxima = datetime.now().date() + timedelta(days=LIMITE_FUTURO_DIAS)
 
         if fecha_inicio.date() > fecha_maxima:

@@ -2,12 +2,12 @@ import customtkinter as ctk
 from datetime import datetime
 import modulos.logica_combustible as lc
 import modulos.logica_visualizaciones as lv
+from modulos.funciones_datos import cargar_eventos_planificados
 
 
 class GestorSincronizacion:
-    """
-    Clase que gestiona la sincronización de ventanas abiertas.
-    """
+
+    # Clase que gestiona la sincronización de ventanas abiertas.
 
     def __init__(self, app):
         """
@@ -70,13 +70,6 @@ class GestorSincronizacion:
             self.ventanas_registradas[tipo_ventana] = ventanas_validas
 
     def actualizar_ventanas_tipo(self, tipo_ventana, datos=None):
-        """
-        Actualiza todas las ventanas de un tipo específico.
-
-        Args:
-            tipo_ventana: Tipo de ventana a actualizar
-            datos: Datos adicionales para la actualización (opcional)
-        """
         self.limpiar_ventanas_cerradas()
 
         if tipo_ventana not in self.ventanas_registradas:
@@ -90,6 +83,8 @@ class GestorSincronizacion:
                     self._actualizar_ventana_combustible(ventana, datos)
                 elif tipo_ventana == "eventos":
                     self._actualizar_ventana_eventos(ventana, datos)
+                elif tipo_ventana == "eliminar":  # <-- NUEVO
+                    self._actualizar_ventana_eliminar(ventana, datos)
 
                 ventanas_actualizadas += 1
             except Exception as e:
@@ -208,6 +203,7 @@ class GestorSincronizacion:
         Notifica que los eventos han cambiado y actualiza todas las ventanas.
         """
         self.actualizar_ventanas_tipo("eventos")
+        self.actualizar_ventanas_tipo("eliminar")
 
     def notificar_todos_los_cambios(self):
         """
@@ -217,67 +213,94 @@ class GestorSincronizacion:
         self.notificar_cambio_combustible()
         self.notificar_cambio_eventos()
 
-    def crear_ventana_eventos(self, parent, eventos_planificados, mostrar_recursos_callback):
-     """
-     Crea una ventana de eventos planificados y la registra automáticamente.
-     """
-     ventana_eventos = ctk.CTkToplevel(parent)
-     ventana_eventos.title("📋 Eventos Planificados")
-     ventana_eventos.geometry("440x400")
-    
-     ventana_eventos.transient(parent)
-     ventana_eventos.lift()
-     ventana_eventos.focus_force()
+    def crear_ventana_eventos(
+        self, parent, eventos_planificados, mostrar_recursos_callback
+    ):
+        """
+        Crea una ventana de eventos planificados y la registra automáticamente.
+        """
+        ventana_eventos = ctk.CTkToplevel(parent)
+        ventana_eventos.title("📋 Eventos Planificados")
+        ventana_eventos.geometry("420x600")
 
-    # Registrar la ventana
-     self.registrar_ventana('eventos', ventana_eventos)
+        ventana_eventos.transient(parent)
+        ventana_eventos.lift()
+        ventana_eventos.focus_force()
 
-    # Configurar cierre
-     def on_close():
-        self.eliminar_ventana('eventos', ventana_eventos)
-        ventana_eventos.destroy()
-    
-     ventana_eventos.protocol("WM_DELETE_WINDOW", on_close)
+        # Registrar la ventana
+        self.registrar_ventana("eventos", ventana_eventos)
 
-    # Llamar a _crear_contenido_eventos (NO usar el callback directamente)
-     self._crear_contenido_eventos(ventana_eventos)
+        # Configurar cierre
+        def on_close():
+            self.eliminar_ventana("eventos", ventana_eventos)
+            ventana_eventos.destroy()
 
-     return ventana_eventos
+        ventana_eventos.protocol("WM_DELETE_WINDOW", on_close)
+
+        # Llamar a _crear_contenido_eventos (NO usar el callback directamente)
+        self._crear_contenido_eventos(ventana_eventos)
+
+        return ventana_eventos
 
     def _crear_contenido_eventos(self, ventana):
-     """
-     Crea el contenido de una ventana de eventos.
-     """
-    # Importar aquí para evitar problemas de importación circular
-     import modulos.logica_visualizaciones as lv
-    
-    # Título
-     titulo = ctk.CTkLabel(
-        ventana, text="EVENTOS PLANIFICADOS", font=("Arial", 16, "bold")
-    )
-     titulo.pack(pady=10)
 
-    # Frame para contener los eventos con scroll
-     frame_contenedor = ctk.CTkScrollableFrame(ventana, width=550, height=400)
-     frame_contenedor.pack(pady=10, padx=10, fill="both", expand=True)
+        # Recargar eventos desde archivo
+        eventos_actualizados = cargar_eventos_planificados()
+        self.app.eventos_planificados = eventos_actualizados
 
-    # Verificar si hay eventos
-     if not self.app.eventos_planificados:
-        sin_eventos = ctk.CTkLabel(
-            frame_contenedor,
-            text=" No hay eventos planificados todavía.",
-            font=("Arial", 12),
-            text_color="gray",
+        # Título
+        titulo = ctk.CTkLabel(
+            ventana, text="EVENTOS PLANIFICADOS", font=("Arial", 16, "bold")
         )
-        sin_eventos.pack(pady=20)
-     else:
-        # Mostrar cada evento
-        for i, evento in enumerate(self.app.eventos_planificados, 1):
-            # Crear un frame para cada evento (como una tarjeta)
+        titulo.pack(pady=10)
+
+        # Frame con scroll (más grande para que quepan más eventos)
+        frame_contenedor = ctk.CTkScrollableFrame(ventana, width=550, height=450)
+        frame_contenedor.pack(pady=10, padx=10, fill="both", expand=True)
+
+        # Si no hay eventos
+        if not self.app.eventos_planificados:
+            sin_eventos = ctk.CTkLabel(
+                frame_contenedor,
+                text=" No hay eventos planificados todavía.",
+                font=("Arial", 12),
+                text_color="gray",
+            )
+            sin_eventos.pack(pady=20)
+            btn_cerrar = ctk.CTkButton(
+                ventana, text="Cerrar", width=100, command=ventana.destroy
+            )
+            btn_cerrar.pack(pady=10)
+            return
+
+        # Ordenar eventos por fecha (más antiguos primero)
+        eventos_ordenados = sorted(
+            self.app.eventos_planificados,
+            key=lambda x: datetime.strptime(x["fecha_inicio"], "%d/%m/%Y"),
+        )
+
+        mes_actual = None
+
+        for i, evento in enumerate(eventos_ordenados, 1):
+            # Obtener mes y año del evento
+            fecha_obj = datetime.strptime(evento["fecha_inicio"], "%d/%m/%Y")
+            mes_anno = fecha_obj.strftime("%B %Y")  # Ejemplo: "March 2026"
+
+            # Si cambia el mes, mostrar encabezado
+            if mes_anno != mes_actual:
+                mes_actual = mes_anno
+                lbl_mes = ctk.CTkLabel(
+                    frame_contenedor,
+                    text=f"📅 {mes_anno}",
+                    font=("Arial", 14, "bold"),
+                    text_color="#4CAF50",
+                )
+                lbl_mes.pack(anchor="w", pady=(15, 5), padx=5)
+
+            # --- MISMO FORMATO DE CADA EVENTO (sin cambios) ---
             frame_evento = ctk.CTkFrame(frame_contenedor)
             frame_evento.pack(fill="x", pady=5, padx=5)
 
-            # Contenido del evento
             contenido_evento = ctk.CTkFrame(frame_evento)
             contenido_evento.pack(fill="x", padx=10, pady=5)
 
@@ -312,7 +335,7 @@ class GestorSincronizacion:
             )
             lbl_duracion.grid(row=3, column=0, sticky="w")
 
-            # Botón para ver recursos - ¡USANDO lv.mostrar_recursos_evento directamente!
+            # Botón ver recursos
             btn_recursos = ctk.CTkButton(
                 contenido_evento,
                 text="📦 Ver Recursos",
@@ -320,17 +343,116 @@ class GestorSincronizacion:
                 height=30,
                 fg_color="#2196F3",
                 hover_color="#1976D2",
-                command=lambda ev=evento: lv.mostrar_recursos_evento(ventana, ev),  # ✅ CORREGIDO
+                command=lambda ev=evento: lv.mostrar_recursos_evento(ventana, ev),
             )
             btn_recursos.grid(
                 row=0, column=1, rowspan=4, padx=(20, 0), pady=5, sticky="e"
             )
+            # -------------------------------------------------
 
-    # Botón para cerrar la ventana
-     btn_cerrar = ctk.CTkButton(
-        ventana, text="Cerrar", width=100, command=ventana.destroy
-    )
-     btn_cerrar.pack(pady=10)
+        # Botón para cerrar
+        btn_cerrar = ctk.CTkButton(
+            ventana, text="Cerrar", width=100, command=ventana.destroy
+        )
+        btn_cerrar.pack(pady=10)
+
+    def _actualizar_ventana_eliminar(self, ventana, datos=None):
+
+        # Actualiza una ventana de eliminación de eventos.
+        # 1. Recargar eventos desde archivo
+
+        eventos_actualizados = cargar_eventos_planificados()
+        self.app.eventos_planificados = eventos_actualizados
+
+        # 2. Obtener el frame scrollable guardado en la ventana
+        if hasattr(ventana, "frame_scroll_eliminar"):
+            frame_scroll = ventana.frame_scroll_eliminar
+        else:
+            # Fallback: buscarlo en los hijos (por si acaso)
+            frame_scroll = None
+            for child in ventana.winfo_children():
+                if isinstance(child, ctk.CTkScrollableFrame):
+                    frame_scroll = child
+                    break
+
+        if frame_scroll is None:
+            print("⚠️ No se encontró el frame scrollable en ventana de eliminación")
+            return
+
+        # 3. Limpiar SOLO el contenido, NO destruir el frame_scroll
+        for widget in frame_scroll.winfo_children():
+            widget.destroy()
+
+        # 4. Recrear el contenido (checkboxes)
+        self._crear_contenido_eliminar(ventana, frame_scroll)
+
+    def _crear_contenido_eliminar(self, ventana, frame_scroll):
+
+        # Crea el contenido de la ventana de eliminación (checkboxes de eventos).
+
+        if not self.app.eventos_planificados:
+            ctk.CTkLabel(
+                frame_scroll,
+                text=" No hay eventos planificados todavía.",
+                font=("Arial", 12),
+                text_color="gray",
+            ).pack(pady=20)
+            return
+
+        # ----- CHECKBOX "SELECCIONAR TODOS" -----
+        frame_seleccion_todos = ctk.CTkFrame(frame_scroll)
+        frame_seleccion_todos.pack(fill="x", pady=(0, 10), padx=5)
+
+        ventana.var_seleccionar_todos = ctk.BooleanVar(value=False)
+
+        checkbox_seleccionar_todos = ctk.CTkCheckBox(
+            frame_seleccion_todos,
+            text="📋 SELECCIONAR TODOS LOS EVENTOS",
+            variable=ventana.var_seleccionar_todos,
+            onvalue=True,
+            offvalue=False,
+            font=("Arial", 12, "bold"),
+            command=lambda: self._toggle_todos_eliminar(
+                ventana, ventana.var_seleccionar_todos
+            ),
+        )
+        checkbox_seleccionar_todos.pack(anchor="w", padx=5)
+
+        # ----- LISTA DE EVENTOS -----
+        ventana.checkboxes_eliminar = []
+
+        for i, evento in enumerate(self.app.eventos_planificados, 1):
+            var_checkbox = ctk.BooleanVar(value=False)
+            ventana.checkboxes_eliminar.append(var_checkbox)
+
+            fecha_inicio = evento.get("fecha_inicio", "N/A")
+            duracion = evento.get("duracion_dias", 1)
+            recursos_count = len(
+                evento.get("recursos", evento.get("recursos_detalle", []))
+            )
+            texto_evento = f"Evento #{i}: {evento['tipo']} - {fecha_inicio} ({duracion} días, {recursos_count} recursos)"
+
+            frame_evento = ctk.CTkFrame(frame_scroll)
+            frame_evento.pack(fill="x", pady=2, padx=5)
+
+            checkbox = ctk.CTkCheckBox(
+                frame_evento,
+                text=texto_evento,
+                variable=var_checkbox,
+                onvalue=True,
+                offvalue=False,
+                font=("Arial", 11),
+                width=500,
+            )
+            checkbox.pack(anchor="w", padx=10, pady=5)
+
+    def _toggle_todos_eliminar(self, ventana, var_todos):
+        """Activa/desactiva todos los checkboxes de la ventana de eliminación."""
+        estado = var_todos.get()
+        if hasattr(ventana, "checkboxes_eliminar"):
+            for var in ventana.checkboxes_eliminar:
+                var.set(estado)
+
 
 # Funciones de conveniencia para uso directo
 def crear_gestor_sincronizacion(app):

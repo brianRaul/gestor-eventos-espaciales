@@ -8,7 +8,7 @@ La aplicación garantiza que los recursos no se asignen a más de un evento simu
 
 ---
 
-## 🏗️ Arquitectura Basada en Clases - La Ventaja de `GestorEventos`
+##  Arquitectura Basada en Clases - La Ventaja de `GestorEventos`
 
 ### **Diseño Orientado a Objetos con Clase Principal**
 
@@ -90,10 +90,10 @@ python main.py
 1. **Carga Automática de Datos**: 
    - Carga los tipos de evento desde `eventos_predeterminados.json`
    - Carga los recursos disponibles desde `recursos.json`
-   - Carga eventos existentes desde `eventos_planificados.json` (si existe)
+   - Carga eventos existentes desde `eventos_planificados.json` 
 
 2. **Inicialización de la Interfaz**:
-   - Crea la ventana principal con tamaño fijo (675x975 píxeles)
+   - Crea la ventana principal con tamaño fijo (675x990 píxeles)
    - Configura todos los elementos de la interfaz
    - Inicializa el sistema de sincronización de ventanas
 
@@ -102,41 +102,6 @@ python main.py
    - El contador de eventos se actualiza automáticamente
    - Los recursos se cargan en el panel de selección
 
----
-
-## 🔗 Conexión entre Funciones y Módulos
-
-### **Flujo de Datos y Control**
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    CLASE GestorEventos (main.py)                 │
-├─────────────────────────────────────────────────────────────────┤
-│  Interfaz Gráfica          │     Gestión de Estado              │
-│  • crear_interfaz()        │     • eventos_planificados         │
-│  • lbl_info, btn_crear     │     • recursos                     │
-│  • combo_evento, etc.      │     • tipos_evento_data            │
-└─────────────┬──────────────────────────────┬────────────────────┘
-              │                              │
-              ▼                              ▼
-    ┌──────────────────┐          ┌────────────────────────┐
-    │  Módulos de UI   │          │  Módulos de Lógica     │
-    │  • logica_       │          │  • funciones_crear_    │
-    │    visualizaciones│          │    evento.py          │
-    │  • logica_       │          │  • funciones_series_   │
-    │    recursos       │          │    recurrentes.py     │
-    └──────────────────┘          └────────────────────────┘
-              │                              │
-              └──────────────┬───────────────┘
-                             │
-                             ▼
-               ┌────────────────────────────┐
-               │   Sistema de Sincronización │
-               │   • logica_sincronizacion.py│
-               │   • Actualiza ventanas      │
-               │     automáticamente         │
-               └────────────────────────────┘
-```
 
 ### **Conexiones Clave entre Componentes**
 
@@ -246,27 +211,6 @@ Consumo/Reposición → Actualización automática de todas las ventanas
 
 ---
 
-## **Estructura del Código**
-
-### **Arquitectura Modular**
-El sistema está organizado en módulos especializados para mantener una separación clara de responsabilidades:
-
-```
-main.py                          # Interfaz gráfica principal (CustomTkinter)
-│
-├── funciones_datos.py           # Carga y guardado de archivos JSON
-├── funciones_crear_evento.py    # Lógica principal de creación de eventos
-├── funciones_buscar_hueco.py    # Búsqueda de fechas disponibles
-├── funciones_series_recurrentes.py # Gestión de series de eventos
-│
-├── logica_combustible.py        # Gestión de combustible
-├── logica_eliminacion.py        # Eliminación de eventos con devolución
-├── logica_serie.py              # Validación de series recurrentes
-├── logica_visualizaciones.py    # Visualización de eventos y recursos
-├── logica_recursos.py           # Gestión y validación de recursos
-├── logica_fechas.py             # Validación y cálculo de fechas
-└── logica_validaciones.py       # Validaciones generales
-```
 
 ### **Flujo de Datos**
 ```
@@ -341,7 +285,7 @@ La aplicación incluye **15 tipos de eventos aeroespaciales** preconfigurados, c
 # Validaciones implementadas:
 1. Formato DD/MM/YYYY correcto
 2. No fechas pasadas (>= hoy)
-3. Límite de 3 años (1095 días desde hoy)
+3. Límite de 1 año (365 días desde hoy)
 4. Días válidos según mes (incluye años bisiestos)
 5. Duración dentro de límites del tipo de evento
 6. Series no exceden 1 año de duración total
@@ -363,7 +307,7 @@ El algoritmo de búsqueda considera:
 1. **Eventos existentes** y sus recursos asignados
 2. **Disponibilidad por categoría y tipo** de recurso
 3. **Stock de combustible** actual
-4. **Límites temporales** (3 años máximo)
+4. **Límites temporales** (1 año máximo)
 5. **Restricciones específicas** del tipo de evento
 
 ### **Gestión de Series Recurrentes**
@@ -483,7 +427,7 @@ Almacena eventos creados con estructura unificada:
 ## ⚠️ **Límites y Restricciones del Sistema**
 
 ### **Límites Absolutos**
-- **Planificación máxima**: 3 años (1095 días) desde hoy
+- **Planificación máxima**: 1 año (365 días) desde hoy
 - **Duración máxima de serie**: 1 año (365 días)
 - **Eventos simultáneos**: Limitados por recursos disponibles
 - **Combustible máximo**: Definido por capacidad de tanques
@@ -495,7 +439,7 @@ Almacena eventos creados con estructura unificada:
 4. **Recursos opcionales permitidos** → Flexibilidad en configuración
 
 ### **Consideraciones de Rendimiento**
-- **Búsqueda lineal** en ventana de 3 años
+- **Búsqueda lineal** en ventana de 1 año
 - **Validación por recurso** en cada creación
 - **Ordenamiento automático** de eventos por fecha
 - **Actualización en tiempo real** de interfaces

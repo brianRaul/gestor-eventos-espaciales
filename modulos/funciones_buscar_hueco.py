@@ -1,20 +1,20 @@
 from datetime import datetime
 
 # ========== FUNCIONES PRINCIPALES ==========
-
-
 def verificar_disponibilidad_fecha(
-    fecha_inicio, fecha_fin, recursos_necesarios, eventos_planificados, recursos
+    fecha_inicio, fecha_fin, recursos_necesarios, eventos_planificados, recursos,
+    eventos_por_fecha=None, recursos_por_clave=None
 ):
-    # 1. Encontrar eventos que se solapan
-    eventos_solapados = encontrar_eventos_solapados(
-        fecha_inicio, fecha_fin, eventos_planificados
-    )
+    # 1. Encontrar eventos que se solapan (usar índice si está disponible)
+    if eventos_por_fecha is not None:
+        eventos_solapados = encontrar_eventos_solapados_rapido(fecha_inicio, fecha_fin, eventos_por_fecha)
+    else:
+        eventos_solapados = encontrar_eventos_solapados(fecha_inicio, fecha_fin, eventos_planificados)
 
     # 2. Si no hay eventos solapados, verificar solo combustible
     if not eventos_solapados:
         disponible, mensaje = verificar_disponibilidad_sin_solapamientos(
-            recursos_necesarios, recursos
+            recursos_necesarios, recursos, recursos_por_clave
         )
         return disponible, mensaje
 
@@ -23,10 +23,9 @@ def verificar_disponibilidad_fecha(
 
     # 4. Verificar disponibilidad con solapamientos
     disponible, mensaje = verificar_disponibilidad_con_solapamientos(
-        recursos_necesarios, recursos_ocupados, recursos
+        recursos_necesarios, recursos_ocupados, recursos, recursos_por_clave
     )
     return disponible, mensaje
-
 
 # Prepara los recursos requeridos en formato para verificación
 # Convierte la lista de recursos requeridos a diccionario
@@ -45,9 +44,7 @@ def preparar_recursos_requeridos(recursos_requeridos):
 
     return recursos_necesarios
 
-
 # ========== FUNCIONES AUXILIARES ==========
-
 
 # Encuentra eventos que se solapan con un rango de fechas
 def encontrar_eventos_solapados(fecha_inicio, fecha_fin, eventos_planificados):
@@ -67,6 +64,20 @@ def encontrar_eventos_solapados(fecha_inicio, fecha_fin, eventos_planificados):
 
     return eventos_solapados
 
+def encontrar_eventos_solapados_rapido(fecha_inicio, fecha_fin, eventos_por_fecha):
+    """
+    Versión optimizada que usa el índice de fechas (eventos_por_fecha).
+    """
+    from datetime import timedelta
+    eventos_solapados = set()
+    fecha_actual = fecha_inicio
+    while fecha_actual <= fecha_fin:
+        fecha_str = fecha_actual.strftime("%d/%m/%Y")
+        eventos_dia = eventos_por_fecha.get(fecha_str, [])
+        eventos_solapados.update(eventos_dia)
+        fecha_actual += timedelta(days=1)
+    return list(eventos_solapados)
+
 # Extrae las fechas de inicio y fin de un evento
 def obtener_fechas_evento(evento):
 
@@ -80,28 +91,11 @@ def obtener_fechas_evento(evento):
 # Calcula cuántos recursos están ocupados por eventos solapados
 def calcular_recursos_ocupados(eventos_solapados):
     recursos_ocupados = {}
-
     for evento in eventos_solapados:
-        # PRIORIDAD 1: Usar la estructura nueva (recursos_detalle) si existe
-        if "recursos_detalle" in evento and evento["recursos_detalle"]:
-            for rd in evento["recursos_detalle"]:
-                clave = f"{rd['categoria']}|{rd['tipo']}"
-                cantidad = rd.get("cantidad", 1)
-                
-                if clave not in recursos_ocupados:
-                    recursos_ocupados[clave] = 0
-                recursos_ocupados[clave] += cantidad
-        
-        # PRIORIDAD 2: Compatibilidad con estructura antigua (recursos_usados)
-        elif "recursos_usados" in evento:
-            for recurso_usado, cantidad in evento.get("recursos_usados", {}).items():
-                clave = obtener_clave_recurso_por_nombre(evento, recurso_usado)
-
-                if clave:
-                    if clave not in recursos_ocupados:
-                        recursos_ocupados[clave] = 0
-                    recursos_ocupados[clave] += cantidad
-
+        # Usar resumen precalculado (más rápido)
+        resumen = evento.get("resumen_recursos", {})
+        for clave, cantidad in resumen.items():
+            recursos_ocupados[clave] = recursos_ocupados.get(clave, 0) + cantidad
     return recursos_ocupados
 
 # Obtiene la clave (categoria|tipo) a partir del nombre del recurso
@@ -112,66 +106,55 @@ def obtener_clave_recurso_por_nombre(evento, nombre_recurso):
             return f"{r_detalle['categoria']}|{r_detalle['tipo']}"
     return None
 
-def verificar_disponibilidad_sin_solapamientos(recursos_necesarios, recursos):
+def verificar_disponibilidad_sin_solapamientos(recursos_necesarios, recursos, recursos_por_clave=None):
     for _, req in recursos_necesarios.items():
         if req["es_combustible"]:
-            stock_disponible = obtener_stock_combustible(req, recursos)
-
+            stock_disponible = obtener_stock_combustible(req, recursos, recursos_por_clave)
             if stock_disponible < req["cantidad"]:
-                # MENSAJE CORTO
                 faltante = req["cantidad"] - stock_disponible
-                return (
-                    False,
-                    f"❌ Combustible insuficiente: {req['categoria']} {req['tipo']} (faltan {faltante}L)",
-                )
-
+                return False, f"❌ Combustible insuficiente: {req['categoria']} {req['tipo']} (faltan {faltante}L)"
     return True, "Sin problemas de combustible"
 
-
 def verificar_disponibilidad_con_solapamientos(
-    recursos_necesarios, recursos_ocupados, recursos
+    recursos_necesarios, recursos_ocupados, recursos, recursos_por_clave=None
 ):
     for clave, req in recursos_necesarios.items():
         cantidad_necesaria = req["cantidad"]
-
-        # Para combustible
         if req["es_combustible"]:
-            stock_disponible = obtener_stock_combustible(req, recursos)
-
+            stock_disponible = obtener_stock_combustible(req, recursos, recursos_por_clave)
             if stock_disponible < cantidad_necesaria:
-                # MENSAJE CORTO
                 faltante = cantidad_necesaria - stock_disponible
-                return (
-                    False,
-                    f"❌ Combustible insuficiente: {req['categoria']} {req['tipo']} (faltan {faltante}L)",
-                )
-
-        # Para equipos
+                return False, f"❌ Combustible insuficiente: {req['categoria']} {req['tipo']} (faltan {faltante}L)"
         else:
-            capacidad_total = obtener_capacidad_equipos(req, recursos)
+            capacidad_total = obtener_capacidad_equipos(req, recursos, recursos_por_clave)
             cantidad_ocupada = recursos_ocupados.get(clave, 0)
             disponible = capacidad_total - cantidad_ocupada
-
             if disponible < cantidad_necesaria:
-                return (
-                    False,
-                    f"❌ {req['categoria']} {req['tipo']} no disponible (faltan {cantidad_necesaria - disponible} unidades)",
-                )
-
+                return False, f"❌ {req['categoria']} {req['tipo']} no disponible (faltan {cantidad_necesaria - disponible} unidades)"
     return True, "Disponible"
 
-def obtener_stock_combustible(req, recursos):
-    stock_total = 0
-    for r in recursos:
-        if r["categoria"] == req["categoria"] and r["tipo"] == req["tipo"]:
-            stock_total += r["cantidad_disponible"]
-    return stock_total
-
+def obtener_stock_combustible(req, recursos, recursos_por_clave=None):
+    if recursos_por_clave is not None:
+        clave = f"{req['categoria']}|{req['tipo']}"
+        recurso = recursos_por_clave.get(clave)
+        return recurso["cantidad_disponible"] if recurso else 0
+    else:
+        # Fallback a búsqueda lineal
+        stock_total = 0
+        for r in recursos:
+            if r["categoria"] == req["categoria"] and r["tipo"] == req["tipo"]:
+                stock_total += r["cantidad_disponible"]
+        return stock_total
 
 # Calcula la capacidad total de equipos
-def obtener_capacidad_equipos(req, recursos):
-    capacidad_total = 0
-    for r in recursos:
-        if r["categoria"] == req["categoria"] and r["tipo"] == req["tipo"]:
-            capacidad_total += r["cantidad_total"]
-    return capacidad_total
+def obtener_capacidad_equipos(req, recursos, recursos_por_clave=None):
+    if recursos_por_clave is not None:
+        clave = f"{req['categoria']}|{req['tipo']}"
+        recurso = recursos_por_clave.get(clave)
+        return recurso["cantidad_total"] if recurso else 0
+    else:
+        capacidad_total = 0
+        for r in recursos:
+            if r["categoria"] == req["categoria"] and r["tipo"] == req["tipo"]:
+                capacidad_total += r["cantidad_total"]
+        return capacidad_total

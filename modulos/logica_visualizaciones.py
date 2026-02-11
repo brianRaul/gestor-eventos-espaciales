@@ -16,7 +16,7 @@ def mostrar_eventos_planificados(
     # Crear una nueva ventana emergente
     ventana_eventos = ctk.CTkToplevel(parent)
     ventana_eventos.title("📋 Eventos Planificados")
-    ventana_eventos.geometry("440x400")
+    ventana_eventos.geometry("440x500")
 
     ventana_eventos.transient(parent)  # Hace que sea ventana hija
     ventana_eventos.lift()  # Trae la ventana al frente
