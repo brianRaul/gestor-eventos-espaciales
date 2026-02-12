@@ -297,13 +297,8 @@ class GestorEventos(ctk.CTk):
             self.crear_checkboxes_recursos()
 
             # Limpiar campos de entrada
-            self.entry_day.delete(0, "end")
-            self.entry_month.delete(0, "end")
-            self.entry_year.delete(0, "end")
-            self.entry_duracion.delete(0, "end")
-            self.combo_evento.set("Elige un tipo de evento")
-            self.limpiar_seleccion_recursos()
-
+            lv.reset_campos_evento(self, es_serie=False)
+           
             if recursos_opcionales:
                 lv.mostrar_recursos_opcionales(self, recursos_opcionales)
             # Mostrar mensaje de éxito
@@ -771,16 +766,7 @@ class GestorEventos(ctk.CTk):
             self.crear_checkboxes_recursos()
 
             # Limpiar campos después de éxito
-            self.entry_day.delete(0, "end")
-            self.entry_month.delete(0, "end")
-            self.entry_year.delete(0, "end")
-            self.entry_duracion.delete(0, "end")
-            self.entry_intervalo.delete(0, "end")
-            self.entry_repeticiones.delete(0, "end")
-            self.entry_intervalo.insert(0, "7")
-            self.entry_repeticiones.insert(0, "1")
-            self.combo_evento.set("Elige un tipo de evento")
-            self.limpiar_seleccion_recursos()
+            lv.reset_campos_evento(self, es_serie=True)
 
             if recursos_opcionales_serie:
                 lv.mostrar_recursos_opcionales(self, list(recursos_opcionales_serie))
