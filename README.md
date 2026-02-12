@@ -207,6 +207,21 @@ Muestra recursos requeridos, duración, exclusiones y coexistencia de forma agru
 - Control de stock de combustible con reposición manual
 - Visualización del estado de combustible con alertas de nivel bajo
 
+### 📌 Supuestos del modelo de recursos
+
+Para garantizar la corrección y eficiencia del planificador, el sistema se basa en los siguientes supuestos de diseño. **No son limitaciones**, sino decisiones deliberadas que simplifican la lógica sin perder expresividad en el dominio aeroespacial modelado.
+
+| Supuesto | Explicación |
+|----------|-------------|
+| **Recursos como pools homogéneos** | Cada combinación `(categoría, tipo)` representa un conjunto de **unidades idénticas e intercambiables**. Ejemplo: `COHETE Pesado` con `cantidad_total = 3` son **3 cohetes pesados iguales**, no hay matrículas individuales. |
+| **Unicidad de `(categoría, tipo)` en el inventario** | El archivo `recursos.json` **solo puede contener una entrada por cada par `(categoría, tipo)`**. Si se añadieran dos modelos distintos con la misma categoría y tipo, el comportamiento no estaría definido (el índice `recursos_por_clave` sobrescribiría). **Los datos proporcionados cumplen esta condición**. |
+| **Selección única en la interfaz** | Por cada recurso necesario, el usuario marca **una sola casilla**. La cantidad requerida (extraída de `eventos_predeterminados.json`) se asigna directamente a ese pool. No es posible seleccionar el mismo recurso varias veces, y no es necesario, ya que la cantidad se especifica en la definición del evento. |
+
+**¿Por qué estos supuestos no son errores?**  
+- **Sobreconsumo**: Dado que no existen duplicados de `(categoría, tipo)`, al iterar sobre `recursos_seleccionados` se encuentra **como máximo un recurso** por cada requerimiento. Por tanto, la asignación de cantidades es correcta y nunca se produce una sobreasignación.  
+- **Disponibilidad por instancia**: Al ser los recursos pools homogéneos, basta con conocer cuántas unidades del pool están libres. El sistema calcula `capacidad_total - ocupación_total` para cada `(categoría, tipo)`. Es suficiente y mucho más eficiente que llevar un control individualizado.
+
+
 ### ⚙️ **Sistema de Restricciones Completo**
 - **Reglas de exclusión**: recursos que no pueden usarse juntos
 - **Requisitos coexistentes**: recursos que deben asignarse simultáneamente

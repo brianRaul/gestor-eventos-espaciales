@@ -7,11 +7,6 @@
         "cantidad_total": 3
       },
       {
-        "modelo": "Apolo-2",
-        "tipo": "Semipesado",
-        "cantidad_total": 2
-      },
-      {
         "modelo": "Explorador-1",
         "tipo": "Ligero",
         "cantidad_total": 4
@@ -58,7 +53,7 @@
         "modelo": "Deposito-Liquido",
         "tipo": "Liquido",
         "cantidad_total": 600000,
-        "cantidad_disponible": 555000
+        "cantidad_disponible": 15000
       },
       {
         "modelo": "Tanque-Solido",

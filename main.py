@@ -373,7 +373,7 @@ class GestorEventos(ctk.CTk):
         # Crear ventana nueva
         self.ventana_combustible = ctk.CTkToplevel(self)
         self.ventana_combustible.title("📊 Estado de Combustible")
-        self.ventana_combustible.geometry("400x350")
+        self.ventana_combustible.geometry("400x400")
 
         self.ventana_combustible.transient(self)  # Hace que sea ventana hija
         self.ventana_combustible.lift()  # Trae la ventana al frente
