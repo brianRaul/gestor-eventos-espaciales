@@ -1,10 +1,10 @@
-from datetime import datetime
+from datetime import datetime,timedelta
 
 # ========== FUNCIONES PRINCIPALES ==========
 def verificar_disponibilidad_fecha(
     fecha_inicio, fecha_fin, recursos_necesarios, eventos_planificados, recursos,
-    eventos_por_fecha=None, recursos_por_clave=None
-):
+    eventos_por_fecha=None, recursos_por_clave=None):
+    
     # 1. Encontrar eventos que se solapan (usar índice si está disponible)
     if eventos_por_fecha is not None:
         eventos_solapados = encontrar_eventos_solapados_rapido(fecha_inicio, fecha_fin, eventos_por_fecha)
@@ -65,10 +65,6 @@ def encontrar_eventos_solapados(fecha_inicio, fecha_fin, eventos_planificados):
     return eventos_solapados
 
 def encontrar_eventos_solapados_rapido(fecha_inicio, fecha_fin, eventos_por_fecha):
-    """
-    Versión optimizada que usa el índice de fechas (eventos_por_fecha).
-    """
-    from datetime import timedelta
     eventos_solapados = set()
     fecha_actual = fecha_inicio
     while fecha_actual <= fecha_fin:

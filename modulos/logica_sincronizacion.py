@@ -453,7 +453,6 @@ class GestorSincronizacion:
             for var in ventana.checkboxes_eliminar:
                 var.set(estado)
 
-
 # Funciones de conveniencia para uso directo
 def crear_gestor_sincronizacion(app):
     """
@@ -464,7 +463,6 @@ def crear_gestor_sincronizacion(app):
     """
     return GestorSincronizacion(app)
 
-
 def registrar_ventana_combustible(gestor, ventana):
     """
     Registra una ventana de combustible.
@@ -474,7 +472,6 @@ def registrar_ventana_combustible(gestor, ventana):
         ventana: Ventana de combustible
     """
     gestor.registrar_ventana("combustible", ventana)
-
 
 def registrar_ventana_eventos(gestor, ventana):
     """

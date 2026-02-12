@@ -291,7 +291,7 @@ def procesar_creacion_evento(
     if not valido:
         return False, mensaje, None, []
 
-    # 8.1. Validar recursos opcionales
+    # 8. Validar recursos opcionales
     recursos_opcionales = validar_recursos_opcionales(
         evento_data, recursos_seleccionados
     )
@@ -317,12 +317,12 @@ def procesar_creacion_evento(
             f"{lista_recursos}"
         )
         
-    # 8. Consumir recursos
+    # 8.1. Consumir recursos
     recursos_consumidos = consumir_recursos(
-        evento_data, recursos_seleccionados, recursos,recursos_por_clave=recursos_por_clave 
+        evento_data, recursos_seleccionados, recursos, recursos_por_clave=recursos_por_clave 
     )
 
-    # 9. Crear diccionario del evento CON ESTRUCTURA UNIFICADA
+    # 9. Crear diccionario del evento
     nuevo_evento = crear_evento_dict(
         tipo_evento,
         fecha_inicio,
@@ -335,7 +335,5 @@ def procesar_creacion_evento(
     )
 
     mensaje_exito = f"🚀 Evento '{tipo_evento}' creado exitosamente"
-    if mensaje_opcional:
-        mensaje_exito += mensaje_opcional
 
     return True, mensaje_exito, nuevo_evento, recursos_opcionales

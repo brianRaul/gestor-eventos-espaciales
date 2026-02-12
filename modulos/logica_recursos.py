@@ -1,6 +1,3 @@
-# logica_recursos.py
-# Este módulo contiene la lógica para gestión de recursos
-
 def obtener_recursos_por_categoria(recursos):
     """
     Agrupa recursos por categoría para facilitar su visualización

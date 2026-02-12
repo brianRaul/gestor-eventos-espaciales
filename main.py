@@ -20,33 +20,32 @@ class GestorEventos(ctk.CTk):
     def __init__(self):
         super().__init__()
 
-        # 1.Configurar ventana
+        # Configurar ventana
         self.title("Gestor de Eventos Espaciales")
-        self.geometry("675x990")
+        self.geometry("675x930")
+        self.resizable(False, False) # Tamaño fijo
 
-        self.resizable(False, False)
-
-        self.evento_seleccionado = None
-
-        self.MAX_EVENTOS = 100
+        self.evento_seleccionado = None # Evento actual
+        self.MAX_EVENTOS = 100          # Máximo de eventos
 
         # Inicializar gestor de sincronización
         self.gestor_sinc = lsinc.crear_gestor_sincronizacion(self)
 
-        # 2. CARGA DE EVENTOS
+        # Carga de Eventos
         self.tipos_evento_data = cargar_eventos_desde_json()
-
-        # Extraemos las llaves (nombres de eventos) para el ComboBox
-        self.tipos_evento = list(self.tipos_evento_data.keys())
-
-        # Cargamos los recursos
+        
+        # Carga los recursos
         self.recursos = cargar_recursos_desde_json()
-
-        # 3. CARGA DE ARCHIVOS DE AGENDA
+        
+        # 3. Carga de archivos de agenda
         # Importante: Aseguramos que sea una lista para evitar el error 'NoneType'
         self.eventos_planificados = cargar_eventos_planificados()
         if self.eventos_planificados is None:
             self.eventos_planificados = []
+
+        # Extraemos las llaves (nombres de eventos) para el ComboBox
+        self.tipos_evento = list(self.tipos_evento_data.keys())
+
 
         self.eventos_por_fecha = {}  # fecha_str -> lista de eventos
         self.recursos_por_clave = {}  # "categoria|tipo" -> recurso
@@ -84,7 +83,7 @@ class GestorEventos(ctk.CTk):
 
             # Actualizar la lista en memoria con los objetos completos (incluyendo fechas date)
             # Pero primero debemos asegurar que self.eventos_planificados tenga los campos _date
-            # Lo más fácil: recargar los eventos desde el archivo y reindexar
+            # recargar los eventos desde el archivo y reindexar
             self.eventos_planificados = cargar_eventos_planificados()
             self._reindexar_eventos()
             print(f"✅ Eventos guardados y ordenados: {len(eventos_ordenados)} eventos")
@@ -258,8 +257,8 @@ class GestorEventos(ctk.CTk):
                     text_color="red",
                 )
                 return
-        except:
-            pass  # La validación detallada se hará después
+        except ValueError:
+            pass 
 
         # 2. Obtener recursos seleccionados de los checkboxes
         recursos_seleccionados_nombres = [
@@ -267,7 +266,7 @@ class GestorEventos(ctk.CTk):
         ]
 
         # 3. Llamar a la función de lógica externa
-        resultado, mensaje, nuevo_evento, _ = procesar_creacion_evento(
+        resultado, mensaje, nuevo_evento, recursos_opcionales = procesar_creacion_evento(
             tipo_evento=tipo_evento,
             day=day,
             month=month,
@@ -281,7 +280,7 @@ class GestorEventos(ctk.CTk):
 
         # 4. Manejar el resultado (INTERFAZ GRÁFICA)
         if resultado and nuevo_evento:
-            # Éxito: agregar evento (ya viene con estructura completa)
+            # Éxito: agregar evento 
             self.eventos_planificados.append(nuevo_evento)
             self._reindexar_eventos()
 
@@ -304,11 +303,13 @@ class GestorEventos(ctk.CTk):
             self.entry_duracion.delete(0, "end")
             self.combo_evento.set("Elige un tipo de evento")
             self.limpiar_seleccion_recursos()
-
+            
+            if recursos_opcionales:
+             lv.mostrar_recursos_opcionales(self,recursos_opcionales)
             # Mostrar mensaje de éxito
             self.lbl_info.configure(text=mensaje, text_color="green")
         else:
-            # Error: mostrar mensaje TAL CUAL viene (ya es corto)
+            # Error
             self.lbl_info.configure(text=mensaje, text_color="red")
 
     # .5 ========== Mostrar eventos planificados ======
@@ -691,7 +692,7 @@ class GestorEventos(ctk.CTk):
         )
         self.lbl_info.configure(text=mensaje, text_color="green")
 
-    # .14 ========= Crear serie de eventos ==========
+    # .14 ========= Crear serie de eventos ============
     def crear_serie_recurrente(self):
         # 1. Obtener datos de la interfaz
         tipo_evento = self.combo_evento.get()
@@ -747,7 +748,7 @@ class GestorEventos(ctk.CTk):
             return
 
         # 6. Llamar a la función de creación de serie
-        exito, mensaje, eventos_creados, fecha_problema = fsr.crear_serie_recurrente(
+        exito, mensaje, eventos_creados, fecha_problema ,recursos_opcionales_serie= fsr.crear_serie_recurrente(
             tipo_evento=tipo_evento,
             recursos_seleccionados_nombres=recursos_seleccionados,
             fecha_inicio_str=datos_validados["fecha_str"],
@@ -785,6 +786,9 @@ class GestorEventos(ctk.CTk):
             self.entry_repeticiones.insert(0, "1")
             self.combo_evento.set("Elige un tipo de evento")
             self.limpiar_seleccion_recursos()
+            
+            if recursos_opcionales_serie:
+                lv.mostrar_recursos_opcionales(self,list(recursos_opcionales_serie))
 
             self.lbl_info.configure(
                 text=mensaje,
@@ -806,7 +810,7 @@ class GestorEventos(ctk.CTk):
             # Error de validación: mostrar solo el error (ya es corto)
             self.lbl_info.configure(text=mensaje, text_color="red")
 
-    # .15 ========= sugerir serie ===================
+    # .15 ========= sugerir serie =====================
     def sugerir_serie_completa(self):
         # --- 1. CAPTURA DE DATOS DE LA INTERFAZ ---
         tipo = self.combo_evento.get()
@@ -876,6 +880,7 @@ class GestorEventos(ctk.CTk):
             else:
                 self.lbl_info.configure(text=mensaje, text_color="red")
 
+    # .16 ========= reindexar eventos =================
     def _reindexar_eventos(self):
         """Reconstruye el índice de eventos por fecha.
         Convierte automáticamente las fechas si falta el campo date.
@@ -902,6 +907,7 @@ class GestorEventos(ctk.CTk):
                     self.eventos_por_fecha[fecha] = []
                 self.eventos_por_fecha[fecha].append(ev)
 
+    # .17 ========= indexar recursos ==================
     def _indexar_recursos(self):
         """Construye el índice de recursos por clave."""
         self.recursos_por_clave = {}
@@ -946,7 +952,7 @@ class GestorEventos(ctk.CTk):
 
         ctk.CTkLabel(
             frame_recursos,
-            text="Seleccionar Recursos:",
+            text="Seleccionar Recursos y Fecha:",
             font=("Monaco", 16),
         ).pack(pady=5)
 
@@ -1055,6 +1061,17 @@ class GestorEventos(ctk.CTk):
             command=self.limpiar_seleccion_recursos,
         )
         btn_limpiar.pack(side="left", padx=5)
+        
+                # ========== BOTÓN DE SUGERENCIA ==========
+        self.btn_sugerir = ctk.CTkButton(
+            frame_botones_recursos,
+            text="🔍 Sugerir Próxima Fecha Libre",
+            width=200,
+            fg_color="#1f538d",
+            hover_color="#14375e",
+            command=self.sugerir_fecha_disponible,
+        )
+        self.btn_sugerir.pack(side="left",padx=5)
 
         # ========== 5. RECURRENCIA ==========
         frame_recurrencia = ctk.CTkFrame(self)
@@ -1165,18 +1182,6 @@ class GestorEventos(ctk.CTk):
         )
         btn_rellenar.pack(side="left", padx=10)
 
-        # ========== BOTÓN DE SUGERENCIA ==========
-        self.btn_sugerir = ctk.CTkButton(
-            self,
-            text="🔍 Sugerir Próxima Fecha Libre",
-            width=250,
-            height=35,
-            fg_color="#1f538d",
-            hover_color="#14375e",
-            command=self.sugerir_fecha_disponible,
-        )
-        self.btn_sugerir.pack(pady=10)
-
         # ========== 7. BOTÓN PRINCIPAL ==========
         self.btn_crear = ctk.CTkButton(
             self,
@@ -1201,7 +1206,7 @@ class GestorEventos(ctk.CTk):
 
         # ========== 9. CONTADOR DE EVENTOS ==========
         frame_contador = ctk.CTkFrame(self)
-        frame_contador.pack(pady=20, padx=20, fill="x")
+        frame_contador.pack(pady=30, padx=20, fill="x")
 
         self.lbl_contador = ctk.CTkLabel(
             frame_contador, text="Eventos planificados: 0", font=("Arial", 12)

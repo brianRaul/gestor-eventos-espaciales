@@ -1,6 +1,4 @@
-# logica_visualizacion.py
 import customtkinter as ctk
-
 
 def mostrar_eventos_planificados(
     parent, eventos_planificados, mostrar_recursos_callback
@@ -104,7 +102,6 @@ def mostrar_eventos_planificados(
         ventana_eventos, text="Cerrar", width=100, command=ventana_eventos.destroy
     )
     btn_cerrar.pack(pady=10)
-
 
 def mostrar_recursos_evento(parent, evento):
     """
@@ -244,3 +241,41 @@ def mostrar_recursos_evento(parent, evento):
         ventana_recursos, text="Cerrar", width=100, command=ventana_recursos.destroy
     )
     btn_cerrar.pack(pady=10)
+    
+def mostrar_recursos_opcionales(parent, recursos_opcionales):
+    """
+    Muestra una ventana emergente con la lista de recursos opcionales seleccionados.
+
+    Args:
+        parent: ventana principal (GestorEventos) o cualquier Toplevel padre
+        recursos_opcionales: lista de dicts o strings con nombres de recursos
+    """
+    ventana = ctk.CTkToplevel(parent)
+    ventana.title("ℹ️ Recursos Opcionales")
+    ventana.geometry("400x300")
+    ventana.transient(parent)
+    ventana.lift()
+    ventana.focus_force()
+
+    ctk.CTkLabel(
+        ventana,
+        text="Recursos opcionales incluidos:",
+        font=("Arial", 14, "bold")
+    ).pack(pady=10)
+
+    frame_scroll = ctk.CTkScrollableFrame(ventana, width=350, height=200)
+    frame_scroll.pack(pady=10, padx=10, fill="both", expand=True)
+
+    for recurso in recursos_opcionales:
+        nombre = recurso["nombre_mostrar"] if isinstance(recurso, dict) else recurso
+        ctk.CTkLabel(
+            frame_scroll,
+            text=f"• {nombre}",
+            font=("Arial", 12)
+        ).pack(anchor="w", padx=10, pady=2)
+
+    ctk.CTkButton(
+        ventana,
+        text="Cerrar",
+        command=ventana.destroy
+    ).pack(pady=10)

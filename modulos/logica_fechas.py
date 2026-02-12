@@ -1,6 +1,4 @@
-# logica_fechas.py
 from datetime import datetime, date, timedelta
-
 
 def sugerir_fecha_disponible_logica(
     tipo_evento,

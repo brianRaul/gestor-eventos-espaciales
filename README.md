@@ -2,9 +2,9 @@
 
 ## 📖 Descripción
 
-El **Gestor de Eventos Espaciales** es una aplicación de escritorio desarrollada en Python para la planificación inteligente de eventos aeroespaciales. Este sistema permite gestionar recursos limitados, validar restricciones complejas y evitar conflictos de programación en operaciones como lanzamientos de cohetes, pruebas de motores, simulaciones de aterrizaje y más.
+El **Gestor de Eventos Espaciales** es una solución avanzada de software desarrollada en Python, diseñada para la orquestación y logística de misiones aeroespaciales complejas. A diferencia de un calendario convencional, este sistema actúa como un motor de simulación de recursos, permitiendo gestionar desde lanzamientos orbitales hasta pruebas de propulsión crítica en un entorno de inventario limitado.
 
-La aplicación garantiza que los recursos no se asignen a más de un evento simultáneamente y que se respeten todas las reglas de co-requisitos y exclusiones definidas para cada tipo de evento.
+La plataforma no solo previene solapamientos temporales, sino que gestiona dinámicamente el ciclo de vida de los recursos: desde el uso de equipos físicos reutilizables hasta el consumo volumétrico de combustibles criogénicos. Mediante un robusto sistema de reglas de exclusión y co-requisitos, el gestor garantiza que cada evento sea técnicamente viable antes de ser confirmado, asegurando que los recursos críticos no se sobreasignen y que se respeten estrictamente los protocolos de seguridad definidos para cada tipo de misión.
 
 ---
 
@@ -29,12 +29,17 @@ La aplicación está estructurada alrededor de la clase principal `GestorEventos
 - **Gestión de Ventanas Secundarias**: Controla todas las ventanas emergentes (Toplevel) que se crean
 - **Comunicación Centralizada**: Todas las partes de la aplicación acceden a los mismos datos a través de la instancia principal
 
-#### **4. Sincronización Automática**
-- **Patrón Observador Integrado**: La clase principal coordina la actualización de todas las ventanas abiertas
-- **Datos Siempre Actualizados**: Cuando se realizan cambios (crear/eliminar eventos, modificar combustible), todas las ventanas abiertas se actualizan automáticamente
-- **Registro de Ventanas**: Mantiene un registro de todas las ventanas abiertas para notificarles de cambios
-
 ---
+
+## Diseño Modular y Escalable (Refactorización)
+
+Para mantener el código limpio y profesional, la aplicación delega la lógica compleja en módulos especializados ubicados en el directorio modulos/:
+
+    logica_sincronizacion.py: Implementa un sistema de actualización en tiempo real (patrón Observer). Gestiona la comunicación entre la ventana principal y las secundarias; por ejemplo, si rellenamos combustible, todas las ventanas de stock abiertas se actualizan instantáneamente sin necesidad de reiniciarlas.
+
+    logica_combustible.py y logica_eliminacion.py: Gestionan el balance de masa. Al cancelar un evento, se calcula la devolución de combustible; si el tanque alcanza su capacidad máxima, el sistema procesa el excedente como "combustible desperdiciado", simulando una pérdida real por drenado.
+
+    funciones_buscar_hueco.py: Algoritmo de búsqueda que verifica simultáneamente la disponibilidad de equipos (evitando solapamientos) y la viabilidad del inventario de consumibles para fechas futuras.
 
 ## 🚀 Cómo Ejecutar el Programa
 
@@ -57,23 +62,20 @@ python -c "import customtkinter; print('✅ CustomTkinter instalado correctament
 
 ```
 gestor_eventos_espaciales/
-├── main.py                          # Punto de entrada - Clase GestorEventos
-├── eventos_predeterminados.json     # Configuración de tipos de evento
-├── recursos.json                    # Inventario de recursos disponibles
-├── eventos_planificados.json        # Eventos creados (se genera automáticamente)
-└── modulos/                         # Módulos de lógica de negocio
-    ├── funciones_datos.py           # Carga/guardado de datos
-    ├── funciones_crear_evento.py    # Lógica de creación de eventos
-    ├── funciones_buscar_hueco.py    # Búsqueda de fechas disponibles
-    ├── funciones_series_recurrentes.py # Gestión de series
-    ├── logica_combustible.py        # Gestión de combustible
-    ├── logica_eliminacion.py        # Eliminación con devolución
-    ├── logica_serie.py              # Validación de series
-    ├── logica_visualizaciones.py    # Visualizaciones de eventos
-    ├── logica_recursos.py           # Gestión de recursos
-    ├── logica_fechas.py             # Validación de fechas
-    ├── logica_validaciones.py       # Validaciones generales
-    └── logica_sincronizacion.py     # Sincronización de ventanas
+├── main.py                          # Punto de entrada y UI Principal
+├── eventos_predeterminados.json     # Reglas de negocio y tipos de misión
+├── recursos.json                    # Inventario (Equipos y Combustible)
+├── eventos_planificados.json        # Base de datos de eventos guardados
+└── modulos/                         # Lógica de negocio encapsulada
+    ├── funciones_datos.py           # Persistencia y carga de JSON
+    ├── funciones_crear_evento.py    # Orquestador de validación y creación
+    ├── funciones_buscar_hueco.py    # Algoritmo de sugerencia de fechas
+    ├── funciones_series_recurrentes.py # Lógica de eventos múltiples
+    ├── logica_combustible.py        # Gestión de stock y porcentajes
+    ├── logica_eliminacion.py        # Lógica de devolución y desperdicio
+    ├── logica_sincronizacion.py     # Gestor de ventanas (Sincronización)
+    ├── logica_validaciones.py       # Reglas de exclusión/coexistencia
+    └── logica_visualizaciones.py    # Generación de UI dinámica
 ```
 
 ### **Pasos para Ejecutar**

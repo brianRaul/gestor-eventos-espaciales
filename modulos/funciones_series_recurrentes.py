@@ -24,13 +24,13 @@ def crear_serie_recurrente(
         or len(str(intervalo_dias)) > 4
         or len(str(num_eventos)) > 4
     ):
-        return False, "❌ Número inválido", [], None
+        return False, "❌ Número inválido", [], None,set()
 
     # 2. Convertir fecha
     try:
         fecha_inicial = datetime.strptime(fecha_inicio_str, "%d/%m/%Y").date()
     except:
-        return False, "❌ Fecha inválida", [], None
+        return False, "❌ Fecha inválida", [], None,set()
 
     # 3. Verificar que el intervalo no sea menor que la duración
     if num_eventos > 1 and intervalo_dias < duracion_dias:
@@ -38,7 +38,7 @@ def crear_serie_recurrente(
             False,
             "❌ El intervalo debe ser mayor o igual a la duración",
             [],
-            None,
+            None,set()
         )
 
     # 4. LÍMITES DE TIEMPO
@@ -48,7 +48,7 @@ def crear_serie_recurrente(
 
     # Verificar que el primer evento no esté en el pasado
     if fecha_inicial < HOY:
-        return False, "❌ No puedes planificar en el pasado", [], None
+        return False, "❌ No puedes planificar en el pasado", [], None,set()
 
     # Verificar que el primer evento esté dentro de 1 año
     if fecha_inicial > HOY + timedelta(days=LIMITE_FUTURO_DIAS):
@@ -56,7 +56,7 @@ def crear_serie_recurrente(
             False,
             f"❌ Fecha fuera de rango (máximo 1 año)",
             [],
-            None,
+            None,set()
         )
 
     # 5. Calcular duración total de la serie usando función del módulo
@@ -70,11 +70,11 @@ def crear_serie_recurrente(
     )
     
     if not valido:
-        return False, mensaje, [], None
+        return False, mensaje, [], None,set()
 
     # 7. Obtener datos del tipo de evento
     if tipo_evento not in tipos_evento_data:
-        return False, "❌ Tipo de evento no encontrado", [], None
+        return False, "❌ Tipo de evento no encontrado", [], None,set()
 
     evento_data = tipos_evento_data[tipo_evento]
     recursos_requeridos = evento_data.get("recursos_requeridos", [])
@@ -103,7 +103,7 @@ def crear_serie_recurrente(
                     False,
                     f"❌ Capacidad insuficiente (máximo {eventos_posibles} eventos)",
                     [],
-                    None,
+                    None,set()
                 )
 
     # 9. Verificar combustible disponible actual
@@ -131,7 +131,7 @@ def crear_serie_recurrente(
                 False,
                 f"❌ Combustible insuficiente (faltan {faltante}L de {categoria} {tipo})",
                 [],
-                None,
+                None,set()
             )
 
     # 10. VALIDAR TODOS LOS EVENTOS (sin crear)
@@ -156,9 +156,9 @@ def crear_serie_recurrente(
         if not exito:
             # Determinar si es error de solapamiento
             if lval.es_error_solapamiento(mensaje):
-                return False, mensaje, [], fecha_temp
+                return False, mensaje, [], fecha_temp,set()
             else:
-                return False, mensaje, [], None
+                return False, mensaje, [], None,set()
 
         # Crear evento simulado con estructura completa
         evento_simulado = {
@@ -227,7 +227,7 @@ def crear_serie_recurrente(
                 False,
                 f"❌ Error en evento {i+1}: {mensaje}",
                 eventos_creados,
-                fecha_temp,
+                fecha_temp,set()
             )
 
         # VERIFICACIÓN CLAVE: Si no hay nuevo_evento, retornar error
@@ -236,7 +236,7 @@ def crear_serie_recurrente(
                 False,
                 f"❌ Error en evento {i+1}: No se pudo crear",
                 eventos_creados,
-                fecha_temp,
+                fecha_temp,set()
             )
 
         # Si llegamos aquí, el evento se creó exitosamente
@@ -255,13 +255,8 @@ def crear_serie_recurrente(
 
     # 12. Mensaje final de la serie
     mensaje_final = f"✅ Serie creada: {len(eventos_creados)} eventos"
-
-    # Añadir información sobre recursos opcionales si los hay
-    if recursos_opcionales_serie:
-        mensaje_final += f"\n\nℹ️ Recursos opcionales incluidos"
     
-    return True, mensaje_final, eventos_creados, None
-
+    return True, mensaje_final, eventos_creados, None, recursos_opcionales_serie
 
 def buscar_serie_completa_disponible(
     tipo_evento,
