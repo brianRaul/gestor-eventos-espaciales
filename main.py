@@ -905,7 +905,7 @@ class GestorEventos(ctk.CTk):
         lbl_titulo = ctk.CTkLabel(
             self,
             text="GESTOR DE EVENTOS ESPACIALES",
-            font=("Monaco", 25, "bold"),
+            font=("Monaco", 28, "bold"),
             text_color="#1087BF",
         )
         lbl_titulo.pack(pady=20)
@@ -1183,7 +1183,7 @@ class GestorEventos(ctk.CTk):
             text="🚀 Crear Nuevo Evento",
             width=100,
             height=45,
-            font=("Monaco", 14, "bold"),
+            font=("Monaco", 15, "bold"),
             fg_color="#4CAF50",
             hover_color="#388E3C",
             command=self.crear_evento,
