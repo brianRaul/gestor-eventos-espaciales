@@ -94,14 +94,6 @@ def calcular_recursos_ocupados(eventos_solapados):
             recursos_ocupados[clave] = recursos_ocupados.get(clave, 0) + cantidad
     return recursos_ocupados
 
-# Obtiene la clave (categoria|tipo) a partir del nombre del recurso
-def obtener_clave_recurso_por_nombre(evento, nombre_recurso):
-
-    for r_detalle in evento.get("recursos_detalle", []):
-        if r_detalle["nombre_mostrar"] == nombre_recurso:
-            return f"{r_detalle['categoria']}|{r_detalle['tipo']}"
-    return None
-
 def verificar_disponibilidad_sin_solapamientos(recursos_necesarios, recursos, recursos_por_clave=None):
     for _, req in recursos_necesarios.items():
         if req["es_combustible"]:

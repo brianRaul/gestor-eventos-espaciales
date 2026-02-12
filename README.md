@@ -95,7 +95,7 @@ python main.py
    - Carga eventos existentes desde `eventos_planificados.json` 
 
 2. **Inicialización de la Interfaz**:
-   - Crea la ventana principal con tamaño fijo (675x990 píxeles)
+   - Crea la ventana principal con tamaño fijo (675x930 píxeles)
    - Configura todos los elementos de la interfaz
    - Inicializa el sistema de sincronización de ventanas
 

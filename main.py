@@ -64,34 +64,32 @@ class GestorEventos(ctk.CTk):
     ################ GUARDAR DATOS ###################
 
     def guardar_eventos_en_json(self):
-        try:
-            eventos_a_guardar = []
-            for ev in self.eventos_planificados:
-                ev_copy = ev.copy()
-                # Eliminar campos temporales que no deben ir al JSON
-                ev_copy.pop("fecha_inicio_date", None)
-                ev_copy.pop("fecha_fin_date", None)
-                # resumen_recursos puede quedarse, es útil para cálculos futuros
-                eventos_a_guardar.append(ev_copy)
+     try:
+        # 1. Ordenar la lista en memoria directamente
+        self.eventos_planificados.sort(
+            key=lambda x: datetime.strptime(x["fecha_inicio"], "%d/%m/%Y")
+        )
 
-            eventos_ordenados = sorted(
-                eventos_a_guardar,
-                key=lambda x: datetime.strptime(x["fecha_inicio"], "%d/%m/%Y"),
-            )
-            with open("eventos_planificados.json", "w", encoding="utf-8") as f:
-                json.dump(eventos_ordenados, f, ensure_ascii=False, indent=4)
+        # 2. Preparar datos para JSON (copia limpia sin objetos datetime)
+        eventos_a_guardar = []
+        for ev in self.eventos_planificados:
+            ev_copy = ev.copy()
+            ev_copy.pop("fecha_inicio_date", None)
+            ev_copy.pop("fecha_fin_date", None)
+            eventos_a_guardar.append(ev_copy)
 
-            # Actualizar la lista en memoria con los objetos completos (incluyendo fechas date)
-            # Pero primero debemos asegurar que self.eventos_planificados tenga los campos _date
-            # recargar los eventos desde el archivo y reindexar
-            self.eventos_planificados = cargar_eventos_planificados()
-            self._reindexar_eventos()
-            print(f"✅ Eventos guardados y ordenados: {len(eventos_ordenados)} eventos")
-            return True
-        except Exception as e:
-            print(f"❌ Error al guardar en JSON: {e}")
-            return False
+        # 3. Guardar en disco una sola vez
+        with open("eventos_planificados.json", "w", encoding="utf-8") as f:
+            json.dump(eventos_a_guardar, f, ensure_ascii=False, indent=4)
 
+        # 4. Reindexar usando la lista que ya tenemos en memoria
+        self._reindexar_eventos()
+        print(f"✅ Eventos guardados y ordenados.")
+        return True
+     except Exception as e:
+        print(f"❌ Error al guardar en JSON: {e}")
+        return False
+    
     def guardar_recursos(self):
         try:
             estructura_original = {"recursos": {}}
@@ -168,7 +166,7 @@ class GestorEventos(ctk.CTk):
                 self.checkbox_vars[recurso["nombre_mostrar"]] = var
 
                 # Usar funciones del módulo para obtener texto y color
-                texto, _ = lr.obtener_texto_recurso(recurso)
+                texto = lr.obtener_texto_recurso(recurso)
                 color = lr.obtener_color_recurso(recurso)
 
                 # Crear checkbox
@@ -497,14 +495,7 @@ class GestorEventos(ctk.CTk):
                 text="ℹ️ Todo el combustible ya está lleno", text_color="orange"
             )
 
-    # .10 ========= Verifica si hay combustible suficiente para toda la serie =======
-    def verificar_combustible_para_serie(self, tipo_evento, repeticiones, recursos):
-        # Usar función del módulo
-        return lc.verificar_combustible_para_serie_logica(
-            tipo_evento, repeticiones, recursos, self.tipos_evento_data
-        )
-
-    # .11 ========= Eliminar Eventos ==================
+    # .10 ========= Eliminar Eventos ==================
     def eliminar_eventos_planificados(self):
 
         self.eventos_planificados = cargar_eventos_planificados()
@@ -624,14 +615,14 @@ class GestorEventos(ctk.CTk):
         )
         btn_cancelar.pack(side="left", padx=10)
 
-    # .12 ========= Seleccionar todos los eventos para eliminar =========
+    # .11 ========= Seleccionar todos los eventos para eliminar =========
     def toggle_seleccionar_todos_eventos_eliminar(self, ventana, var_todos):
         estado = var_todos.get()
         if hasattr(ventana, "checkboxes_eliminar"):
             for checkbox_var in ventana.checkboxes_eliminar:
                 checkbox_var.set(estado)
 
-    # .13 ========= Confirmar eliminación =============
+    # .12 ========= Confirmar eliminación =============
     def confirmar_eliminacion(self, ventana_eliminar):
         # 1. Obtener índices de eventos seleccionados para eliminar
         eventos_a_eliminar_indices = []
@@ -692,7 +683,7 @@ class GestorEventos(ctk.CTk):
         )
         self.lbl_info.configure(text=mensaje, text_color="green")
 
-    # .14 ========= Crear serie de eventos ============
+    # .13 ========= Crear serie de eventos ============
     def crear_serie_recurrente(self):
         # 1. Obtener datos de la interfaz
         tipo_evento = self.combo_evento.get()
@@ -810,7 +801,7 @@ class GestorEventos(ctk.CTk):
             # Error de validación: mostrar solo el error (ya es corto)
             self.lbl_info.configure(text=mensaje, text_color="red")
 
-    # .15 ========= sugerir serie =====================
+    # .14 ========= sugerir serie =====================
     def sugerir_serie_completa(self):
         # --- 1. CAPTURA DE DATOS DE LA INTERFAZ ---
         tipo = self.combo_evento.get()
@@ -880,7 +871,7 @@ class GestorEventos(ctk.CTk):
             else:
                 self.lbl_info.configure(text=mensaje, text_color="red")
 
-    # .16 ========= reindexar eventos =================
+    # .15 ========= reindexar eventos =================
     def _reindexar_eventos(self):
         """Reconstruye el índice de eventos por fecha.
         Convierte automáticamente las fechas si falta el campo date.
@@ -907,7 +898,7 @@ class GestorEventos(ctk.CTk):
                     self.eventos_por_fecha[fecha] = []
                 self.eventos_por_fecha[fecha].append(ev)
 
-    # .17 ========= indexar recursos ==================
+    # .16 ========= indexar recursos ==================
     def _indexar_recursos(self):
         """Construye el índice de recursos por clave."""
         self.recursos_por_clave = {}
