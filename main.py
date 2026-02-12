@@ -483,6 +483,8 @@ class GestorEventos(ctk.CTk):
 
             # Notificar cambio a todas las ventanas de combustible
             self.gestor_sinc.notificar_cambio_combustible()
+            
+            self.crear_checkboxes_recursos()
 
             # Mensaje de éxito
             mensaje = f"✅ Combustible rellenado\n⛽ +{litros_agregados:,} litros"
@@ -966,7 +968,7 @@ class GestorEventos(ctk.CTk):
 
         # ========== 5. FECHA DEL EVENTO ==========
         frame_fecha_evento = ctk.CTkFrame(
-            frame_recursos, width=50, border_color="white", border_width=2
+            frame_recursos, width=45, border_color="white", border_width=2
         )
         frame_fecha_evento.pack(side="left", padx=5)
 

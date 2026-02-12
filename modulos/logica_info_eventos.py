@@ -3,8 +3,6 @@ from datetime import datetime
 
 def mostrar_info_eventos(parent, tipos_evento_data):
     """
-    Crea una ventana con la información de todos los tipos de evento.
-    
     Args:
         parent: ventana principal (GestorEventos)
         tipos_evento_data: dict cargado desde eventos_predeterminados.json
