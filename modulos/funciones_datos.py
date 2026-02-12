@@ -82,18 +82,3 @@ def cargar_eventos_planificados():
     except (FileNotFoundError, json.JSONDecodeError):
         return []
     
-# Guarda solo recursos combustibles
-def guardar_recursos_combustible(recursos):
-    try:
-        # Filtrar solo combustibles
-        recursos_combustible = [
-            r for r in recursos 
-            if r.get("es_combustible", False)
-        ]
-        
-        with open("combustible.json", "w", encoding="utf-8") as f:
-            json.dump(recursos_combustible, f, indent=4, ensure_ascii=False)
-        print(f"✅ Combustible guardado: {len(recursos_combustible)} recursos")
-    except Exception as e:
-        print(f"❌ Error guardando combustible: {e}")
-        

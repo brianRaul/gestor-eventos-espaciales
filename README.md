@@ -1,10 +1,11 @@
+```markdown
 # 🚀 Gestor de Eventos Espaciales - Planificador Inteligente de Eventos
 
 ## 📖 Descripción
 
-El **Gestor de Eventos Espaciales** es una aplicación de escritorio desarrollada en Python para la planificación inteligente de eventos aeroespaciales. Este sistema permite gestionar recursos limitados, validar restricciones complejas y evitar conflictos de programación en operaciones como lanzamientos de cohetes, pruebas de motores, simulaciones de aterrizaje y más.
+El **Gestor de Eventos Espaciales** es una solución avanzada de software desarrollada en Python, diseñada para la orquestación y logística de misiones aeroespaciales complejas. A diferencia de un calendario convencional, este sistema actúa como un motor de simulación de recursos, permitiendo gestionar desde lanzamientos orbitales hasta pruebas de propulsión crítica en un entorno de inventario limitado.
 
-La aplicación garantiza que los recursos no se asignen a más de un evento simultáneamente y que se respeten todas las reglas de co-requisitos y exclusiones definidas para cada tipo de evento.
+La plataforma no solo previene solapamientos temporales, sino que gestiona dinámicamente el ciclo de vida de los recursos: desde el uso de equipos físicos reutilizables hasta el consumo volumétrico de combustibles criogénicos. Mediante un robusto sistema de reglas de exclusión y co-requisitos, el gestor garantiza que cada evento sea técnicamente viable antes de ser confirmado, asegurando que los recursos críticos no se sobreasignen y que se respeten estrictamente los protocolos de seguridad definidos para cada tipo de misión.
 
 ---
 
@@ -29,12 +30,17 @@ La aplicación está estructurada alrededor de la clase principal `GestorEventos
 - **Gestión de Ventanas Secundarias**: Controla todas las ventanas emergentes (Toplevel) que se crean
 - **Comunicación Centralizada**: Todas las partes de la aplicación acceden a los mismos datos a través de la instancia principal
 
-#### **4. Sincronización Automática**
-- **Patrón Observador Integrado**: La clase principal coordina la actualización de todas las ventanas abiertas
-- **Datos Siempre Actualizados**: Cuando se realizan cambios (crear/eliminar eventos, modificar combustible), todas las ventanas abiertas se actualizan automáticamente
-- **Registro de Ventanas**: Mantiene un registro de todas las ventanas abiertas para notificarles de cambios
-
 ---
+
+## Diseño Modular y Escalable (Refactorización)
+
+Para mantener el código limpio y profesional, la aplicación delega la lógica compleja en módulos especializados ubicados en el directorio modulos/:
+
+    logica_sincronizacion.py: Implementa un sistema de actualización en tiempo real (patrón Observer). Gestiona la comunicación entre la ventana principal y las secundarias; por ejemplo, si rellenamos combustible, todas las ventanas de stock abiertas se actualizan instantáneamente sin necesidad de reiniciarlas.
+
+    logica_combustible.py y logica_eliminacion.py: Gestionan el balance de masa. Al cancelar un evento, se calcula la devolución de combustible; si el tanque alcanza su capacidad máxima, el sistema procesa el excedente como "combustible desperdiciado", simulando una pérdida real por drenado.
+
+    funciones_buscar_hueco.py: Algoritmo de búsqueda que verifica simultáneamente la disponibilidad de equipos (evitando solapamientos) y la viabilidad del inventario de consumibles para fechas futuras.
 
 ## 🚀 Cómo Ejecutar el Programa
 
@@ -57,23 +63,22 @@ python -c "import customtkinter; print('✅ CustomTkinter instalado correctament
 
 ```
 gestor_eventos_espaciales/
-├── main.py                          # Punto de entrada - Clase GestorEventos
-├── eventos_predeterminados.json     # Configuración de tipos de evento
-├── recursos.json                    # Inventario de recursos disponibles
-├── eventos_planificados.json        # Eventos creados (se genera automáticamente)
-└── modulos/                         # Módulos de lógica de negocio
-    ├── funciones_datos.py           # Carga/guardado de datos
-    ├── funciones_crear_evento.py    # Lógica de creación de eventos
-    ├── funciones_buscar_hueco.py    # Búsqueda de fechas disponibles
-    ├── funciones_series_recurrentes.py # Gestión de series
-    ├── logica_combustible.py        # Gestión de combustible
-    ├── logica_eliminacion.py        # Eliminación con devolución
-    ├── logica_serie.py              # Validación de series
-    ├── logica_visualizaciones.py    # Visualizaciones de eventos
-    ├── logica_recursos.py           # Gestión de recursos
-    ├── logica_fechas.py             # Validación de fechas
-    ├── logica_validaciones.py       # Validaciones generales
-    └── logica_sincronizacion.py     # Sincronización de ventanas
+├── main.py                          # Punto de entrada y UI Principal
+├── eventos_predeterminados.json     # Reglas de negocio y tipos de misión
+├── recursos.json                    # Inventario (Equipos y Combustible)
+├── eventos_planificados.json        # Base de datos de eventos guardados
+└── modulos/                         # Lógica de negocio encapsulada
+    ├── funciones_datos.py           # Persistencia y carga de JSON
+    ├── funciones_crear_evento.py    # Orquestador de validación y creación
+    ├── funciones_buscar_hueco.py    # Algoritmo de sugerencia de fechas
+    ├── funciones_series_recurrentes.py # Lógica de eventos múltiples
+    ├── logica_combustible.py        # Gestión de stock y porcentajes
+    ├── logica_eliminacion.py        # Lógica de devolución y desperdicio
+    ├── logica_sincronizacion.py     # Gestor de ventanas (Sincronización)
+    ├── logica_validaciones.py       # Reglas de exclusión/coexistencia
+    ├── logica_visualizaciones.py    # Generación de UI dinámica
+    ├── logica_info_eventos.py       # Ventana de información de tipos de evento (recursos, reglas, duración)
+    └── logica_recursos.py           # Lógica de recursos y recomendaciones
 ```
 
 ### **Pasos para Ejecutar**
@@ -93,7 +98,7 @@ python main.py
    - Carga eventos existentes desde `eventos_planificados.json` 
 
 2. **Inicialización de la Interfaz**:
-   - Crea la ventana principal con tamaño fijo (675x990 píxeles)
+   - Crea la ventana principal con tamaño fijo (675x930 píxeles)
    - Configura todos los elementos de la interfaz
    - Inicializa el sistema de sincronización de ventanas
 
@@ -137,6 +142,15 @@ Estado de Combustible → logica_combustible.obtener_combustibles()
 main.py.ver_combustible() → Ventana con datos actualizados
                      ↓
 Consumo/Reposición → Actualización automática de todas las ventanas
+```
+
+#### **5. Consulta de Información de Eventos** 
+```
+Interfaz → main.py (botón con lambda) → logica_info_eventos.mostrar_info_eventos()
+         ↓
+Toma `tipos_evento_data` → Genera ventana emergente con todos los eventos
+         ↓
+Muestra recursos requeridos, duración, exclusiones y coexistencia de forma agrupada
 ```
 
 ### **Comunicación entre Módulos**
@@ -184,14 +198,29 @@ Consumo/Reposición → Actualización automática de todas las ventanas
 ### **Planificación Inteligente**
 - Creación de eventos individuales con validación en tiempo real
 - Soporte para **series recurrentes** con intervalo personalizable
-- Validación automática de fechas y duraciones (límite de 3 años)
+- Validación automática de fechas y duraciones (límite de 1 año)
 - Sugerencia inteligente de la próxima fecha disponible
 
 ### 🔧 **Gestión Avanzada de Recursos**
 - Inventario completo de recursos aeroespaciales (cohetes, plataformas, combustible, etc.)
-- Recursos con cantidad (pools) y recursos únicos
+- Recursos con cantidad (pools) 
 - Control de stock de combustible con reposición manual
 - Visualización del estado de combustible con alertas de nivel bajo
+
+### 📌 Supuestos del modelo de recursos
+
+Para garantizar la corrección y eficiencia del planificador, el sistema se basa en los siguientes supuestos de diseño. **No son limitaciones**, sino decisiones deliberadas que simplifican la lógica sin perder expresividad en el dominio aeroespacial modelado.
+
+| Supuesto | Explicación |
+|----------|-------------|
+| **Recursos como pools homogéneos** | Cada combinación `(categoría, tipo)` representa un conjunto de **unidades idénticas e intercambiables**. Ejemplo: `COHETE Pesado` con `cantidad_total = 3` son **3 cohetes pesados iguales**, no hay matrículas individuales. |
+| **Unicidad de `(categoría, tipo)` en el inventario** | El archivo `recursos.json` **solo puede contener una entrada por cada par `(categoría, tipo)`**. Si se añadieran dos modelos distintos con la misma categoría y tipo, el comportamiento no estaría definido (el índice `recursos_por_clave` sobrescribiría). **Los datos proporcionados cumplen esta condición**. |
+| **Selección única en la interfaz** | Por cada recurso necesario, el usuario marca **una sola casilla**. La cantidad requerida (extraída de `eventos_predeterminados.json`) se asigna directamente a ese pool. No es posible seleccionar el mismo recurso varias veces, y no es necesario, ya que la cantidad se especifica en la definición del evento. |
+
+**¿Por qué estos supuestos no son errores?**  
+- **Sobreconsumo**: Dado que no existen duplicados de `(categoría, tipo)`, al iterar sobre `recursos_seleccionados` se encuentra **como máximo un recurso** por cada requerimiento. Por tanto, la asignación de cantidades es correcta y nunca se produce una sobreasignación.  
+- **Disponibilidad por instancia**: Al ser los recursos pools homogéneos, basta con conocer cuántas unidades del pool están libres. El sistema calcula `capacidad_total - ocupación_total` para cada `(categoría, tipo)`. Es suficiente y mucho más eficiente que llevar un control individualizado.
+
 
 ### ⚙️ **Sistema de Restricciones Completo**
 - **Reglas de exclusión**: recursos que no pueden usarse juntos
@@ -202,6 +231,7 @@ Consumo/Reposición → Actualización automática de todas las ventanas
 - Desarrollada con **CustomTkinter** para un aspecto profesional
 - Panel de recursos agrupados por categorías
 - Vista detallada de eventos planificados
+-  Botón "📚 Info Eventos" que muestra **toda la información de los 15 tipos de evento** (recursos requeridos, duración, reglas de exclusión y coexistencia) en una ventana con scroll, sin necesidad de abrir el archivo JSON.
 - Feedback visual inmediato con colores e iconos
 
 ### 💾 **Persistencia Robusta**
@@ -210,7 +240,6 @@ Consumo/Reposición → Actualización automática de todas las ventanas
 - Archivos separados para configuración, recursos y eventos
 
 ---
-
 
 ### **Flujo de Datos**
 ```
@@ -275,6 +304,8 @@ La aplicación incluye **15 tipos de eventos aeroespaciales** preconfigurados, c
 13. **Mantenimiento de torre fija** - Mantenimiento especializado
 14. **Prueba de comunicaciones por radio** - Comunicaciones UHF
 15. **Prueba mixta combustible sólido-líquido** - Prueba con ambos combustibles
+
+> 💡 **Consulta rápida:** Todos estos eventos y sus requisitos están disponibles desde la interfaz principal mediante el botón **"📚 Info Eventos"**.
 
 ---
 
@@ -477,11 +508,6 @@ Almacena eventos creados con estructura unificada:
 - **Errores de sistema**: Logs en consola + mensajes amigables
 - **Errores de datos**: Carga segura con valores por defecto
 
-### **Compatibilidad Hacia Atrás**
-- **Eventos antiguos**: Compatibles con nueva estructura
-- **Recursos obsoletos**: Marcados pero no eliminados
-- **Configuraciones viejas**: Convertidas automáticamente
-
 ---
 
 ## 🎨 **Interfaz de Usuario**
@@ -493,6 +519,7 @@ Almacena eventos creados con estructura unificada:
 4. **Sección de recurrencia** → Para series de eventos
 5. **Botones de acción** → Colores según función (verde=crear, rojo=eliminar)
 6. **Área de información** → Mensajes de estado y errores
+7. **Botón de información** → "📚 Info Eventos" abre una guía completa de todos los tipos de misión.
 
 ### **Feedback Visual**
 - **✅ Verde**: Operación exitosa
@@ -506,27 +533,8 @@ Almacena eventos creados con estructura unificada:
 - **"Marcar Recomendados"** → Selección automática de recursos obligatorios
 - **"Sugerir Fecha"** → Búsqueda inteligente de hueco
 - **"Ver Recursos"** → Detalle completo por evento
-
----
-
-## 🔮 **Futuras Mejoras Potenciales**
-
-### **Mejoras de Funcionalidad**
-1. **Exportación a calendario** (iCal, Google Calendar)
-2. **Notificaciones por email** para eventos próximos
-3. **Múltiples usuarios** con permisos diferentes
-4. **Estadísticas y reportes** de uso de recursos
-
-### **Mejoras Técnicas**
-1. **API REST** para integración con otros sistemas
-2. **Base de datos** en lugar de archivos JSON
-3. **Interfaz web** además de desktop
-4. **Sistema de plugins** para tipos de eventos personalizados
-
----
+- **"📚 Info Eventos"** → Muestra una ventana de referencia con las especificaciones de cada evento.
 
 ## 👨‍💻 **Autor**
 
 **Brian Raúl López Pérez**
-
-**¡Listo para ejecutar y usar!** 🚀

@@ -453,8 +453,6 @@ class GestorSincronizacion:
             for var in ventana.checkboxes_eliminar:
                 var.set(estado)
 
-
-# Funciones de conveniencia para uso directo
 def crear_gestor_sincronizacion(app):
     """
     Crea y retorna una instancia del gestor de sincronización.
@@ -463,25 +461,3 @@ def crear_gestor_sincronizacion(app):
         app: Instancia principal de la aplicación
     """
     return GestorSincronizacion(app)
-
-
-def registrar_ventana_combustible(gestor, ventana):
-    """
-    Registra una ventana de combustible.
-
-    Args:
-        gestor: Instancia de GestorSincronizacion
-        ventana: Ventana de combustible
-    """
-    gestor.registrar_ventana("combustible", ventana)
-
-
-def registrar_ventana_eventos(gestor, ventana):
-    """
-    Registra una ventana de eventos.
-
-    Args:
-        gestor: Instancia de GestorSincronizacion
-        ventana: Ventana de eventos
-    """
-    gestor.registrar_ventana("eventos", ventana)

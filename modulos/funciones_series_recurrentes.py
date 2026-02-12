@@ -2,8 +2,9 @@
 from datetime import datetime, date, timedelta
 from .funciones_crear_evento import *
 from .funciones_buscar_hueco import *
-from . import logica_fechas as lf  
+from . import logica_fechas as lf
 from . import logica_validaciones as lval
+
 
 def crear_serie_recurrente(
     tipo_evento,
@@ -24,13 +25,13 @@ def crear_serie_recurrente(
         or len(str(intervalo_dias)) > 4
         or len(str(num_eventos)) > 4
     ):
-        return False, "❌ Número inválido", [], None
+        return False, "❌ Número inválido", [], None, set()
 
     # 2. Convertir fecha
     try:
         fecha_inicial = datetime.strptime(fecha_inicio_str, "%d/%m/%Y").date()
     except:
-        return False, "❌ Fecha inválida", [], None
+        return False, "❌ Fecha inválida", [], None, set()
 
     # 3. Verificar que el intervalo no sea menor que la duración
     if num_eventos > 1 and intervalo_dias < duracion_dias:
@@ -39,25 +40,21 @@ def crear_serie_recurrente(
             "❌ El intervalo debe ser mayor o igual a la duración",
             [],
             None,
+            set(),
         )
 
     # 4. LÍMITES DE TIEMPO
     HOY = datetime.now().date()
     LIMITE_FUTURO_DIAS = 365  # 1 año (cambiado de 1095)
-    LIMITE_SERIE_DIAS = 365   # 1 año para la serie
+    LIMITE_SERIE_DIAS = 365  # 1 año para la serie
 
     # Verificar que el primer evento no esté en el pasado
     if fecha_inicial < HOY:
-        return False, "❌ No puedes planificar en el pasado", [], None
+        return False, "❌ No puedes planificar en el pasado", [], None, set()
 
     # Verificar que el primer evento esté dentro de 1 año
     if fecha_inicial > HOY + timedelta(days=LIMITE_FUTURO_DIAS):
-        return (
-            False,
-            f"❌ Fecha fuera de rango (máximo 1 año)",
-            [],
-            None,
-        )
+        return (False, f"❌ Fecha fuera de rango (máximo 1 año)", [], None, set())
 
     # 5. Calcular duración total de la serie usando función del módulo
     duracion_total_serie = lf.calcular_duracion_total_serie(
@@ -66,15 +63,19 @@ def crear_serie_recurrente(
 
     # 6. Verificar límites de la serie usando función del módulo
     valido, mensaje = lf.validar_limites_serie(
-        duracion_dias, intervalo_dias, num_eventos, LIMITE_SERIE_DIAS, LIMITE_FUTURO_DIAS
+        duracion_dias,
+        intervalo_dias,
+        num_eventos,
+        LIMITE_SERIE_DIAS,
+        LIMITE_FUTURO_DIAS,
     )
-    
+
     if not valido:
-        return False, mensaje, [], None
+        return False, mensaje, [], None, set()
 
     # 7. Obtener datos del tipo de evento
     if tipo_evento not in tipos_evento_data:
-        return False, "❌ Tipo de evento no encontrado", [], None
+        return False, "❌ Tipo de evento no encontrado", [], None, set()
 
     evento_data = tipos_evento_data[tipo_evento]
     recursos_requeridos = evento_data.get("recursos_requeridos", [])
@@ -104,6 +105,7 @@ def crear_serie_recurrente(
                     f"❌ Capacidad insuficiente (máximo {eventos_posibles} eventos)",
                     [],
                     None,
+                    set(),
                 )
 
     # 9. Verificar combustible disponible actual
@@ -132,6 +134,7 @@ def crear_serie_recurrente(
                 f"❌ Combustible insuficiente (faltan {faltante}L de {categoria} {tipo})",
                 [],
                 None,
+                set(),
             )
 
     # 10. VALIDAR TODOS LOS EVENTOS (sin crear)
@@ -156,9 +159,9 @@ def crear_serie_recurrente(
         if not exito:
             # Determinar si es error de solapamiento
             if lval.es_error_solapamiento(mensaje):
-                return False, mensaje, [], fecha_temp
+                return False, mensaje, [], fecha_temp, set()
             else:
-                return False, mensaje, [], None
+                return False, mensaje, [], None, set()
 
         # Crear evento simulado con estructura completa
         evento_simulado = {
@@ -171,18 +174,19 @@ def crear_serie_recurrente(
         }
 
         # Llenar recursos_detalle (igual que en crear_evento_dict)
+        # Llenar recursos_detalle
         for nombre_recurso in recursos_seleccionados_nombres:
             for recurso in recursos:
                 if recurso["nombre_mostrar"] == nombre_recurso:
                     cantidad = 1
-                    if recurso["es_combustible"]:
-                        for req in recursos_requeridos:
-                            if (
-                                req["categoria"] == recurso["categoria"]
-                                and req["tipo"] == recurso["tipo"]
-                            ):
-                                cantidad = req.get("cantidad", 1)
-                                break
+                    # Buscar cantidad requerida para TODOS los recursos
+                    for req in recursos_requeridos:
+                        if (
+                            req["categoria"] == recurso["categoria"]
+                            and req["tipo"] == recurso["tipo"]
+                        ):
+                            cantidad = req.get("cantidad", 1)
+                            break
 
                     evento_simulado["recursos_detalle"].append(
                         {
@@ -228,6 +232,7 @@ def crear_serie_recurrente(
                 f"❌ Error en evento {i+1}: {mensaje}",
                 eventos_creados,
                 fecha_temp,
+                set(),
             )
 
         # VERIFICACIÓN CLAVE: Si no hay nuevo_evento, retornar error
@@ -237,6 +242,7 @@ def crear_serie_recurrente(
                 f"❌ Error en evento {i+1}: No se pudo crear",
                 eventos_creados,
                 fecha_temp,
+                set(),
             )
 
         # Si llegamos aquí, el evento se creó exitosamente
@@ -256,11 +262,7 @@ def crear_serie_recurrente(
     # 12. Mensaje final de la serie
     mensaje_final = f"✅ Serie creada: {len(eventos_creados)} eventos"
 
-    # Añadir información sobre recursos opcionales si los hay
-    if recursos_opcionales_serie:
-        mensaje_final += f"\n\nℹ️ Recursos opcionales incluidos"
-    
-    return True, mensaje_final, eventos_creados, None
+    return True, mensaje_final, eventos_creados, None, recursos_opcionales_serie
 
 
 def buscar_serie_completa_disponible(
@@ -274,7 +276,7 @@ def buscar_serie_completa_disponible(
     tipos_evento_data,
     app=None,
     eventos_por_fecha=None,
-    recursos_por_clave=None,     
+    recursos_por_clave=None,
 ):
     LIMITE_DIAS_SERIE = 365  # Límite de duración de serie
     LIMITE_FUTURO_DIAS = 365  # Límite de 1 año para planificación (cambiado de 1095)
@@ -307,9 +309,13 @@ def buscar_serie_completa_disponible(
 
     # Verificar que toda la serie quepa dentro de 1 año desde hoy
     valido, mensaje = lf.validar_limites_serie(
-        duracion_dias, intervalo_dias, num_eventos, LIMITE_DIAS_SERIE, LIMITE_FUTURO_DIAS
+        duracion_dias,
+        intervalo_dias,
+        num_eventos,
+        LIMITE_DIAS_SERIE,
+        LIMITE_FUTURO_DIAS,
     )
-    
+
     if not valido:
         return False, None, mensaje
 
@@ -379,7 +385,7 @@ def buscar_serie_completa_disponible(
                 None,
                 f"❌ Combustible insuficiente (faltan {faltante}L de {categoria} {tipo})",
             )
-    
+
     # --- 2. BÚSQUEDA DE FECHAS DISPONIBLES ---
     LIMITE_BUSQUEDA = 365  # Buscar en los próximos 365 días (1 año)
 
@@ -398,12 +404,12 @@ def buscar_serie_completa_disponible(
             fecha_candidata.strftime("%d/%m/%Y"),
             duracion_dias,
             intervalo_dias,
-            num_eventos
+            num_eventos,
         )
-        
+
         if not valido_fechas:
             continue
-            
+
         # Verificar que la última fecha de la serie no exceda el límite
         fecha_fin_ultimo = fechas_fin[-1] if fechas_fin else fecha_candidata
         if fecha_fin_ultimo > fecha_maxima:

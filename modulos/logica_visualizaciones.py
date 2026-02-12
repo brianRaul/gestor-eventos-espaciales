@@ -1,6 +1,4 @@
-# logica_visualizacion.py
 import customtkinter as ctk
-
 
 def mostrar_eventos_planificados(
     parent, eventos_planificados, mostrar_recursos_callback
@@ -104,7 +102,6 @@ def mostrar_eventos_planificados(
         ventana_eventos, text="Cerrar", width=100, command=ventana_eventos.destroy
     )
     btn_cerrar.pack(pady=10)
-
 
 def mostrar_recursos_evento(parent, evento):
     """
@@ -244,3 +241,90 @@ def mostrar_recursos_evento(parent, evento):
         ventana_recursos, text="Cerrar", width=100, command=ventana_recursos.destroy
     )
     btn_cerrar.pack(pady=10)
+    
+def mostrar_recursos_opcionales(parent, recursos_opcionales):
+    """
+    Muestra una ventana emergente con la lista de recursos opcionales seleccionados.
+
+    Args:
+        parent: ventana principal (GestorEventos) o cualquier Toplevel padre
+        recursos_opcionales: lista de dicts o strings con nombres de recursos
+    """
+    ventana = ctk.CTkToplevel(parent)
+    ventana.title("ℹ️ Recursos Opcionales")
+    ventana.geometry("400x300")
+    ventana.transient(parent)
+    ventana.lift()
+    ventana.focus_force()
+
+    ctk.CTkLabel(
+        ventana,
+        text="Recursos opcionales incluidos:",
+        font=("Arial", 14, "bold")
+    ).pack(pady=10)
+
+    frame_scroll = ctk.CTkScrollableFrame(ventana, width=350, height=200)
+    frame_scroll.pack(pady=10, padx=10, fill="both", expand=True)
+
+    for recurso in recursos_opcionales:
+        nombre = recurso["nombre_mostrar"] if isinstance(recurso, dict) else recurso
+        ctk.CTkLabel(
+            frame_scroll,
+            text=f"• {nombre}",
+            font=("Arial", 12)
+        ).pack(anchor="w", padx=10, pady=2)
+
+    ctk.CTkButton(
+        ventana,
+        text="Cerrar",
+        command=ventana.destroy
+    ).pack(pady=10)
+
+def reset_campos_evento(app, es_serie=False):
+    """
+    Limpia los campos de fecha/tipo/recurso y fuerza la aparición de placeholders.
+    Args:
+        app: instancia de GestorEventos.
+        es_serie: True si se está reseteando tras crear una serie (también limpia intervalo/repeticiones).
+    """
+    # ----- 1. LIMPIAR CONTENIDO DE LOS CAMPOS -----
+    app.entry_day.delete(0, "end")
+    app.entry_month.delete(0, "end")
+    app.entry_year.delete(0, "end")
+    app.entry_duracion.delete(0, "end")
+    app.combo_evento.set("Elige un tipo de evento")
+    app.limpiar_seleccion_recursos()
+
+    if es_serie:
+        app.entry_intervalo.delete(0, "end")
+        app.entry_repeticiones.delete(0, "end")
+        app.entry_intervalo.insert(0, "7")
+        app.entry_repeticiones.insert(0, "1")
+
+    # ----- 2. FORZAR PÉRDIDA DE FOCO EN TODOS LOS ENTRIES DE FECHA -----
+    entries_fecha = [
+        app.entry_day,
+        app.entry_month,
+        app.entry_year,
+        app.entry_duracion
+    ]
+
+    for entry in entries_fecha:
+        entry.event_generate('<FocusOut>')          # Simula que pierde el foco
+        entry.configure(placeholder_text="")        # Borra temporalmente el placeholder
+        # (La reasignación del placeholder se hará después, con un pequeño retraso)
+
+    # ----- 3. QUITAR EL FOCO DE CUALQUIER ENTRY -----
+    app.btn_crear.focus_set()                      # El botón "Crear" toma el foco
+    app.update_idletasks()                        # Refresco visual inmediato
+
+    # ----- 4. REASIGNAR LOS PLACEHOLDERS ORIGINALES (con retraso mínimo) -----
+    def restaurar_placeholders():
+        app.entry_day.configure(placeholder_text="Día")
+        app.entry_month.configure(placeholder_text="Mes")
+        app.entry_year.configure(placeholder_text="Año")
+        app.entry_duracion.configure(placeholder_text="Días de duración")
+        app.update_idletasks()
+
+    # Ejecutar después de que el bucle de eventos haya procesado el clic
+    app.after(10, restaurar_placeholders)
