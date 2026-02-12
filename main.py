@@ -1044,7 +1044,7 @@ class GestorEventos(ctk.CTk):
             hover_color="#1976D2",
             command=self.marcar_recursos_recomendados,
         )
-        btn_marcar_recomendados.pack(side="left", padx=5)
+        btn_marcar_recomendados.pack(side="left", padx=0)
 
         # Botón para limpiar selección
         btn_limpiar = ctk.CTkButton(
@@ -1066,7 +1066,7 @@ class GestorEventos(ctk.CTk):
             hover_color="#14375e",
             command=self.sugerir_fecha_disponible,
         )
-        self.btn_sugerir.pack(side="left", padx=5)
+        self.btn_sugerir.pack(side="left", padx=45)
 
         # ========== 5. RECURRENCIA ==========
         frame_recurrencia = ctk.CTkFrame(self)
@@ -1136,6 +1136,8 @@ class GestorEventos(ctk.CTk):
             frame_botones,
             text="📋 Ver Eventos Planificados",
             width=180,
+            fg_color="#2196F3",
+            hover_color="#1976D2",
             command=self.mostrar_eventos_planificados,
         )
         self.btn_ver.pack(side="left", padx=10)
@@ -1144,8 +1146,8 @@ class GestorEventos(ctk.CTk):
             frame_botones,
             text="📚 Info Eventos",
             width=180,
-            fg_color="#9C27B0",  # Púrpura
-            hover_color="#6A1B9A",
+            fg_color="#2196F3",
+            hover_color="#1976D2",
             command=lambda: lie.mostrar_info_eventos(self, self.tipos_evento_data)  
         )
         self.btn_info_eventos.pack(side="left", padx=10)

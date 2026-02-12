@@ -53,7 +53,7 @@
         "modelo": "Deposito-Liquido",
         "tipo": "Liquido",
         "cantidad_total": 600000,
-        "cantidad_disponible": 322000
+        "cantidad_disponible": 287000
       },
       {
         "modelo": "Tanque-Solido",

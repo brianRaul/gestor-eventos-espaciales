@@ -459,6 +459,91 @@
         "estado": "planificado"
     },
     {
+        "tipo": "Carga de combustible",
+        "fecha_inicio": "14/02/2026",
+        "fecha_fin": "14/02/2026",
+        "duracion_dias": 1,
+        "recursos": [
+            "LC-39A (Estatica)",
+            "Panel-Legacy-01 (Analogico)",
+            "Deposito-Liquido (Liquido)",
+            "Sistema-Activo-B (Activa)"
+        ],
+        "recursos_detalle": [
+            {
+                "nombre_mostrar": "LC-39A (Estatica)",
+                "categoria": "PLATAFORMA DE LANZAMIENTO",
+                "modelo": "LC-39A",
+                "tipo": "Estatica",
+                "es_combustible": false,
+                "es_consumible": false,
+                "cantidad": 1
+            },
+            {
+                "nombre_mostrar": "Panel-Legacy-01 (Analogico)",
+                "categoria": "EQUIPO DE CONTROL",
+                "modelo": "Panel-Legacy-01",
+                "tipo": "Analogico",
+                "es_combustible": false,
+                "es_consumible": false,
+                "cantidad": 1
+            },
+            {
+                "nombre_mostrar": "Deposito-Liquido (Liquido)",
+                "categoria": "SISTEMA DE COMBUSTIBLE",
+                "modelo": "Deposito-Liquido",
+                "tipo": "Liquido",
+                "es_combustible": true,
+                "es_consumible": true,
+                "cantidad": 35000
+            },
+            {
+                "nombre_mostrar": "Sistema-Activo-B (Activa)",
+                "categoria": "SISTEMA DE SEGURIDAD",
+                "modelo": "Sistema-Activo-B",
+                "tipo": "Activa",
+                "es_combustible": false,
+                "es_consumible": false,
+                "cantidad": 1
+            }
+        ],
+        "recursos_usados": {
+            "LC-39A (Estatica)": 1,
+            "Panel-Legacy-01 (Analogico)": 1,
+            "Deposito-Liquido (Liquido)": 35000,
+            "Sistema-Activo-B (Activa)": 1
+        },
+        "recursos_consumidos": [
+            {
+                "recurso": "LC-39A (Estatica)",
+                "cantidad": 1,
+                "es_consumible": false
+            },
+            {
+                "recurso": "Panel-Legacy-01 (Analogico)",
+                "cantidad": 1,
+                "es_consumible": false
+            },
+            {
+                "recurso": "Deposito-Liquido (Liquido)",
+                "cantidad": 35000,
+                "es_consumible": true
+            },
+            {
+                "recurso": "Sistema-Activo-B (Activa)",
+                "cantidad": 1,
+                "es_consumible": false
+            }
+        ],
+        "resumen_recursos": {
+            "PLATAFORMA DE LANZAMIENTO|Estatica": 1,
+            "EQUIPO DE CONTROL|Analogico": 1,
+            "SISTEMA DE COMBUSTIBLE|Liquido": 35000,
+            "SISTEMA DE SEGURIDAD|Activa": 1
+        },
+        "estado": "planificado"
+    },
+    {
         "tipo": "Despegue de cohete",
         "fecha_inicio": "15/02/2026",
         "fecha_fin": "16/02/2026",
