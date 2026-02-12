@@ -5,6 +5,7 @@ import tkinter.messagebox as messagebox
 from modulos.funciones_datos import *
 from modulos.funciones_crear_evento import *
 from modulos.funciones_buscar_hueco import *
+import modulos.logica_info_eventos as lie
 import modulos.funciones_series_recurrentes as fsr
 import modulos.logica_combustible as lc
 import modulos.logica_eliminacion as le
@@ -23,20 +24,20 @@ class GestorEventos(ctk.CTk):
         # Configurar ventana
         self.title("Gestor de Eventos Espaciales")
         self.geometry("675x930")
-        self.resizable(False, False) # Tamaño fijo
+        self.resizable(False, False)  # Tamaño fijo
 
-        self.evento_seleccionado = None # Evento actual
-        self.MAX_EVENTOS = 100          # Máximo de eventos
+        self.evento_seleccionado = None  # Evento actual
+        self.MAX_EVENTOS = 100  # Máximo de eventos
 
         # Inicializar gestor de sincronización
         self.gestor_sinc = lsinc.crear_gestor_sincronizacion(self)
 
         # Carga de Eventos
         self.tipos_evento_data = cargar_eventos_desde_json()
-        
+
         # Carga los recursos
         self.recursos = cargar_recursos_desde_json()
-        
+
         # 3. Carga de archivos de agenda
         # Importante: Aseguramos que sea una lista para evitar el error 'NoneType'
         self.eventos_planificados = cargar_eventos_planificados()
@@ -45,7 +46,6 @@ class GestorEventos(ctk.CTk):
 
         # Extraemos las llaves (nombres de eventos) para el ComboBox
         self.tipos_evento = list(self.tipos_evento_data.keys())
-
 
         self.eventos_por_fecha = {}  # fecha_str -> lista de eventos
         self.recursos_por_clave = {}  # "categoria|tipo" -> recurso
@@ -64,32 +64,32 @@ class GestorEventos(ctk.CTk):
     ################ GUARDAR DATOS ###################
 
     def guardar_eventos_en_json(self):
-     try:
-        # 1. Ordenar la lista en memoria directamente
-        self.eventos_planificados.sort(
-            key=lambda x: datetime.strptime(x["fecha_inicio"], "%d/%m/%Y")
-        )
+        try:
+            # 1. Ordenar la lista en memoria directamente
+            self.eventos_planificados.sort(
+                key=lambda x: datetime.strptime(x["fecha_inicio"], "%d/%m/%Y")
+            )
 
-        # 2. Preparar datos para JSON (copia limpia sin objetos datetime)
-        eventos_a_guardar = []
-        for ev in self.eventos_planificados:
-            ev_copy = ev.copy()
-            ev_copy.pop("fecha_inicio_date", None)
-            ev_copy.pop("fecha_fin_date", None)
-            eventos_a_guardar.append(ev_copy)
+            # 2. Preparar datos para JSON (copia limpia sin objetos datetime)
+            eventos_a_guardar = []
+            for ev in self.eventos_planificados:
+                ev_copy = ev.copy()
+                ev_copy.pop("fecha_inicio_date", None)
+                ev_copy.pop("fecha_fin_date", None)
+                eventos_a_guardar.append(ev_copy)
 
-        # 3. Guardar en disco una sola vez
-        with open("eventos_planificados.json", "w", encoding="utf-8") as f:
-            json.dump(eventos_a_guardar, f, ensure_ascii=False, indent=4)
+            # 3. Guardar en disco una sola vez
+            with open("eventos_planificados.json", "w", encoding="utf-8") as f:
+                json.dump(eventos_a_guardar, f, ensure_ascii=False, indent=4)
 
-        # 4. Reindexar usando la lista que ya tenemos en memoria
-        self._reindexar_eventos()
-        print(f"✅ Eventos guardados y ordenados.")
-        return True
-     except Exception as e:
-        print(f"❌ Error al guardar en JSON: {e}")
-        return False
-    
+            # 4. Reindexar usando la lista que ya tenemos en memoria
+            self._reindexar_eventos()
+            print(f"✅ Eventos guardados y ordenados.")
+            return True
+        except Exception as e:
+            print(f"❌ Error al guardar en JSON: {e}")
+            return False
+
     def guardar_recursos(self):
         try:
             estructura_original = {"recursos": {}}
@@ -256,7 +256,7 @@ class GestorEventos(ctk.CTk):
                 )
                 return
         except ValueError:
-            pass 
+            pass
 
         # 2. Obtener recursos seleccionados de los checkboxes
         recursos_seleccionados_nombres = [
@@ -264,21 +264,23 @@ class GestorEventos(ctk.CTk):
         ]
 
         # 3. Llamar a la función de lógica externa
-        resultado, mensaje, nuevo_evento, recursos_opcionales = procesar_creacion_evento(
-            tipo_evento=tipo_evento,
-            day=day,
-            month=month,
-            year=year,
-            duracion_str=duracion_str,
-            recursos_seleccionados_nombres=recursos_seleccionados_nombres,
-            recursos=self.recursos,
-            eventos_planificados=self.eventos_planificados,
-            tipos_evento_data=self.tipos_evento_data,
+        resultado, mensaje, nuevo_evento, recursos_opcionales = (
+            procesar_creacion_evento(
+                tipo_evento=tipo_evento,
+                day=day,
+                month=month,
+                year=year,
+                duracion_str=duracion_str,
+                recursos_seleccionados_nombres=recursos_seleccionados_nombres,
+                recursos=self.recursos,
+                eventos_planificados=self.eventos_planificados,
+                tipos_evento_data=self.tipos_evento_data,
+            )
         )
 
         # 4. Manejar el resultado (INTERFAZ GRÁFICA)
         if resultado and nuevo_evento:
-            # Éxito: agregar evento 
+            # Éxito: agregar evento
             self.eventos_planificados.append(nuevo_evento)
             self._reindexar_eventos()
 
@@ -301,9 +303,9 @@ class GestorEventos(ctk.CTk):
             self.entry_duracion.delete(0, "end")
             self.combo_evento.set("Elige un tipo de evento")
             self.limpiar_seleccion_recursos()
-            
+
             if recursos_opcionales:
-             lv.mostrar_recursos_opcionales(self,recursos_opcionales)
+                lv.mostrar_recursos_opcionales(self, recursos_opcionales)
             # Mostrar mensaje de éxito
             self.lbl_info.configure(text=mensaje, text_color="green")
         else:
@@ -739,17 +741,19 @@ class GestorEventos(ctk.CTk):
             return
 
         # 6. Llamar a la función de creación de serie
-        exito, mensaje, eventos_creados, fecha_problema ,recursos_opcionales_serie= fsr.crear_serie_recurrente(
-            tipo_evento=tipo_evento,
-            recursos_seleccionados_nombres=recursos_seleccionados,
-            fecha_inicio_str=datos_validados["fecha_str"],
-            duracion_dias=datos_validados["duracion"],
-            intervalo_dias=datos_validados["intervalo"],
-            num_eventos=datos_validados["repeticiones"],
-            recursos=self.recursos,
-            eventos_planificados=self.eventos_planificados,
-            tipos_evento_data=self.tipos_evento_data,
-            app=self,
+        exito, mensaje, eventos_creados, fecha_problema, recursos_opcionales_serie = (
+            fsr.crear_serie_recurrente(
+                tipo_evento=tipo_evento,
+                recursos_seleccionados_nombres=recursos_seleccionados,
+                fecha_inicio_str=datos_validados["fecha_str"],
+                duracion_dias=datos_validados["duracion"],
+                intervalo_dias=datos_validados["intervalo"],
+                num_eventos=datos_validados["repeticiones"],
+                recursos=self.recursos,
+                eventos_planificados=self.eventos_planificados,
+                tipos_evento_data=self.tipos_evento_data,
+                app=self,
+            )
         )
 
         # 7. Manejar resultado
@@ -777,9 +781,9 @@ class GestorEventos(ctk.CTk):
             self.entry_repeticiones.insert(0, "1")
             self.combo_evento.set("Elige un tipo de evento")
             self.limpiar_seleccion_recursos()
-            
+
             if recursos_opcionales_serie:
-                lv.mostrar_recursos_opcionales(self,list(recursos_opcionales_serie))
+                lv.mostrar_recursos_opcionales(self, list(recursos_opcionales_serie))
 
             self.lbl_info.configure(
                 text=mensaje,
@@ -1052,8 +1056,8 @@ class GestorEventos(ctk.CTk):
             command=self.limpiar_seleccion_recursos,
         )
         btn_limpiar.pack(side="left", padx=5)
-        
-                # ========== BOTÓN DE SUGERENCIA ==========
+
+        # ========== BOTÓN DE SUGERENCIA ==========
         self.btn_sugerir = ctk.CTkButton(
             frame_botones_recursos,
             text="🔍 Sugerir Próxima Fecha Libre",
@@ -1062,7 +1066,7 @@ class GestorEventos(ctk.CTk):
             hover_color="#14375e",
             command=self.sugerir_fecha_disponible,
         )
-        self.btn_sugerir.pack(side="left",padx=5)
+        self.btn_sugerir.pack(side="left", padx=5)
 
         # ========== 5. RECURRENCIA ==========
         frame_recurrencia = ctk.CTkFrame(self)
@@ -1135,6 +1139,16 @@ class GestorEventos(ctk.CTk):
             command=self.mostrar_eventos_planificados,
         )
         self.btn_ver.pack(side="left", padx=10)
+
+        self.btn_info_eventos = ctk.CTkButton(
+            frame_botones,
+            text="📚 Info Eventos",
+            width=180,
+            fg_color="#9C27B0",  # Púrpura
+            hover_color="#6A1B9A",
+            command=lambda: lie.mostrar_info_eventos(self, self.tipos_evento_data)  
+        )
+        self.btn_info_eventos.pack(side="left", padx=10)
 
         # Botón para eliminar eventos
         self.btn_eliminar = ctk.CTkButton(
