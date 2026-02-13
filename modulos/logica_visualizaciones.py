@@ -4,8 +4,6 @@ def mostrar_eventos_planificados(
     parent, eventos_planificados, mostrar_recursos_callback
 ):
     """
-    Muestra una ventana con la lista de eventos planificados
-
     Args:
         parent: ventana padre (main window)
         eventos_planificados: lista de eventos a mostrar
@@ -14,7 +12,7 @@ def mostrar_eventos_planificados(
     # Crear una nueva ventana emergente
     ventana_eventos = ctk.CTkToplevel(parent)
     ventana_eventos.title("📋 Eventos Planificados")
-    ventana_eventos.geometry("440x500")
+    ventana_eventos.geometry("480x500")
 
     ventana_eventos.transient(parent)  # Hace que sea ventana hija
     ventana_eventos.lift()  # Trae la ventana al frente
@@ -22,7 +20,7 @@ def mostrar_eventos_planificados(
 
     # Título
     titulo = ctk.CTkLabel(
-        ventana_eventos, text="EVENTOS PLANIFICADOS", font=("Arial", 16, "bold")
+        ventana_eventos, text="EVENTOS PLANIFICADOS", font=("Monaco", 16, "bold")
     )
     titulo.pack(pady=10)
 
@@ -105,8 +103,6 @@ def mostrar_eventos_planificados(
 
 def mostrar_recursos_evento(parent, evento):
     """
-    Muestra los recursos utilizados en un evento específico
-
     Args:
         parent: ventana padre
         evento: diccionario con la información del evento
@@ -124,7 +120,7 @@ def mostrar_recursos_evento(parent, evento):
     titulo = ctk.CTkLabel(
         ventana_recursos,
         text=f"RECURSOS UTILIZADOS: {evento['tipo']}",
-        font=("Arial", 16, "bold"),
+        font=("Monaco", 16, "bold"),
     )
     titulo.pack(pady=10)
 
@@ -135,7 +131,7 @@ def mostrar_recursos_evento(parent, evento):
     ctk.CTkLabel(
         info_frame,
         text=f"📅 Fecha: {evento.get('fecha_inicio', 'N/A')} | Duración: {evento.get('duracion_dias', 1)} días",
-        font=("Arial", 12),
+        font=("Monaco", 12),
     ).pack(pady=5)
 
     # Frame con scroll para recursos
@@ -244,8 +240,6 @@ def mostrar_recursos_evento(parent, evento):
     
 def mostrar_recursos_opcionales(parent, recursos_opcionales):
     """
-    Muestra una ventana emergente con la lista de recursos opcionales seleccionados.
-
     Args:
         parent: ventana principal (GestorEventos) o cualquier Toplevel padre
         recursos_opcionales: lista de dicts o strings con nombres de recursos
@@ -260,7 +254,7 @@ def mostrar_recursos_opcionales(parent, recursos_opcionales):
     ctk.CTkLabel(
         ventana,
         text="Recursos opcionales incluidos:",
-        font=("Arial", 14, "bold")
+        font=("Monaco", 14, "bold")
     ).pack(pady=10)
 
     frame_scroll = ctk.CTkScrollableFrame(ventana, width=350, height=200)
