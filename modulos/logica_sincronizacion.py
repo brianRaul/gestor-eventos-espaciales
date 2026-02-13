@@ -129,7 +129,7 @@ class GestorSincronizacion:
         ctk.CTkLabel(
             ventana,
             text="📊 ESTADO DE COMBUSTIBLE",
-            font=("Arial", 16, "bold"),
+            font=("Monaco", 16, "bold"),
             text_color="#FF9800",
         ).pack(pady=10)
 
@@ -172,21 +172,21 @@ class GestorSincronizacion:
                         frame_advertencia,
                         text=f"⚠️ ATENCIÓN: Evento '{tipo_evento_actual}'",
                         text_color="#FF9800",
-                        font=("Arial", 12, "bold"),
+                        font=("Monaco", 12, "bold"),
                     ).pack(pady=2)
 
                     ctk.CTkLabel(
                         frame_advertencia,
                         text=f"Faltan {advertencia['faltante']:,}L de {advertencia['categoria']} {advertencia['tipo']}",
                         text_color="#FF5252",
-                        font=("Arial", 11),
+                        font=("Monaco", 11),
                     ).pack(pady=2)
 
                     ctk.CTkLabel(
                         frame_advertencia,
                         text=f"Se necesitan {advertencia['necesario']:,}L por evento",
                         text_color="gray",
-                        font=("Arial", 10),
+                        font=("Monaco", 10),
                     ).pack(pady=2)
 
         # Botón para cerrar
@@ -221,7 +221,7 @@ class GestorSincronizacion:
         """
         ventana_eventos = ctk.CTkToplevel(parent)
         ventana_eventos.title("📋 Eventos Planificados")
-        ventana_eventos.geometry("420x600")
+        ventana_eventos.geometry("520x600")
 
         ventana_eventos.transient(parent)
         ventana_eventos.lift()
@@ -250,7 +250,7 @@ class GestorSincronizacion:
 
         # Título
         titulo = ctk.CTkLabel(
-            ventana, text="EVENTOS PLANIFICADOS", font=("Arial", 16, "bold")
+            ventana, text="EVENTOS PLANIFICADOS", font=("Monaco", 16, "bold")
         )
         titulo.pack(pady=10)
 
@@ -263,7 +263,7 @@ class GestorSincronizacion:
             sin_eventos = ctk.CTkLabel(
                 frame_contenedor,
                 text=" No hay eventos planificados todavía.",
-                font=("Arial", 12),
+                font=("Monaco", 12),
                 text_color="gray",
             )
             sin_eventos.pack(pady=20)
@@ -292,7 +292,7 @@ class GestorSincronizacion:
                 lbl_mes = ctk.CTkLabel(
                     frame_contenedor,
                     text=f"📅 {mes_anno}",
-                    font=("Arial", 14, "bold"),
+                    font=("Monaco", 14, "bold"),
                     text_color="#4CAF50",
                 )
                 lbl_mes.pack(anchor="w", pady=(15, 5), padx=5)
@@ -323,7 +323,7 @@ class GestorSincronizacion:
             lbl_fecha = ctk.CTkLabel(
                 contenido_evento,
                 text=f"📅 Inicio: {fecha_inicio} | Fin: {fecha_fin}",
-                font=("Arial", 12),
+                font=("Monaco", 12),
             )
             lbl_fecha.grid(row=2, column=0, sticky="w")
 
@@ -394,7 +394,7 @@ class GestorSincronizacion:
             ctk.CTkLabel(
                 frame_scroll,
                 text=" No hay eventos planificados todavía.",
-                font=("Arial", 12),
+                font=("Monaco", 12),
                 text_color="gray",
             ).pack(pady=20)
             return
@@ -411,7 +411,7 @@ class GestorSincronizacion:
             variable=ventana.var_seleccionar_todos,
             onvalue=True,
             offvalue=False,
-            font=("Arial", 12, "bold"),
+            font=("Monaco", 12, "bold"),
             command=lambda: self._toggle_todos_eliminar(
                 ventana, ventana.var_seleccionar_todos
             ),
@@ -441,7 +441,7 @@ class GestorSincronizacion:
                 variable=var_checkbox,
                 onvalue=True,
                 offvalue=False,
-                font=("Arial", 11),
+                font=("Monaco", 11),
                 width=500,
             )
             checkbox.pack(anchor="w", padx=10, pady=5)
