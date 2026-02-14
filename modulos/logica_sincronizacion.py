@@ -157,38 +157,6 @@ class GestorSincronizacion:
                     frame_tanque, text=texto, font=("Arial", 11), text_color=color
                 ).pack(anchor="w", padx=10, pady=5)
 
-            tipo_evento_actual = self.app.combo_evento.get()
-
-            if tipo_evento_actual and tipo_evento_actual != "Elige un tipo de evento":
-                advertencias = lc.obtener_advertencias_combustible_evento(
-                    tipo_evento_actual, combustibles, self.app.tipos_evento_data
-                )
-
-                for advertencia in advertencias:
-                    frame_advertencia = ctk.CTkFrame(ventana)
-                    frame_advertencia.pack(pady=5, padx=20, fill="x")
-
-                    ctk.CTkLabel(
-                        frame_advertencia,
-                        text=f"⚠️ ATENCIÓN: Evento '{tipo_evento_actual}'",
-                        text_color="#FF9800",
-                        font=("Monaco", 12, "bold"),
-                    ).pack(pady=2)
-
-                    ctk.CTkLabel(
-                        frame_advertencia,
-                        text=f"Faltan {advertencia['faltante']:,}L de {advertencia['categoria']} {advertencia['tipo']}",
-                        text_color="#FF5252",
-                        font=("Monaco", 11),
-                    ).pack(pady=2)
-
-                    ctk.CTkLabel(
-                        frame_advertencia,
-                        text=f"Se necesitan {advertencia['necesario']:,}L por evento",
-                        text_color="gray",
-                        font=("Monaco", 10),
-                    ).pack(pady=2)
-
         # Botón para cerrar
         ctk.CTkButton(ventana, text="Cerrar", command=ventana.destroy).pack(pady=10)
 

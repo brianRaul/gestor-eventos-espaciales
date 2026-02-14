@@ -76,39 +76,6 @@ def verificar_combustible_para_serie_logica(tipo_evento, repeticiones, recursos,
 
     return True, ""
 
-def obtener_advertencias_combustible_evento(tipo_evento, combustibles, tipos_evento_data):
-    """
-    Obtiene advertencias de combustible para un tipo de evento específico
-    """
-    advertencias = []
-    
-    if tipo_evento not in tipos_evento_data:
-        return advertencias
-    
-    evento_data = tipos_evento_data[tipo_evento]
-    recursos_requeridos = evento_data.get("recursos_requeridos", [])
-    
-    for req in recursos_requeridos:
-        if "COMBUSTIBLE" in req["categoria"].upper():
-            for recurso_comb in combustibles:
-                if (
-                    recurso_comb["categoria"] == req["categoria"]
-                    and recurso_comb["tipo"] == req["tipo"]
-                ):
-                    if recurso_comb["cantidad_disponible"] < req["cantidad"]:
-                        faltante = req["cantidad"] - recurso_comb["cantidad_disponible"]
-                        advertencias.append({
-                            "recurso": recurso_comb["nombre_mostrar"],
-                            "categoria": req["categoria"],
-                            "tipo": req["tipo"],
-                            "necesario": req["cantidad"],
-                            "disponible": recurso_comb["cantidad_disponible"],
-                            "faltante": faltante
-                        })
-                    break
-    
-    return advertencias
-
 def calcular_porcentaje_combustible(recurso):
     """
     Calcula el porcentaje de combustible disponible

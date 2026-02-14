@@ -344,7 +344,7 @@ class GestorEventos(ctk.CTk):
         else:
             if es_error_combustible:
                 mensaje = (
-                    f"❌ {mensaje}\n\n💡 Usa 'Rellenar Todo' para reponer combustible."
+                    f"❌ {mensaje}\n\n💡 Usa 'Rellenar Tanque' para reponer combustible."
                 )
             self.lbl_info.configure(text=mensaje, text_color="red")
 
@@ -429,42 +429,7 @@ class GestorEventos(ctk.CTk):
                 ctk.CTkLabel(
                     frame_tanque, text=texto, font=("Arial", 11), text_color=color
                 ).pack(anchor="w", padx=10, pady=5)
-
-            tipo_evento_actual = self.combo_evento.get()
-
-            if tipo_evento_actual and tipo_evento_actual != "Elige un tipo de evento":
-                # Usar función del módulo para obtener advertencias
-                advertencias = lc.obtener_advertencias_combustible_evento(
-                    tipo_evento_actual, combustibles, self.tipos_evento_data
-                )
-
-                for advertencia in advertencias:
-                    # Crear frame para advertencia
-                    frame_advertencia = ctk.CTkFrame(self.ventana_combustible)
-                    frame_advertencia.pack(pady=5, padx=20, fill="x")
-
-                    # Mostrar advertencia
-                    ctk.CTkLabel(
-                        frame_advertencia,
-                        text=f"⚠️ ATENCIÓN: Evento '{tipo_evento_actual}'",
-                        text_color="#FF9800",
-                        font=("Arial", 12, "bold"),
-                    ).pack(pady=2)
-
-                    ctk.CTkLabel(
-                        frame_advertencia,
-                        text=f"Faltan {advertencia['faltante']:,}L de {advertencia['categoria']} {advertencia['tipo']}",
-                        text_color="#FF5252",
-                        font=("Arial", 11),
-                    ).pack(pady=2)
-
-                    ctk.CTkLabel(
-                        frame_advertencia,
-                        text=f"Se necesitan {advertencia['necesario']:,}L por evento",
-                        text_color="gray",
-                        font=("Arial", 10),
-                    ).pack(pady=2)
-
+                
         # Botón para cerrar
         ctk.CTkButton(self.ventana_combustible, text="Cerrar", command=on_close).pack(
             pady=10
@@ -1166,7 +1131,7 @@ class GestorEventos(ctk.CTk):
         )
         btn_ver.pack(side="left", padx=10)
 
-        # Botón 2: Rellenar todo
+        # Botón 2: Rellenar Tanques
         btn_rellenar = ctk.CTkButton(
             frame_combustible,
             text="⛽ Rellenar Tanques",
