@@ -431,7 +431,7 @@ Almacena eventos creados con estructura unificada:
 
 ### **Gestionar Conflictos**
 1. **Error de solapamiento** → Usar "Sugerir fecha"
-2. **Combustible insuficiente** → Usar "Rellenar todo"
+2. **Combustible insuficiente** → Usar "Rellenar tanque"
 3. **Recursos ocupados** → Buscar hueco automáticamente
 
 ---
@@ -460,7 +460,7 @@ Almacena eventos creados con estructura unificada:
 ### **Límites Absolutos**
 - **Planificación máxima**: 1 año (365 días) desde hoy
 - **Duración máxima de serie**: 1 año (365 días)
-- **Eventos simultáneos**: Limitados por recursos disponibles
+- **Eventos simultáneos**: Limitados por recursos disponibles(Solo 100 eventos como máximo)
 - **Combustible máximo**: Definido por capacidad de tanques
 
 ### **Restricciones de Diseño**
