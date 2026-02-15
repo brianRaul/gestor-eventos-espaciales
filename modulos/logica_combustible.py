@@ -36,46 +36,6 @@ def rellenar_combustible_logica(recursos):
     
     return litros_agregados, recursos_modificados
 
-def verificar_combustible_para_serie_logica(tipo_evento, repeticiones, recursos, tipos_evento_data):
-    """
-    Verifica si hay combustible suficiente para una serie de eventos
-    """
-    if tipo_evento not in tipos_evento_data:
-        return False, "Tipo de evento no válido"
-
-    evento_data = tipos_evento_data[tipo_evento]
-    recursos_requeridos = evento_data.get("recursos_requeridos", [])
-
-    # Calcular combustible total necesario
-    combustible_necesario = {}
-
-    for req in recursos_requeridos:
-        if "COMBUSTIBLE" in req["categoria"].upper():
-            clave = f"{req['categoria']}|{req['tipo']}"
-            if clave not in combustible_necesario:
-                combustible_necesario[clave] = 0
-            combustible_necesario[clave] += req["cantidad"] * repeticiones
-
-    # Verificar stock disponible
-    for clave, cantidad_necesaria in combustible_necesario.items():
-        categoria, tipo = clave.split("|")
-        stock_disponible = 0
-
-        # Sumar todo el combustible del mismo tipo
-        for recurso in recursos:
-            if (
-                recurso.get("es_combustible", False)
-                and recurso["categoria"] == categoria
-                and recurso["tipo"] == tipo
-            ):
-                stock_disponible += recurso["cantidad_disponible"]
-
-        if stock_disponible < cantidad_necesaria:
-            faltante = cantidad_necesaria - stock_disponible
-            return False, f"⛽ Faltan {faltante}L de {categoria} {tipo}"
-
-    return True, ""
-
 def calcular_porcentaje_combustible(recurso):
     """
     Calcula el porcentaje de combustible disponible
