@@ -1,0 +1,224 @@
+import customtkinter as ctk
+
+
+def mostrar_recursos_evento(parent, evento):
+    """
+    Args:
+        parent: ventana padre
+        evento: diccionario con la información del evento
+    """
+    # Crear ventana emergente
+    ventana_recursos = ctk.CTkToplevel(parent)
+    ventana_recursos.title(f"📦 Recursos del Evento: {evento['tipo']}")
+    ventana_recursos.geometry("500x500")
+
+    ventana_recursos.transient(parent)  # Hace que sea hija de ventana_eventos
+    ventana_recursos.lift()  # Trae la ventana al frente
+    ventana_recursos.focus_force()  # Enfoca la ventana
+
+    # Título
+    titulo = ctk.CTkLabel(
+        ventana_recursos,
+        text=f"RECURSOS UTILIZADOS: {evento['tipo']}",
+        font=("Monaco", 16, "bold"),
+    )
+    titulo.pack(pady=10)
+
+    # Información del evento
+    info_frame = ctk.CTkFrame(ventana_recursos)
+    info_frame.pack(pady=5, padx=20, fill="x")
+
+    ctk.CTkLabel(
+        info_frame,
+        text=f"📅 Fecha: {evento.get('fecha_inicio', 'N/A')} | Duración: {evento.get('duracion_dias', 1)} días",
+        font=("Monaco", 12),
+    ).pack(pady=5)
+
+    # Frame con scroll para recursos
+    frame_scroll = ctk.CTkScrollableFrame(ventana_recursos, width=450, height=250)
+    frame_scroll.pack(pady=10, padx=10, fill="both", expand=True)
+
+    # Verificar qué campos de recursos existen
+    if "recursos_detalle" in evento:
+        # Usar recursos_detalle aunque esté vacío
+        recursos = evento["recursos_detalle"]
+    elif "recursos" in evento:
+        # Para compatibilidad con eventos antiguos
+        recursos = evento["recursos"]
+    elif "recursos_utilizados" in evento:
+        # Para compatibilidad con eventos muy antiguos
+        recursos = evento["recursos_utilizados"]
+    else:
+        # No hay recursos en ningún formato
+        recursos = []
+
+    if not recursos:
+        ctk.CTkLabel(
+            frame_scroll,
+            text="ℹ️ Este evento no tiene información de recursos\n(o fue creado antes de implementar esta función)",
+            text_color="orange",
+            font=("Arial", 12),
+        ).pack(pady=50)
+
+        # Mostrar el evento completo para depuración
+        ctk.CTkLabel(
+            frame_scroll,
+            text=f"Campos disponibles en el evento: {list(evento.keys())}",
+            text_color="gray",
+            font=("Arial", 10),
+        ).pack(pady=10)
+    else:
+        # Contadores
+        recursos_combustible = 0
+        recursos_equipos = 0
+
+        # Mostrar cada recurso
+        for recurso in recursos:
+            # Crear frame para cada recurso
+            frame_recurso = ctk.CTkFrame(frame_scroll)
+            frame_recurso.pack(fill="x", pady=3, padx=5)
+
+            # Determinar si es combustible
+            es_combustible = recurso.get("es_combustible", False)
+            if not es_combustible:
+                # Intentar detectar por nombre o categoría
+                nombre = recurso.get("nombre_mostrar", "").lower()
+                categoria = recurso.get("categoria", "").lower()
+                if (
+                    "combustible" in nombre
+                    or "combustible" in categoria
+                    or "fuel" in nombre
+                ):
+                    es_combustible = True
+
+            # Color según tipo
+            if es_combustible:
+                color = "#FF9800"  # Naranja para combustible
+                icono = "⛽"
+                recursos_combustible += 1
+                cantidad = recurso.get("cantidad", 1)
+                cantidad_texto = f"{cantidad}L"
+            else:
+                color = "#2196F3"  # Azul para equipos
+                icono = "🛠️"
+                recursos_equipos += 1
+                cantidad = recurso.get("cantidad", 1)
+                cantidad_texto = f"{cantidad} unidades"
+
+            # Obtener nombre para mostrar
+            nombre_mostrar = recurso.get(
+                "nombre_mostrar", recurso.get("nombre", "Recurso sin nombre")
+            )
+
+            # Mostrar información del recurso
+            texto_recurso = f"{icono} {nombre_mostrar} - {cantidad_texto}"
+            lbl_recurso = ctk.CTkLabel(
+                frame_recurso,
+                text=texto_recurso,
+                font=("Arial", 11),
+                text_color=color,
+            )
+            lbl_recurso.pack(anchor="w", padx=10, pady=5)
+
+        # Mostrar resumen
+        resumen_frame = ctk.CTkFrame(ventana_recursos)
+        resumen_frame.pack(pady=5, padx=20, fill="x")
+
+        resumen_text = f"📊 Total: {len(recursos)} recursos"
+        if recursos_combustible > 0:
+            resumen_text += f" | ⛽ Combustible: {recursos_combustible}"
+        if recursos_equipos > 0:
+            resumen_text += f" | 🛠️ Equipos: {recursos_equipos}"
+
+        ctk.CTkLabel(resumen_frame, text=resumen_text, font=("Arial", 11)).pack(pady=5)
+
+    # Botón para cerrar
+    btn_cerrar = ctk.CTkButton(
+        ventana_recursos, text="Cerrar", width=100, command=ventana_recursos.destroy
+    )
+    btn_cerrar.pack(pady=10)
+    
+def mostrar_recursos_opcionales(parent, recursos_opcionales):
+    """
+    Args:
+        parent: ventana principal (GestorEventos) o cualquier Toplevel padre
+        recursos_opcionales: lista de dicts o strings con nombres de recursos
+    """
+    ventana = ctk.CTkToplevel(parent)
+    ventana.title("ℹ️ Recursos Opcionales")
+    ventana.geometry("400x300")
+    ventana.transient(parent)
+    ventana.lift()
+    ventana.focus_force()
+
+    ctk.CTkLabel(
+        ventana,
+        text="Recursos opcionales incluidos:",
+        font=("Monaco", 14, "bold")
+    ).pack(pady=10)
+
+    frame_scroll = ctk.CTkScrollableFrame(ventana, width=350, height=200)
+    frame_scroll.pack(pady=10, padx=10, fill="both", expand=True)
+
+    for recurso in recursos_opcionales:
+        nombre = recurso["nombre_mostrar"] if isinstance(recurso, dict) else recurso
+        ctk.CTkLabel(
+            frame_scroll,
+            text=f"• {nombre}",
+            font=("Arial", 12)
+        ).pack(anchor="w", padx=10, pady=2)
+
+    ctk.CTkButton(
+        ventana,
+        text="Cerrar",
+        command=ventana.destroy
+    ).pack(pady=10)
+
+def reset_campos_evento(app, es_serie=False):
+    """
+    Limpia los campos de fecha/tipo/recurso y fuerza la aparición de placeholders.
+    Args:
+        app: instancia de GestorEventos.
+        es_serie: True si se está reseteando tras crear una serie (también limpia intervalo/repeticiones).
+    """
+    # ----- 1. LIMPIAR CONTENIDO DE LOS CAMPOS -----
+    app.entry_day.delete(0, "end")
+    app.entry_month.delete(0, "end")
+    app.entry_year.delete(0, "end")
+    app.entry_duracion.delete(0, "end")
+    app.combo_evento.set("Elige un tipo de evento")
+    app.limpiar_seleccion_recursos()
+
+    if es_serie:
+        app.entry_intervalo.delete(0, "end")
+        app.entry_repeticiones.delete(0, "end")
+        app.entry_intervalo.insert(0, "7")
+        app.entry_repeticiones.insert(0, "1")
+
+    # ----- 2. FORZAR PÉRDIDA DE FOCO EN TODOS LOS ENTRIES DE FECHA -----
+    entries_fecha = [
+        app.entry_day,
+        app.entry_month,
+        app.entry_year,
+        app.entry_duracion
+    ]
+
+    for entry in entries_fecha:
+        entry.event_generate('<FocusOut>')          # Simula que pierde el foco
+        entry.configure(placeholder_text="")        # Borra temporalmente el placeholder
+        # (La reasignación del placeholder se hará después, con un pequeño retraso)
+
+    # ----- 3. QUITAR EL FOCO DE CUALQUIER ENTRY -----
+    app.btn_crear.focus_set()                      # El botón "Crear" toma el foco
+    app.update_idletasks()                        # Refresco visual inmediato
+
+    # ----- 4. REASIGNAR LOS PLACEHOLDERS ORIGINALES (con retraso mínimo) -----
+    def restaurar_placeholders():
+        app.entry_day.configure(placeholder_text="Día")
+        app.entry_month.configure(placeholder_text="Mes")
+        app.entry_year.configure(placeholder_text="Año")
+        app.entry_duracion.configure(placeholder_text="Días de duración")
+        app.update_idletasks()
+
+    # Ejecutar después de que el bucle de eventos haya procesado el clic
+    app.after(10, restaurar_placeholders)

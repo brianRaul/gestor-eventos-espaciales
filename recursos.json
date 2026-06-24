@@ -1,0 +1,186 @@
+{
+  "recursos": {
+    "COHETE": [
+      {
+        "modelo": "Apolo-1",
+        "tipo": "Pesado",
+        "cantidad_total": 3
+      },
+      {
+        "modelo": "Explorador-1",
+        "tipo": "Ligero",
+        "cantidad_total": 4
+      }
+    ],
+    "PLATAFORMA DE LANZAMIENTO": [
+      {
+        "modelo": "LC-39A",
+        "tipo": "Estatica",
+        "cantidad_total": 2
+      },
+      {
+        "modelo": "Barca Ocean",
+        "tipo": "Movil",
+        "cantidad_total": 2
+      }
+    ],
+    "EQUIPO DE CONTROL": [
+      {
+        "modelo": "Consola-MCD-01",
+        "tipo": "Digital",
+        "cantidad_total": 3
+      },
+      {
+        "modelo": "Panel-Legacy-01",
+        "tipo": "Analogico",
+        "cantidad_total": 1
+      }
+    ],
+    "SALA DE CONTROL PRINCIPAL": [
+      {
+        "modelo": "Firing Room-1",
+        "tipo": "Primaria",
+        "cantidad_total": 1
+      },
+      {
+        "modelo": "Firing Room-2",
+        "tipo": "Secundaria",
+        "cantidad_total": 1
+      }
+    ],
+    "SISTEMA DE COMBUSTIBLE": [
+      {
+        "modelo": "Deposito-Liquido",
+        "tipo": "Liquido",
+        "cantidad_total": 600000,
+        "cantidad_disponible": 600000
+      },
+      {
+        "modelo": "Tanque-Solido",
+        "tipo": "Solido",
+        "cantidad_total": 500000,
+        "cantidad_disponible": 500000
+      }
+    ],
+    "TORRE DE SERVICIO": [
+      {
+        "modelo": "Torre-Movil-A",
+        "tipo": "Retractil",
+        "cantidad_total": 2
+      },
+      {
+        "modelo": "Torre-Fija-B",
+        "tipo": "Fija",
+        "cantidad_total": 1
+      }
+    ],
+    "SISTEMA DE SEGURIDAD": [
+      {
+        "modelo": "Sistema-Activo-B",
+        "tipo": "Activa",
+        "cantidad_total": 5
+      },
+      {
+        "modelo": "Escudo-Pasivo-A",
+        "tipo": "Pasiva",
+        "cantidad_total": 3
+      }
+    ],
+    "ESTACIÓN DE SEGUIMIENTO": [
+      {
+        "modelo": "Sat-Tracker-1",
+        "tipo": "Satelital",
+        "cantidad_total": 2
+      },
+      {
+        "modelo": "Antena-Terrestre",
+        "tipo": "Terrestre",
+        "cantidad_total": 3
+      }
+    ],
+    "SISTEMA DE NAVEGACIÓN": [
+      {
+        "modelo": "GPS-System-A",
+        "tipo": "GPS",
+        "cantidad_total": 4
+      },
+      {
+        "modelo": "Inertial-Unit-1",
+        "tipo": "Inercial",
+        "cantidad_total": 2
+      }
+    ],
+    "SISTEMA ELÉCTRICO": [
+      {
+        "modelo": "Generador-Principal",
+        "tipo": "Principal",
+        "cantidad_total": 3
+      },
+      {
+        "modelo": "Backup-Generator",
+        "tipo": "Emergencia",
+        "cantidad_total": 2
+      }
+    ],
+    "SISTEMA DE CONTROL TÉRMICO": [
+      {
+        "modelo": "Cooling-System-A",
+        "tipo": "Refrigerante",
+        "cantidad_total": 3
+      },
+      {
+        "modelo": "Aislamiento-Termico",
+        "tipo": "Aislante",
+        "cantidad_total": 10
+      }
+    ],
+    "EQUIPO DE RECUPERACIÓN": [
+      {
+        "modelo": "Helicoptero-Rec-1",
+        "tipo": "Aereo",
+        "cantidad_total": 2
+      },
+      {
+        "modelo": "Vehiculo-Anfibio",
+        "tipo": "Terrestre",
+        "cantidad_total": 4
+      }
+    ],
+    "LABORATORIO DE PRUEBAS": [
+      {
+        "modelo": "Lab-Chem-01",
+        "tipo": "Quimico",
+        "cantidad_total": 1
+      },
+      {
+        "modelo": "Lab-Phys-01",
+        "tipo": "Fisico",
+        "cantidad_total": 1
+      }
+    ],
+    "PLATAFORMA DE ATERRIZAJE": [
+      {
+        "modelo": "Landing-Pad-A",
+        "tipo": "Continental",
+        "cantidad_total": 2
+      },
+      {
+        "modelo": "Barge-Of-I",
+        "tipo": "Maritima",
+        "cantidad_total": 2
+      }
+    ],
+    "EQUIPO DE COMUNICACIÓN": [
+      {
+        "modelo": "Radio-UHF-Gen",
+        "tipo": "Radio",
+        "cantidad_total": 10
+      },
+      {
+        "modelo": "Comms-Sat-Link",
+        "tipo": "Satelital",
+        "cantidad_total": 2
+      }
+    ]
+  }
+}

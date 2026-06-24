@@ -1,0 +1,87 @@
+[
+    {
+        "tipo": "Simulación de aterrizaje",
+        "fecha_inicio": "25/06/2026",
+        "fecha_fin": "26/06/2026",
+        "duracion_dias": 2,
+        "recursos": [
+            "Consola-MCD-01 (Digital)",
+            "Firing Room-2 (Secundaria)",
+            "Inertial-Unit-1 (Inercial)",
+            "Landing-Pad-A (Continental)"
+        ],
+        "recursos_detalle": [
+            {
+                "nombre_mostrar": "Consola-MCD-01 (Digital)",
+                "categoria": "EQUIPO DE CONTROL",
+                "modelo": "Consola-MCD-01",
+                "tipo": "Digital",
+                "es_combustible": false,
+                "es_consumible": false,
+                "cantidad": 1
+            },
+            {
+                "nombre_mostrar": "Firing Room-2 (Secundaria)",
+                "categoria": "SALA DE CONTROL PRINCIPAL",
+                "modelo": "Firing Room-2",
+                "tipo": "Secundaria",
+                "es_combustible": false,
+                "es_consumible": false,
+                "cantidad": 1
+            },
+            {
+                "nombre_mostrar": "Inertial-Unit-1 (Inercial)",
+                "categoria": "SISTEMA DE NAVEGACIÓN",
+                "modelo": "Inertial-Unit-1",
+                "tipo": "Inercial",
+                "es_combustible": false,
+                "es_consumible": false,
+                "cantidad": 1
+            },
+            {
+                "nombre_mostrar": "Landing-Pad-A (Continental)",
+                "categoria": "PLATAFORMA DE ATERRIZAJE",
+                "modelo": "Landing-Pad-A",
+                "tipo": "Continental",
+                "es_combustible": false,
+                "es_consumible": false,
+                "cantidad": 1
+            }
+        ],
+        "recursos_usados": {
+            "Consola-MCD-01 (Digital)": 1,
+            "Firing Room-2 (Secundaria)": 1,
+            "Inertial-Unit-1 (Inercial)": 1,
+            "Landing-Pad-A (Continental)": 1
+        },
+        "recursos_consumidos": [
+            {
+                "recurso": "Consola-MCD-01 (Digital)",
+                "cantidad": 1,
+                "es_consumible": false
+            },
+            {
+                "recurso": "Firing Room-2 (Secundaria)",
+                "cantidad": 1,
+                "es_consumible": false
+            },
+            {
+                "recurso": "Inertial-Unit-1 (Inercial)",
+                "cantidad": 1,
+                "es_consumible": false
+            },
+            {
+                "recurso": "Landing-Pad-A (Continental)",
+                "cantidad": 1,
+                "es_consumible": false
+            }
+        ],
+        "resumen_recursos": {
+            "EQUIPO DE CONTROL|Digital": 1,
+            "SALA DE CONTROL PRINCIPAL|Secundaria": 1,
+            "SISTEMA DE NAVEGACIÓN|Inercial": 1,
+            "PLATAFORMA DE ATERRIZAJE|Continental": 1
+        },
+        "estado": "planificado"
+    }
+]
